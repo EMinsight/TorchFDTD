@@ -485,6 +485,8 @@ class ReversibleCPMLSimulation(torch.nn.Module):
             raise ValueError('ReversibleCPMLSimulation requires ReversibleCPMLOptions.')
         from .boundaries import reject_pmc_faces
         reject_pmc_faces(self.project.region, 'ReversibleCPMLSimulation')
+        from .bfast import reject_bfast
+        reject_bfast(self.project.region, 'ReversibleCPMLSimulation')
         _validate_project(self.project, self.options)
         from .adjoint_memory import _resident_contract
         _resident_contract(self.project.region, self.options)

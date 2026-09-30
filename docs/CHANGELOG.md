@@ -9,6 +9,10 @@ Commits that only record validation evidence or documentation ("Record ...",
 
 ## Unreleased
 
+### Added
+
+- Broadband fixed-angle source technique: `Region.bfast_scaled_k` (Meep's `n sin(theta) (cos(phi), sin(phi))`) runs one real, periodic, broadband simulation at a fixed incidence angle, following Liang et al. (IEEE TAP 2014) with Meep's time-centered update. The time step is scaled by `1 - |k|`. The wavevector tapers to zero before the PML over `Region.bfast_taper_cells` with a compensated medium that keeps the zeroth order reflectionless, because a PML that sees the BFAST terms amplifies spurious modes. `torchfdtd.bfast` adds `bfast_scaled_k`, `physical_field` and `trapped_band`; `estimate()` warns about diffraction orders the PML traps and about sources or monitors in the taper. The resident Torch/NumPy update implements it; other paths refuse it. Projects without BFAST serialize as before ([BFAST.md](BFAST.md), this commit).
+
 ## 1.1.2 (2026-09-30)
 
 ### Added

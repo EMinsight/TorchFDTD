@@ -246,6 +246,8 @@ class YeeGrid(fdtd.Grid):
                 kind = np.complex128 if region.precision == 'float64' else np.complex64
                 self.E, self.H = self.E.astype(kind), self.H.astype(kind)
         self._prepare_boundaries(region, absorber_faces)
+        from .bfast import BfastUpdate
+        self.bfast = BfastUpdate(self, region) if region.bfast else None
         self.faces = {family: [self._zeros(shape) for _, _, shape in blocks] for family, blocks in self.pmc_blocks.items()}
         self.face_inverse_permittivity = [self._zeros(shape)+1 for _, _, shape in self.pmc_blocks['E']]
 
@@ -407,6 +409,8 @@ class YeeGrid(fdtd.Grid):
     def update_E(self):
         prepared = [state.prepare(self.E) for state in self.material_states]
         curl=self.curl(self.H,False)
+        if self.bfast is not None:
+            curl += self.bfast.curl_increment('E', self.H)
         if self.absorber is None:
             self.E += self.courant_number * self.inverse_permittivity * curl
         else:
@@ -421,10 +425,12 @@ class YeeGrid(fdtd.Grid):
             state.correct(self.E, old, response)
 
     def update_H(self):
+        curl = self.curl(self.E, True)
+        if self.bfast is not None:
+            curl += self.bfast.curl_increment('H', self.E)
         if self.absorber is None:
-            self.H -= self.courant_number * self.inverse_permeability * self.curl(self.E, True)
+            self.H -= self.courant_number * self.inverse_permeability * curl
         else:
-            curl = self.curl(self.E, True)
             slabs = [(box, self.H[box]*decay-self.courant_number*gain*self.inverse_permeability[box]*curl[box])
                      for box, decay, gain in self.absorber_update('H')]
             self.H -= self.courant_number * self.inverse_permeability * curl

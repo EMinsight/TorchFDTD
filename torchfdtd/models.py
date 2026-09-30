@@ -274,6 +274,14 @@ class Region(Model):
     pml_dispersion: Literal['ade', 'frozen', 'absorber'] = 'ade'
     boundaries: Boundaries = Field(default_factory=Boundaries)
     bloch_phase: tuple[float, float, float] = (0, 0, 0)  # radians per positive unit-cell translation
+    # Broadband fixed-angle source technique (BFAST, docs/BFAST.md): the in-plane wavevector of every
+    # frequency is omega/c times this dimensionless vector, n*sin(theta)*(cos(phi), sin(phi)) of the
+    # incident medium in the axes of the periodic plane (torchfdtd.bfast.bfast_scaled_k). Fields stay real,
+    # periodic axes carry k, and the time step shrinks by 1-|k|. Written to JSON only when nonzero.
+    bfast_scaled_k: tuple[float, float, float] = (0, 0, 0)
+    # Cells before each PML face over which the BFAST wavevector falls to zero; the PML itself runs the plain
+    # Yee update, which keeps the stretched coordinates from amplifying spurious BFAST modes. Written only with BFAST.
+    bfast_taper_cells: int = Field(default=10, ge=0, le=500)
     background_index: float = Field(default=1, ge=1, le=20)
     backend: Literal['auto', 'cuda', 'cpu'] = 'auto'
     memory_mode: Literal['resident', 'streamed', 'budgeted'] = 'resident'
@@ -310,6 +318,9 @@ class Region(Model):
         data = handler(self)
         if self.resident_cell_limit is None:
             data.pop('resident_cell_limit', None)
+        if not any(self.bfast_scaled_k):
+            data.pop('bfast_scaled_k', None)
+            data.pop('bfast_taper_cells', None)
         return data
 
     def cell_cap_refusal(self):
@@ -346,6 +357,15 @@ class Region(Model):
             raise ValueError(refusal+'. Use memory_mode="streamed" with StreamedSimulation.')
 
     @property
+    def bfast(self):
+        return any(self.bfast_scaled_k)
+
+    @property
+    def bfast_time_factor(self):
+        """Time-step reduction 1-|k| of BFAST, the von Neumann limit of its update in a medium of index 1 or more."""
+        return 1-math.sqrt(sum(k*k for k in self.bfast_scaled_k)) if self.bfast else 1.
+
+    @property
     def complex_fields(self):
         return any(self.boundaries.pair(i)[0].kind == 'bloch' for i in range(2 if self.dimension == '2d' else 3))
 
@@ -373,7 +393,7 @@ class Region(Model):
     @property
     def rectangular_courant(self):
         if self.mesh_steps is None and self.mesh_type!='explicit' and self.time_step_override is None:
-            return self.courant_factor/math.sqrt(2 if self.dimension=='2d' else 3)
+            return self.courant_factor*self.bfast_time_factor/math.sqrt(2 if self.dimension=='2d' else 3)
         return self.time_step*299792458.0/(self.reference_step*1e-6)
 
     @property
@@ -403,9 +423,9 @@ class Region(Model):
     @property
     def cfl_time_step(self):
         if self.mesh_steps is None and self.mesh_type!='explicit':
-            return self.courant_factor / math.sqrt(2 if self.dimension == '2d' else 3) * self.mesh*1e-6 / 299792458.0
+            return self.courant_factor*self.bfast_time_factor / math.sqrt(2 if self.dimension == '2d' else 3) * self.mesh*1e-6 / 299792458.0
         steps=self.axis_steps[:2 if self.dimension=='2d' else 3]
-        return self.courant_factor*1e-6/(299792458.0*math.sqrt(sum(1/h**2 for h in steps)))
+        return self.courant_factor*self.bfast_time_factor*1e-6/(299792458.0*math.sqrt(sum(1/h**2 for h in steps)))
 
     @property
     def actual_size(self):
@@ -449,6 +469,20 @@ class Region(Model):
                 raise ValueError('Mesh must leave at least 5 cells between the PML boundaries.')
         if self.dimension == '2d' and (any(f.kind != 'pml' for f in self.boundaries.pair(2)) or self.bloch_phase[2] != 0):
             raise ValueError('The invariant z axis has no boundary condition in 2D; keep its defaults.')
+        if self.bfast:
+            if not all(math.isfinite(k) for k in self.bfast_scaled_k) or self.bfast_time_factor <= 0:
+                raise ValueError('BFAST requires a scaled wavevector |k| = n*sin(theta) below 1.')
+            for axis, k in enumerate(self.bfast_scaled_k):
+                if k and (axis >= len(active) or active[axis] == 1 or self.boundaries.pair(axis)[0].kind != 'periodic'):
+                    raise ValueError(f'A nonzero BFAST wavevector along {"xyz"[axis]} requires periodic (not Bloch) boundaries on that axis.')
+            if sum(1 for axis, n in enumerate(active) if n > 1 and any(self.pml_layers(axis, side) for side in (0, 1))) > 1:
+                raise ValueError('BFAST supports PML faces on one axis, the propagation axis; make the other axes periodic '
+                                 '(or PEC/PMC/symmetric).')
+            for axis, n in enumerate(active):
+                faces = sum(1 for side in (0, 1) if self.pml_layers(axis, side))
+                if faces and n <= self.pml_layers(axis, 0) + self.pml_layers(axis, 1) + faces*self.bfast_taper_cells + 4:
+                    raise ValueError(f'BFAST needs at least 5 cells along {"xyz"[axis]} between its wavevector tapers '
+                                     f'(bfast_taper_cells={self.bfast_taper_cells} before each PML face).')
         if max(self.shape) > 1_000_000:
             raise ValueError('A grid axis may contain at most one million cells.')
         # The resident size checks apply to explicitly resident regions at
@@ -838,6 +872,8 @@ class Project(Model):
         from .endpoint_native import uses_endpoint, validate_pmc_project
         endpoint = uses_endpoint(r)
         if endpoint:validate_pmc_project(self)
+        if r.bfast and any(s.enabled and (s.kind == 'tfsf' or s.injection == 'oneway') for s in self.sources):
+            raise ValueError('BFAST runs soft sources: one-way and TFSF injection model normal incidence, not a fixed oblique angle.')
         if r.interface_method=='subpixel':
             active={s.material for s in self.structures if s.enabled}
             dispersive=[m for m in self.materials if m.oscillators and m.name in active]

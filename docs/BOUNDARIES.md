@@ -23,7 +23,7 @@ project = Project(region=Region(
 - There are N independent cells on a periodic axis. The period is **N × mesh**, using the mesh-rounded domain size returned by validation. There are no duplicated end planes in saved native arrays.
 - `bloch_phase` is in radians, with **F(r + L) = exp(+i φ) F(r)**. A wavevector in rad/m is converted using φ = k × L in metres. A zero Bloch phase matches Periodic, but retains complex storage.
 - Periodic/Bloch conditions repeat structures and sources. A dipole becomes a phased array of dipoles. Each E/H sheet component receives the fundamental spatial phase exp(i k·r) along Bloch axes at its own Yee position. A single soft sheet radiates in both directions.
-- The phase is fixed across the source spectrum, so this is not broadband fixed-angle/BFAST injection. Diffraction orders can differ by integer multiples of 2π/L.
+- The phase is fixed across the source spectrum, so this is not broadband fixed-angle injection; for that, use `Region.bfast_scaled_k` with Periodic faces ([BFAST.md](BFAST.md)). Diffraction orders can differ by integer multiples of 2π/L.
 - The invariant z dimension has no boundary in 2D. Its configuration remains at defaults.
 
 The sign convention follows the documented [Lumerical Bloch phase relationship](https://optics.ansys.com/hc/en-us/articles/360034382714-Bloch-boundary-conditions-in-FDTD-and-MODE). The FSP wavevector mapping (bandstructure or SI units, source-angle fallback) is described in [FSP_NATIVE.md](FSP_NATIVE.md); equivalence against vendor Bloch fields is not measured.

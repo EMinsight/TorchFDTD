@@ -330,6 +330,8 @@ class FusedYeeCUDA:
 def configure_cuda_kernel(grid, choice):
     if choice == 'torch':
         return
+    from .bfast import reject_bfast
+    reject_bfast(grid.region, 'the fused CUDA kernel')
     implementation = FusedYeeCUDA(grid)
     grid.update_E = implementation.update_E
     grid.update_H = implementation.update_H

@@ -117,6 +117,8 @@ class _System:
         # Preparing coefficients must not allocate another full-volume E/H
         # field or touch fdtd's process-global backend.
         reject_pml_dispersion(project,type(self).__name__)
+        from .bfast import reject_bfast
+        reject_bfast(r,type(self).__name__)
         template=BoundaryDescription(r)
         # PMC/symmetric walls: lower walls mirror inside the volume arrays,
         # upper walls keep their tangential E, normal H and E edges in stored
@@ -711,6 +713,8 @@ class DifferentiableSimulation(torch.nn.Module):
         self.project=Project.model_validate(project.model_dump())
         self.options=options or AdjointOptions()
         p=self.project;r=p.region
+        from .bfast import reject_bfast
+        reject_bfast(r,type(self).__name__)
         if r.interface_method!='staircase':
             raise ValueError('DifferentiableSimulation currently requires staircase coefficients.')
         reject_pml_dispersion(p,type(self).__name__,self._explicit_dispersive_parameters)

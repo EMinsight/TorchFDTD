@@ -460,6 +460,8 @@ def run_streamed_job(project, resolution, *, progress=None, cancel=None):
     started = time.perf_counter()
     p = Project.model_validate(project.model_dump())
     r = p.region
+    from .bfast import reject_bfast
+    reject_bfast(r, 'streamed or tiled execution')
     options = StreamedAdjointOptions(**resolution['options'])
     internal, observations = _browser_scene(p)
     StreamedSimulation(internal, options)  # the streamed API's scene contract
@@ -649,6 +651,8 @@ def run_tiled_job(project, resolution, *, progress=None, cancel=None):
     started = time.perf_counter()
     p = Project.model_validate(project.model_dump())
     r = p.region
+    from .bfast import reject_bfast
+    reject_bfast(r, 'streamed or tiled execution')
     plan, notes = _tiled_plan(p)
     stats = estimate(p)
     stats['warnings'].extend(notes)

@@ -191,6 +191,8 @@ class DistributedYeeDomain:
 
     def __init__(self, region, *, group=None, device='cpu', rank_budget_bytes=1024**3,
                  checkpoints=2, max_replayed_steps=100000):
+        from .bfast import reject_bfast
+        reject_bfast(region, 'distributed domain decomposition')
         if not dist.is_available() or not dist.is_initialized():
             raise RuntimeError('Initialize a torch.distributed process group before creating a distributed domain.')
         self.group = group

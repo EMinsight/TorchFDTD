@@ -385,6 +385,34 @@ def estimate(p: Project, *, endpoint_dispatch=True):
         warnings.append('Periodic/Bloch cells repeat every structure and source. A point source represents an array of sources, not an isolated dipole.')
     if r.complex_fields:
         warnings.append('Bloch runs retain complex fields and traces. Display selection affects snapshots only; NPZ retains real and imaginary parts.')
+    if r.bfast:
+        warnings.append(f'BFAST fields are the physical fields delayed by k.r/c (bfast.physical_field restores the phase); the time step is '
+                        f'scaled by 1-|k| = {r.bfast_time_factor:.3g}, so a pulse needs about 1/(1-|k|) more steps to leave the cell.')
+        from .bfast import full_wavevector_bounds, trapped_band
+        wavelengths = [w for q in map(p.resolved_source, p.sources) if q.enabled
+                       for w in ((q.wavelength_start, q.wavelength_stop) if q.time_definition in ('wavelength', 'frequency') else (q.wavelength,))]
+        for axis, low, high in trapped_band(r):
+            if wavelengths and min(wavelengths) < high and max(wavelengths) >= low:
+                warnings.append(f'BFAST: between {low:.4g} and {high:.4g} um a diffraction order along {"xyz"[axis]} propagates in the '
+                                f'background but not in the compensated PML, so it reflects there and rings; results in that band '
+                                f'are unreliable (docs/BFAST.md).')
+        bounds = full_wavevector_bounds(r)
+        if bounds is not None:
+            axis, low, high = bounds
+            from .geometry import object_bounds
+            for obj in p.structures:
+                if not obj.enabled:
+                    continue
+                center, size = object_bounds(obj)
+                material = next((m for m in p.materials if m.name == obj.material), None)
+                if (center[axis]-size[axis]/2 < low or center[axis]+size[axis]/2 > high) and (
+                        (material is not None and material.oscillators) or r.interface_method == 'subpixel'):
+                    warnings.append(f'{obj.name}: reaches the BFAST taper or PML, where dispersive (ADE) samples and subpixel '
+                                    f'interface cells keep their uncompensated medium and reflect part of the zeroth order.')
+            for item in [q for q in p.sources if q.enabled]+[q for q in p.monitors if q.enabled]:
+                if not low <= item.center[axis] <= high:
+                    warnings.append(f'{item.name}: outside the full BFAST wavevector span {low:.4g}..{high:.4g} um along '
+                                    f'{"xyz"[axis]} (the taper and PML carry a compensated medium). Move it inside.')
     for m in p.monitors:
         m=p.resolved_monitor(m)
         if not m.enabled:
@@ -425,6 +453,9 @@ def estimate(p: Project, *, endpoint_dispatch=True):
     fused = r.backend == 'cuda' and r.cuda_kernel == 'fused' and not r.complex_fields
     volume_bytes = (fused_resident_bytes(r, stored, max_poles) if fused else
                     stored*((400 if r.precision == 'float64' else 200)+(160 if r.precision == 'float64' else 80)*max_poles)*(2 if r.complex_fields else 1))
+    if r.bfast:
+        # Two auxiliary three-component fields and the three field-sized temporaries of each BFAST increment.
+        volume_bytes += stored*(2+3)*3*(8 if r.precision == 'float64' else 4)*(2 if r.complex_fields else 1)
     # Every soft or one-way source term keeps its sampled waveform, one real per step, on the device.
     terms = sum(len(q.polarization_components)*(2 if q.injection == 'oneway' else 1)
                 for q in map(p.resolved_source, p.sources) if q.enabled and q.kind != 'tfsf')
@@ -670,11 +701,15 @@ class Simulation:
 
     def _run(self, progress, cancel, cuda_graph, cuda_graph_steps):
         from .tensor_project import uses_tensor
+        from .bfast import reject_bfast
         if uses_tensor(self.project):
+            reject_bfast(self.project.region, 'the tensor-material solver')
             from .tensor_native import run_tensor
             return run_tensor(self.project, progress, cancel)
         from .endpoint_native import uses_endpoint, run_endpoint
-        if uses_endpoint(self.project.region):return run_endpoint(self.project,progress,cancel)
+        if uses_endpoint(self.project.region):
+            reject_bfast(self.project.region, 'the PMC/symmetric endpoint solver')
+            return run_endpoint(self.project,progress,cancel)
         from .cuda_graph import CudaStepGraphs, observation_schedule, validate_graph_steps
         p, r = self.project, self.project.region
         r.require_resident()
@@ -685,6 +720,8 @@ class Simulation:
         if use_cuda and r.cuda_kernel == 'fused' and r.complex_fields:
             # The same refusal as FusedYeeCUDA, before the grid is allocated.
             raise ValueError('The fused CUDA kernel currently supports real fields. Select cuda_kernel="torch" for Bloch fields.')
+        if use_cuda and r.cuda_kernel == 'fused':
+            reject_bfast(r, 'the fused CUDA kernel')
         from .plan import resources_copy
         plan = self.plan
         stats = resources_copy(plan)
@@ -743,6 +780,9 @@ class Simulation:
         configure_materials(g, p, ownership)
         plan.verify_grid(g)
         configure_interfaces(g,interface_plan)
+        if g.bfast is not None:
+            # After the frozen-PML and subpixel coefficients, which rewrite the inverse permittivity.
+            g.bfast.compensate(g)
         from .cuda_kernels import configure_cuda_kernel
         configure_cuda_kernel(g, r.cuda_kernel)
         from .tfsf import prepare_tfsf,TfsfInjection
@@ -897,6 +937,7 @@ class Simulation:
                      material_sampling=r.material_sampling,
                      epsilon_definition=interface_plan.metadata['epsilon_image'] if interface_plan is not None else 'instantaneous relative permittivity (epsilon-infinity for dispersive cells)',
                      boundaries=r.boundaries.model_dump(), bloch_phase=r.bloch_phase,
+                     **({'bfast_scaled_k': r.bfast_scaled_k} if r.bfast else {}),
                      units='geometry: um; time: s; E/H: reduced fields; Bloch phase: rad', engine='TorchFDTD Yee/CPML on fdtd grid')
         frequency_results=[m.result() for m in frequency_monitors]
         if frequency_results:

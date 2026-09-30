@@ -147,6 +147,8 @@ def _run(cases,projects,objective,output_dir,keep_results,memory_fraction,cuda_g
     grids=[];epsilon=[];traces=[];planes=[];diagnostics=[];decisions=[]
     for p,s,plan in zip(projects,stats,resolved):
         faces=absorber_faces(p)
+        from .bfast import reject_bfast
+        reject_bfast(p.region,'run_tensor_batch')
         if p.region.pml_dispersion=='absorber':s['absorber_faces']=['xyz'[a]+('_max' if side else '_min') for a,side in faces]
         g=YeeGrid(p.region,faces)
         from .subpixel import configure_interfaces
