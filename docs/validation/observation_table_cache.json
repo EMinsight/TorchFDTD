@@ -1,0 +1,206 @@
+{
+  "passed": true,
+  "scope": "warmed repeated plane solves; identical numerical kernels",
+  "baseline": "same source with model host-table cache disabled",
+  "device": "NVIDIA GeForce RTX 3060",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "torch_version": "2.10.0+cu126",
+  "package_path": "D:\\torchfdtd-111-wt\\torchfdtd",
+  "shape": [
+    224,
+    224,
+    32
+  ],
+  "steps": 32,
+  "observations": 1204224,
+  "frequencies": 3,
+  "material_components": 3,
+  "repeats": 3,
+  "model_construction_timed": false,
+  "accuracy": {
+    "fields_bit_identical": true,
+    "material_vjp_bit_identical": true,
+    "no_grad_bit_identical": true,
+    "max_absolute_difference": 0
+  },
+  "material_sha256": "b8d23f2acb110f78d35708431632ddbfeaf651aaf6d088c1daa791ee24f39c18",
+  "project_sha256": "57e83dc9c318de52156ac35a67099d41ef75943ff8a8f1d32dc957d7c4aae29b",
+  "source_sha256": {
+    "differentiable.py": "bb49fb63d49cc4a277a9572749988f708f8fab84f0204bfb2ccbb10f95142c01",
+    "reversible_cpml.py": "fa0e6b9a710bba9dd3fb5d8cb59353dd9ef45ecc95be0eb17e9efc1363511381",
+    "reversible_cpml_planes.py": "9f4851f0b41ebbfe7d59a5898973ca53531df9222fb43236c748d65d486f7fb3",
+    "cuda_adjoint.py": "7942e1a36f0f65113f9395d494b9abbaa319ca91bca1b97fd357beee9ce3bdcd",
+    "cuda_kernels.py": "e2d53c9d9d62d398f1725ac51c6ff88e6b6f5f3aec93cb25e75777302427474b",
+    "reversible_cpml_kernels.py": "9b4dac755d899d94077b78b6747e192db7a2d1ee480dd8c8a51a3d5edc219fed",
+    "reversible_cuda_fused.py": "0a6c46fbd3141e3d55ce9510906376a850ea52134dd849b54cb896df73149cdc"
+  },
+  "driver_sha256": "84e322f2675bb2496b6157eadcea40e89e26689695a4bfbaec98eae355bdbe72",
+  "medians": {
+    "uncached": {
+      "forward_seconds": 2.2665684999665245,
+      "backward_seconds": 2.988885400001891,
+      "pair_seconds": 5.432053199969232,
+      "forward_map_seconds": 1.3735798000125214,
+      "adjoint_layout_seconds": 2.6648184000514448
+    },
+    "cached": {
+      "forward_seconds": 0.6283181000035256,
+      "backward_seconds": 0.12486589991021901,
+      "pair_seconds": 0.8126767000649124,
+      "forward_map_seconds": 0.004103400046005845,
+      "adjoint_layout_seconds": 0.008163300110027194
+    },
+    "no_grad_uncached": {
+      "forward_seconds": 2.015190799953416,
+      "backward_seconds": 0,
+      "pair_seconds": 2.015190799953416,
+      "forward_map_seconds": 1.3459839000133798,
+      "adjoint_layout_seconds": 0
+    },
+    "no_grad_cached": {
+      "forward_seconds": 0.6559246999677271,
+      "backward_seconds": 0,
+      "pair_seconds": 0.6559246999677271,
+      "forward_map_seconds": 0.0035982999252155423,
+      "adjoint_layout_seconds": 0
+    }
+  },
+  "samples": {
+    "uncached": [
+      {
+        "forward_seconds": 1.8714339999714866,
+        "backward_seconds": 2.8750685000559315,
+        "pair_seconds": 4.746502500027418,
+        "forward_map_seconds": 1.2021001999964938,
+        "adjoint_layout_seconds": 2.5682141999714077,
+        "peak_increment_bytes": 579132928,
+        "gpu_reservation_bytes": 1203118060,
+        "forward_kernel_used": "fused_eh",
+        "adjoint_kernel_used": "one_pass"
+      },
+      {
+        "forward_seconds": 2.601079100044444,
+        "backward_seconds": 2.988885400001891,
+        "pair_seconds": 5.589964500046335,
+        "forward_map_seconds": 1.5958131999941543,
+        "adjoint_layout_seconds": 2.6648184000514448,
+        "peak_increment_bytes": 579132928,
+        "gpu_reservation_bytes": 1203118060,
+        "forward_kernel_used": "fused_eh",
+        "adjoint_kernel_used": "one_pass"
+      },
+      {
+        "forward_seconds": 2.2665684999665245,
+        "backward_seconds": 3.1654847000027075,
+        "pair_seconds": 5.432053199969232,
+        "forward_map_seconds": 1.3735798000125214,
+        "adjoint_layout_seconds": 2.745217000017874,
+        "peak_increment_bytes": 579132928,
+        "gpu_reservation_bytes": 1203118060,
+        "forward_kernel_used": "fused_eh",
+        "adjoint_kernel_used": "one_pass"
+      }
+    ],
+    "cached": [
+      {
+        "forward_seconds": 0.5712392999557778,
+        "backward_seconds": 0.11797879997175187,
+        "pair_seconds": 0.6892180999275297,
+        "forward_map_seconds": 0.003343300078995526,
+        "adjoint_layout_seconds": 0.006915199919603765,
+        "peak_increment_bytes": 579132928,
+        "gpu_reservation_bytes": 1203118060,
+        "forward_kernel_used": "fused_eh",
+        "adjoint_kernel_used": "one_pass"
+      },
+      {
+        "forward_seconds": 0.6283181000035256,
+        "backward_seconds": 0.18435860006138682,
+        "pair_seconds": 0.8126767000649124,
+        "forward_map_seconds": 0.004103400046005845,
+        "adjoint_layout_seconds": 0.008163300110027194,
+        "peak_increment_bytes": 579132928,
+        "gpu_reservation_bytes": 1203118060,
+        "forward_kernel_used": "fused_eh",
+        "adjoint_kernel_used": "one_pass"
+      },
+      {
+        "forward_seconds": 0.7458864999935031,
+        "backward_seconds": 0.12486589991021901,
+        "pair_seconds": 0.8707523999037221,
+        "forward_map_seconds": 0.0042100000428035855,
+        "adjoint_layout_seconds": 0.008754500071518123,
+        "peak_increment_bytes": 579132928,
+        "gpu_reservation_bytes": 1203118060,
+        "forward_kernel_used": "fused_eh",
+        "adjoint_kernel_used": "one_pass"
+      }
+    ],
+    "no_grad_uncached": [
+      {
+        "forward_seconds": 1.9323269000742584,
+        "backward_seconds": 0,
+        "pair_seconds": 1.9323269000742584,
+        "forward_map_seconds": 1.2613010000204667,
+        "peak_increment_bytes": 301758464,
+        "gpu_reservation_bytes": 1203118060,
+        "forward_kernel_used": "fused_eh",
+        "adjoint_kernel_used": "split"
+      },
+      {
+        "forward_seconds": 2.015190799953416,
+        "backward_seconds": 0,
+        "pair_seconds": 2.015190799953416,
+        "forward_map_seconds": 1.348103699972853,
+        "peak_increment_bytes": 301758464,
+        "gpu_reservation_bytes": 1203118060,
+        "forward_kernel_used": "fused_eh",
+        "adjoint_kernel_used": "split"
+      },
+      {
+        "forward_seconds": 2.0629925000248477,
+        "backward_seconds": 0,
+        "pair_seconds": 2.0629925000248477,
+        "forward_map_seconds": 1.3459839000133798,
+        "peak_increment_bytes": 301758464,
+        "gpu_reservation_bytes": 1203118060,
+        "forward_kernel_used": "fused_eh",
+        "adjoint_kernel_used": "split"
+      }
+    ],
+    "no_grad_cached": [
+      {
+        "forward_seconds": 0.6559246999677271,
+        "backward_seconds": 0,
+        "pair_seconds": 0.6559246999677271,
+        "forward_map_seconds": 0.0035982999252155423,
+        "peak_increment_bytes": 301758464,
+        "gpu_reservation_bytes": 1203118060,
+        "forward_kernel_used": "fused_eh",
+        "adjoint_kernel_used": "split"
+      },
+      {
+        "forward_seconds": 0.6846183000598103,
+        "backward_seconds": 0,
+        "pair_seconds": 0.6846183000598103,
+        "forward_map_seconds": 0.0034553000004962087,
+        "peak_increment_bytes": 301758464,
+        "gpu_reservation_bytes": 1203118060,
+        "forward_kernel_used": "fused_eh",
+        "adjoint_kernel_used": "split"
+      },
+      {
+        "forward_seconds": 0.6123991999775171,
+        "backward_seconds": 0,
+        "pair_seconds": 0.6123991999775171,
+        "forward_map_seconds": 0.003826900036074221,
+        "peak_increment_bytes": 301758464,
+        "gpu_reservation_bytes": 1203118060,
+        "forward_kernel_used": "fused_eh",
+        "adjoint_kernel_used": "split"
+      }
+    ]
+  },
+  "pair_reduction_fraction": 0.8503923525510546,
+  "no_grad_reduction_fraction": 0.6745098776835972
+}

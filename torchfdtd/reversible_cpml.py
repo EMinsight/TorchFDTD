@@ -220,7 +220,8 @@ def _require_fixed_exterior(value, fixed, interval, chunk):
 
 def _recorded_system(epsilon, project, spectral, options=None, report=None):
     system = _System(project, epsilon.detach(), prepare_kernels=False,
-                     observation_monitors=None if spectral is None else spectral.observers)
+                     observation_monitors=None if spectral is None else spectral.observers,
+                     observation_cache=getattr(spectral, 'observation_cache', None))
     if epsilon.is_cuda:
         from .cuda_kernels import FusedYeeCUDA
         from .cuda_complex import FusedComplexYeeCUDA

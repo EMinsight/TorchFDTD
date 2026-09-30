@@ -102,7 +102,7 @@ class _System:
     _pmc_faces=True
 
     def __init__(self, project, epsilon, *, prepare_updates=True, observation_monitors=None,
-                 prepare_kernels=True, prepare_permittivity=True):
+                 prepare_kernels=True, prepare_permittivity=True, observation_cache=None):
         self.project=project
         self.region=r=project.region
         self.epsilon=epsilon
@@ -184,7 +184,14 @@ class _System:
                 self.sources[family].append((loc,comp,self.tensor(waveform),None if profile is None else self.tensor(profile)))
         self.monitors=[(m.component,index_at(m.center,r,m.component),'xyz'.index(m.component[1].lower()))
                        for m in project.monitors if m.enabled]
-        if observation_monitors is not None:self.monitors=list(observation_monitors)
+        self.observation_cache=observation_cache
+        if observation_monitors is not None:
+            # A plane model owns an immutable tuple. Preserve its identity for
+            # O(1) cache checks instead of rescanning every observation at each
+            # solve. Other callers retain their existing mutable-list contract.
+            self.monitors=(observation_monitors if observation_cache is not None
+                           and isinstance(observation_monitors,tuple)
+                           else list(observation_monitors))
         self.prepare_observations()
         self.kernel=None
         if prepare_kernels and self.device.type=='cuda' and not r.complex_fields:
@@ -220,7 +227,25 @@ class _System:
             else:faces.append(workspace.array(f'inverse_face:{position}',shape,self.dtype).copy_(value).reciprocal_())
         g.face_inverse_permittivity=faces
 
+    def observation_cache_key(self,kind):
+        # Stored PMC faces have topology-dependent state offsets. Keep that
+        # path uncached. Plane models already reject changes to their mesh and
+        # monitor configuration, and the entry also retains/checks the exact
+        # tuple owner, preventing stale reuse after a layout is replaced.
+        if (getattr(self,'observation_cache',None) is None
+                or not isinstance(self.monitors,tuple)
+                or any(self.grid.pmc_blocks.get(family) for family in ('E','H'))):
+            return None
+        return kind,tuple(self.region.shape)
+
     def prepare_observations(self):
+        key=self.observation_cache_key('prepare')
+        cached=None if key is None else self.observation_cache.get(key)
+        if cached is not None and cached[0] is self.monitors:
+            self.observation_maps=[tuple(t.to(self.device) for t in pair) for pair in cached[1]]
+            self.face_observation_maps=[]
+            return
+        build_device=self.device if key is None else torch.device('cpu')
         self.observation_maps=[]
         self.face_observation_maps=[]
         shape=self.region.shape
@@ -236,11 +261,14 @@ class _System:
                     offset=2+len(self.segments)+(block if family=='E' else len(self.grid.pmc_blocks['E'])+block)
                     groups.setdefault(offset,([],[]))
                     groups[offset][0].append(position);groups[offset][1].append(index)
-            self.observation_maps.append((torch.tensor(positions,device=self.device,dtype=torch.long),
-                                          torch.tensor(indices,device=self.device,dtype=torch.long)))
+            self.observation_maps.append((torch.tensor(positions,device=build_device,dtype=torch.long),
+                                          torch.tensor(indices,device=build_device,dtype=torch.long)))
         for offset,(positions,indices) in sorted(groups.items()):
             self.face_observation_maps.append((offset,torch.tensor(positions,device=self.device,dtype=torch.long),
                                                torch.tensor(indices,device=self.device,dtype=torch.long)))
+        if key is not None:
+            self.observation_cache[key]=(self.monitors,tuple(self.observation_maps))
+            self.observation_maps=[tuple(t.to(self.device) for t in pair) for pair in self.observation_maps]
 
     def tensor(self,value):
         is_complex=value.is_complex() if isinstance(value,torch.Tensor) else np.iscomplexobj(value)

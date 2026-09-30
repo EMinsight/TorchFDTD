@@ -20,6 +20,11 @@ class ReversibleCPMLPlaneSimulation(DifferentiablePlaneSimulation):
         if options is not None and not isinstance(options, ReversibleCPMLOptions):
             raise ValueError('Recorded CPML planes require ReversibleCPMLOptions.')
         super().__init__(project, options, quadrature_counts=quadrature_counts)
+        # Fixed Yee observations outlive individual solves. Keep only host
+        # index tables here, with no fields, cotangents or device allocations.
+        # Each solve uploads its own maps on its current stream, so changing
+        # devices/streams cannot reuse stale CUDA pointers or retain VRAM.
+        self._observation_cache = {}
 
     @property
     def interior_z(self):
@@ -28,6 +33,7 @@ class ReversibleCPMLPlaneSimulation(DifferentiablePlaneSimulation):
     def _spectral(self, epsilon, frequency_hz, block_size):
         spectral = super()._spectral(epsilon, frequency_hz, block_size)
         spectral.layout_reservation_bytes = self.layout_reservation_bytes
+        spectral.observation_cache = self._observation_cache
         return spectral
 
     def forward(self, epsilon, frequency_hz, *, fixed_epsilon, block_size=32):

@@ -55,24 +55,33 @@ class FusedAdjointCUDA:
         g=self.system.grid
         real='double' if g.E.dtype==torch.float64 else 'float'
         shape=g.E.shape[:3]
-        groups={}
-        for m,(name,loc,component) in enumerate(self.system.monitors):
-            index=3*((loc[0]*shape[1]+loc[1])*shape[2]+loc[2])+component
-            groups.setdefault((name[0],index),[]).append(m)
-        count=len(groups)
-        # One thread owns each distinct field location. Preserve the original
-        # monitor order within duplicate groups without atomics. Indices are
-        # runtime data, so dense planes do not generate a huge NVRTC program.
-        layout=np.empty(3*count+1+len(self.system.monitors),dtype=np.int64)
-        cursor=0
-        for i,((family,index),monitors) in enumerate(groups.items()):
-            layout[i]=cursor
-            layout[count+1+i]=index
-            layout[2*count+1+i]=int(family=='H')
-            layout[3*count+1+cursor:3*count+1+cursor+len(monitors)]=monitors
-            cursor+=len(monitors)
-        layout[count]=cursor
-        host=torch.from_numpy(layout)
+        key=self.system.observation_cache_key('adjoint') if self.buffers is None and self.direct_views else None
+        cached=None if key is None else self.system.observation_cache.get(key)
+        if cached is not None and cached[0] is self.system.monitors:
+            host,count=cached[1:]
+        else:
+            groups={}
+            for m,(name,loc,component) in enumerate(self.system.monitors):
+                index=3*((loc[0]*shape[1]+loc[1])*shape[2]+loc[2])+component
+                groups.setdefault((name[0],index),[]).append(m)
+            count=len(groups)
+            # One thread owns each distinct field location. Preserve the original
+            # monitor order within duplicate groups without atomics. Indices are
+            # runtime data, so dense planes do not generate a huge NVRTC program.
+            layout=np.empty(3*count+1+len(self.system.monitors),dtype=np.int64)
+            cursor=0
+            for i,((family,index),monitors) in enumerate(groups.items()):
+                layout[i]=cursor
+                layout[count+1+i]=index
+                layout[2*count+1+i]=int(family=='H')
+                layout[3*count+1+cursor:3*count+1+cursor+len(monitors)]=monitors
+                cursor+=len(monitors)
+            layout[count]=cursor
+            host=torch.from_numpy(layout)
+            if key is not None:
+                self.system.observation_cache[key]=(self.system.monitors,host,count)
+        # Cache the read-only host packet, never a CUDA binding. The receiving
+        # solve owns its device copy and binds its fresh fields/seed below.
         self.observer_layout=(host.to(self.system.device) if self.buffers is None else
                               self.buffers.copy('adjoint_observer_layout',host))
         code='''extern "C" __global__ void add_observations(

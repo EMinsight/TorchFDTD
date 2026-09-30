@@ -271,6 +271,30 @@ A call that cannot request a gradient runs forward only: under `torch.no_grad()`
 
 `ReversibleCPMLPlaneSimulation` returns the same monitor-ID mapping of six-component `DifferentiablePlaneResult` objects as the checkpointed plane API. Plane positions, interpolation maps, quadrature, frequencies, and source settings remain fixed. Construction builds host quadrature/interpolation maps before `plan()`. Planning and execution charge their layout allowance, but construction is not allocation-free.
 
+The model also retains fixed observation index tables on the host after their
+first use. Repeated recorded forwards, no-gradient evaluations and real CUDA
+adjoints reuse these tables. Each solve creates its own device copies and
+field/seed bindings. Monitor ordering, including duplicate-location adjoint
+additions, is preserved. The cache has no option to configure and is released
+with the model. It avoids repeated Python setup for dense planes. It does not
+change the numerical kernels or reduce the work of each timestep. The existing
+host layout and observer-preparation allowances cover the retained index
+tables, and per-solve GPU map reservations still apply.
+
+On an RTX 3060, three alternating warmed comparisons of a 224 x 224 x 32
+diagonal-material problem with 32 steps, three frequencies and 1,204,224 Yee
+observations reduced median forward-plus-backward time from 5.432 s to 0.813 s.
+The forward map setup fell from 1.374 s to 0.004 s and the adjoint layout setup
+from 2.665 s to 0.008 s. No-gradient forward time fell from 2.015 s to 0.656 s.
+Spectra and material gradients were bitwise identical, and both paths had the
+same 579,132,928-byte peak Torch CUDA increment. These are setup savings for
+repeated solves of this short, dense-monitor case. Model construction and
+warmup are excluded, and the relative gain depends on timestep count, monitor
+density and host CPU. The baseline uses the same source with its internal
+table cache disabled. [All samples and source hashes](validation/observation_table_cache.json)
+are recorded. Reproduce under an exclusive GPU lock with
+`python -m benchmarks.observation_table_cache --output comparison.json`.
+
 With M unique sampled Yee components, F frequencies, and B=min(block_size,T), the solver stores B by M sample/seed buffers and an F by M spectral accumulator. It regenerates bounded DFT-adjoint seed blocks during backward instead of retaining T by M plane histories. The boundary archive still scales with T. Plane spectra use the native positive exponential `exp(+2*pi*i*f*t)`, with E sampled at `(n+1)*dt` and H at `(n+1.5)*dt`. This differs from the point result's negative-exponential spectrum convention.
 
 This independent CPU example uses fixed nonzero Bloch phases, diagonal real epsilon, a soft Ex plane, and two field planes. It illustrates a material VJP, not a complete CR calibration or optimization:
