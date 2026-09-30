@@ -9,7 +9,11 @@ Commits that only record validation evidence or documentation ("Record ...",
 
 ## Unreleased
 
-- Recorded CPML plane models reuse fixed host observation tables across solves, avoiding repeated dense-plane index preparation while preserving monitor and duplicate-adjoint ordering. Each solve owns fresh CUDA maps and field/seed bindings ([REVERSIBLE_CPML.md](REVERSIBLE_CPML.md#online-fixed-plane-spectra), this commit).
+## 1.1.3 (2026-10-01)
+
+### Performance
+
+- Recorded CPML plane models reuse fixed host observation tables across solves, avoiding repeated dense-plane index preparation while preserving monitor and duplicate-adjoint ordering. Each solve owns fresh CUDA maps and field/seed bindings ([REVERSIBLE_CPML.md](REVERSIBLE_CPML.md#online-fixed-plane-spectra), db4d3d0).
 
 ## 1.1.2 (2026-09-30)
 

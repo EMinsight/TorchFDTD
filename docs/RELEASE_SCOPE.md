@@ -1,5 +1,10 @@
 # Release scope by profile
 
+For v1.1.3, patch validation covers fixed observation-table reuse and its
+related regressions. The [1.1.3 validation scope](RELEASE113_VALIDATION.md)
+records completed checks and omitted full-suite work. It does not claim
+a new complete WORKSTATION or G9-06 pass.
+
 For v1.1.2, the owner selected patch validation covering the changed code.
 The [1.1.2 validation scope](RELEASE112_VALIDATION.md) records completed
 checks and omitted full-suite work. It does not claim a new complete
