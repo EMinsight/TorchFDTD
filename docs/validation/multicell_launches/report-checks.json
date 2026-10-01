@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "counts": {
+    "tests": 18,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "junit_sha256": "19698410a5e52025338258f14ced5b569608802d88d7a6ddeb91ad93c860d635",
+  "input_sha256": {
+    "docs/VALIDATION_REPORT.md": "3b27fe5fe86f337e404d784f0ab531c81dac1a51a62d98a42cdd5106730f5749",
+    "docs/RELEASE_SCOPE.md": "e615ac4c19b4c1e91dab66d8b68fc3d31f03ce0f82d548fafe60ef183d55b8d0",
+    "docs/RELEASE114_VALIDATION.md": "cb9da2783855b13e51bb2f8ba077d9b654810e01e69830ddf2fbb2163e4fd040",
+    "docs/RELEASE_PROCEDURE.md": "da29851e73c23cb05677f6fc3498d0d093cf7dcc37295aeff1922b11fd40d246",
+    "docs/validation/completion_gates.json": "c452ef0af4c3d17eac9db1d1bbf2076cc00e8e7673fbd5a8491d07cc5a10202d",
+    "tests/test_validation_report.py": "7b4491facc0fc7bf53ac6e540070fcae2abfc4dc77af54a2e4697f3454287aae",
+    "scripts/build_validation_report.py": "d23f027c42626ba11fa148295e0dcba8f72d8a5c8c10a9eeddcd58cf702e5c2c",
+    "docs/validation/sbom.json": "4ff5e808c3fdc4ada875a7f33599baae573d3d1355c0835700bd419c5e7defcc",
+    "docs/THIRD_PARTY_NOTICES.md": "a98ce795e22ea946f38b6e43f7ebeb8ed58fa8b118d45a28c93bd348046a0abf"
+  },
+  "source_commit": "34e88ddc6d67e722464c769e92f9dfb921c486b3"
+}
