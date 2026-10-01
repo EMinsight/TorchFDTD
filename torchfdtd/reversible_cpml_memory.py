@@ -9,7 +9,57 @@ import math
 import torch
 
 
+class _TraceAdmissionError(ValueError):
+    """A complete reservation was denied, rather than invalid physics/metadata."""
+
+
 def _cpml_reversible_reservation(project, options, device, interval, *, material_components=1, spectral=None):
+    """Resolve storage using complete reservations, before any solver allocation.
+
+    Keep the device-first choice local to this invocation. The existing CUDA
+    admission queries live free memory, including archives held by other graphs,
+    and may release unused allocator cache. Host admission counts the archive,
+    pinned/device staging and all other solver allocations. Explicit budgets
+    bound this solver, not a shared pool or memory reserved for future calls.
+    No graph/trace keeper, field offload, partial archive or OOM retry is added.
+    """
+    device = torch.device(device)
+    requested = options.trace_storage
+    transfers = getattr(options, 'trace_transfers', 'sync')
+    if requested != 'auto':
+        result = _fixed_cpml_reversible_reservation(project, options, device, interval,
+            material_components=material_components, spectral=spectral,
+            storage=requested, transfers=transfers)
+        result.update(trace_storage_requested=requested, trace_transfers_requested=transfers)
+        return result
+    if device.type not in ('cpu', 'cuda'):
+        raise ValueError('CPML reversible reservation requires CPU or CUDA.')
+    if transfers not in ('sync', 'async'):
+        raise ValueError('trace_transfers must be sync or async.')
+    if getattr(options, 'host_budget_bytes', None) is None:
+        raise ValueError('Automatic trace storage requires an explicit host_budget_bytes total budget.')
+    candidates = [('device', 'sync'), ('cpu', 'async')] if device.type == 'cuda' else [('cpu', 'sync')]
+    attempts = []
+    for storage, resolved_transfers in candidates:
+        try:
+            result = _fixed_cpml_reversible_reservation(project, options, device, interval,
+                material_components=material_components, spectral=spectral,
+                storage=storage, transfers=resolved_transfers)
+        except _TraceAdmissionError as error:
+            attempts.append(dict(storage=storage, transfers=resolved_transfers,
+                                 admitted=False, reason=str(error)))
+            continue
+        attempts.append(dict(storage=storage, transfers=resolved_transfers, admitted=True))
+        result.update(trace_storage_requested='auto', trace_transfers_requested=transfers,
+            trace_placement_policy='device_then_async_cpu' if device.type == 'cuda' else 'cpu_only',
+            trace_placement_attempts=attempts)
+        return result
+    reasons = ' '.join(attempt['storage']+': '+attempt['reason'] for attempt in attempts)
+    raise ValueError('Automatic trace storage cannot admit a complete solver reservation. '+reasons)
+
+
+def _fixed_cpml_reversible_reservation(project, options, device, interval, *,
+                                     material_components=1, spectral=None, storage, transfers):
     from .adjoint_memory import _resident_reservation
     from .differentiable import AdjointOptions
     from .memory_profile import host_memory
@@ -21,7 +71,6 @@ def _cpml_reversible_reservation(project, options, device, interval, *, material
         raise ValueError('CPML reversible reservation requires CPU or CUDA.')
     if type(material_components) is not int or material_components not in (1, 3):
         raise ValueError('material_components must be 1 or 3.')
-    transfers = getattr(options, 'trace_transfers', 'sync')
     requested_chunk = getattr(options, 'trace_chunk_steps', 32)
     diagnostic_lanes = getattr(options, 'diagnostic_chunk_elements', 65536)
     if transfers not in ('sync', 'async'):
@@ -30,7 +79,6 @@ def _cpml_reversible_reservation(project, options, device, interval, *, material
         raise ValueError('trace_chunk_steps must be an integer in [1, 1024].')
     if type(diagnostic_lanes) is not int or not 65536 <= diagnostic_lanes <= 1 << 26:
         raise ValueError('diagnostic_chunk_elements must be an integer in [65536, 2**26].')
-    storage = options.trace_storage
     if storage not in ('device', 'cpu'):
         raise ValueError('Trace storage must be device or cpu.')
     if transfers == 'async' and (device.type != 'cuda' or storage != 'cpu'):
@@ -130,14 +178,14 @@ def _cpml_reversible_reservation(project, options, device, interval, *, material
         host += extra_active
         active = host
     if budgets['host_budget_bytes'] is not None and host > budgets['host_budget_bytes']:
-        raise ValueError('CPML reversible total host reservation exceeds the explicit host budget.')
+        raise _TraceAdmissionError('CPML reversible total host reservation exceeds the explicit host budget.')
     if budgets['resident_budget_bytes'] is not None and active > budgets['resident_budget_bytes']:
-        raise ValueError('CPML reversible total resident reservation exceeds the explicit resident budget.')
+        raise _TraceAdmissionError('CPML reversible total resident reservation exceeds the explicit resident budget.')
     available = host_memory()['available_bytes']
     if available is not None and host > int(.8*available):
-        raise ValueError('CPML reversible total host reservation exceeds available host memory.')
+        raise _TraceAdmissionError('CPML reversible total host reservation exceeds available host memory.')
     if device.type == 'cuda' and active > cuda_budget_limit(device, active, budgets['gpu_budget_bytes']):
-        raise ValueError('CPML reversible complete reservation exceeds the CUDA budget.')
+        raise _TraceAdmissionError('CPML reversible complete reservation exceeds the CUDA budget.')
     parts = dict(base['workspace_components_bytes'])
     parts.update(reconstruction_diagnostics=diagnostics,
                  effective_material_and_autograd=material,

@@ -27,6 +27,10 @@ class ReversibleCPMLOptions(ReversibleOptions):
     """Resident state budgets and lossless boundary-history storage.
 
     Optional asynchronous CPU traces use a bounded pinned two-slot ring.
+    trace_storage='auto' prefers a complete device reservation, then an
+    asynchronous CPU archive on CUDA. An explicit total host budget is
+    required. CPU execution resolves to synchronous CPU storage. Selection
+    happens before allocation and is reported per solve, never mid-trajectory.
     No files are created by this API. Fields and CPML remain resident.
     forward_only='auto' runs a call that cannot request a gradient without
     the trace, terminal copies and drift diagnostics; 'never' records anyway.
@@ -60,11 +64,13 @@ class ReversibleCPMLOptions(ReversibleOptions):
         if (type(self.diagnostic_chunk_elements) is not int
                 or not 65536 <= self.diagnostic_chunk_elements <= 1 << 26):
             raise ValueError('diagnostic_chunk_elements must be an integer in [65536, 2**26].')
-        if self.trace_storage not in ('device', 'cpu'):
-            raise ValueError('trace_storage must be device or cpu.')
+        if self.trace_storage not in ('device', 'cpu', 'auto'):
+            raise ValueError('trace_storage must be device, cpu or auto.')
+        if self.trace_storage == 'auto' and self.host_budget_bytes is None:
+            raise ValueError('Automatic trace storage requires an explicit host_budget_bytes total budget.')
         if self.trace_transfers not in ('sync', 'async'):
             raise ValueError('trace_transfers must be sync or async.')
-        if self.trace_transfers == 'async' and self.trace_storage != 'cpu':
+        if self.trace_transfers == 'async' and self.trace_storage not in ('cpu', 'auto'):
             raise ValueError('Asynchronous traces require trace_storage=cpu.')
         if type(self.trace_chunk_steps) is not int or not 1 <= self.trace_chunk_steps <= 1024:
             raise ValueError('trace_chunk_steps must be an integer in [1, 1024].')
@@ -337,10 +343,13 @@ class _RecordedCPML(torch.autograd.Function):
     def forward(ctx, epsilon, project, options, interval, report, spectral):
         system = _recorded_system(epsilon, project, spectral, options, report)
         a, b = interval
-        trace_device = epsilon.device if options.trace_storage == 'device' else torch.device('cpu')
+        # Admission has resolved automatic placement before effective material
+        # or fields are allocated. Use that exact decision for this graph's
+        # lifetime; later solves may choose differently as live memory changes.
+        trace_device = epsilon.device if report['trace_storage'] == 'device' else torch.device('cpu')
         shape = (project.region.steps, 2, *epsilon.shape[:2], 2)
         transport = None
-        if options.trace_transfers == 'async':
+        if report['trace_transfers'] == 'async':
             from .reversible_trace import AsyncBoundaryTrace
             transport = AsyncBoundaryTrace(shape, epsilon.device,
                 chunk_steps=report['trace_chunk_steps'], dtype=system.field_dtype)
