@@ -425,13 +425,45 @@ With `N` grid cells, transverse area `A = Nx*Ny`, and `T` timesteps, storage is 
 | --- | --- | --- |
 | `collar_cells` | Positive integer, default `1` | Additional lossless rows excluded at each recording cut. |
 | `interior_z` | Inclusive integer pair `(a, b)` with `a < b`, default `None` | Optional subset of the CPML-free reconstruction interval. Exterior epsilon must match the fixed map. |
-| `trace_storage` | `"device"` or `"cpu"`, default `"device"` | Store boundary history on the field device or in CPU memory. |
-| `trace_transfers` | `"sync"` or `"async"`, default `"sync"` | Async requires CUDA execution and CPU trace storage. |
+| `trace_storage` | `"device"`, `"cpu"` or `"auto"`, default `"device"` | Store boundary history on the field device, in CPU memory, or select an admitted placement per solve. Auto requires an explicit total `host_budget_bytes`. |
+| `trace_transfers` | `"sync"` or `"async"`, default `"sync"` | Explicit CPU storage supports either on CUDA. Auto resolves to sync for device storage and async for CPU storage on CUDA. |
 | `trace_chunk_steps` | Integer 1 through 1024, default `32` | Requested async chunk length K, effectively min(K,T). |
 | `forward_only` | `"auto"` or `"never"`, default `"auto"` | `"auto"` runs a call that cannot request a gradient forward only (below). `"never"` records the tape on every call. |
 | `diagnostic_chunk_elements` | Integer 65536 through 2**26, default `65536` | Real lanes per chunk of the drift diagnostic and the finite/material checks. The scratch is reserved at 24 bytes per lane. |
 
-On CPU, both storage choices use host memory and require synchronous transfers. On CUDA, CPU trace storage can use synchronous copies or an asynchronous two-slot transport. The asynchronous mode owns two pinned host chunks, two device chunks, eight reusable events, and one copy stream in addition to the full pageable host archive. Requested chunk length K is clamped to T, so a short run does not reserve unused full-length chunks. Field packing and backward consumption must run on the CUDA compute stream captured during forward. A different-stream backward is rejected. Error cleanup drains the original streams. Sequential retained backward opens a fresh reverse reader after resetting the solver state. A rejected stream call can be retried on the original stream with a retained graph, but a failed transport is not a promise of arbitrary CUDA-error recovery. Run a new forward after a transport failure. This API creates no SSD archive, and asynchronous trace transfers do not make the fields spatially streamed or establish a performance gain.
+On CPU, both explicit storage choices use host memory and require synchronous transfers. On CUDA, CPU trace storage can use synchronous copies or an asynchronous two-slot transport. The asynchronous mode owns two pinned host chunks, two device chunks, eight reusable events, and one copy stream in addition to the full pageable host archive. Requested chunk length K is clamped to T, so a short run does not reserve unused full-length chunks. Field packing and backward consumption must run on the CUDA compute stream captured during forward. Direct transport access on another stream is rejected. PyTorch schedules this autograd node's backward on its forward stream, including when backward is requested from another stream. Error cleanup drains the original streams. Sequential retained backward opens a fresh reverse reader after resetting the solver state. A rejected direct stream call can be retried on the original stream with a retained graph, but a failed transport is not a promise of arbitrary CUDA-error recovery. Run a new forward after a transport failure. This API creates no SSD archive, and asynchronous trace transfers do not make the fields spatially streamed or establish a performance gain.
+
+### Automatic boundary-history placement
+
+```python
+options = ReversibleCPMLOptions(
+    trace_storage="auto",
+    host_budget_bytes=8 * 1024**3,
+    gpu_budget_bytes=4 * 1024**3,
+    trace_chunk_steps=32,
+)
+```
+
+On CUDA, `auto` first admits the **complete solver with a device archive**. If that reservation exceeds an explicit or live-memory limit, it tries the complete solver with an asynchronous CPU archive, including its two pinned host chunks and two device chunks. If neither fits, it raises before allocating effective material or fields. The CPU archive is pageable with bounded pinned staging. On CPU, `auto` selects synchronous CPU storage.
+
+The total host budget is required for `auto` and includes solver host allocations as well as the archive. In a container or a process group sharing RAM, supply the budget allocated to this process, including the desired reserve. GPU admission retains the existing 80% live-free-memory cap. Budgets describe this invocation's complete conservative reservation. They do not reserve capacity for a later solve or form a shared rank-level pool. Existing live graphs are visible through the live free-memory queries. Unused allocator cache may be released during admission.
+
+Every call makes a fresh decision. An admitted graph keeps its selected archive until that graph is released and never migrates it during forward or backward. `report["trace_storage_requested"]` records `"auto"`, while `trace_storage` and `trace_transfers` record the actual choice. `trace_placement_attempts` records admitted and denied candidates. `plan()` makes the same metadata-only decision using memory available at planning time. Execution repeats admission, so a previous plan does not guarantee the same choice. An allocation error is propagated without replaying the forward or retrying another archive.
+
+This option applies to the existing resident recorded CPML point and plane APIs, with the same physics and derivative restrictions. The periodic browser configuration continues to expose explicit CPU/device storage. Automatic placement does not retain a batch of tile graphs or change the sequential batch replay algorithm.
+
+An external NCS H200 run measured **193 to 123 seconds** with observation caching and kept-unit graph/trace placement combined, a 36.3% reduction. That workflow retains unit graphs to avoid a second recorded forward. Automatic archive placement in TorchFDTD is measured separately with `python -m benchmarks.automatic_trace_storage --output comparison.json`.
+
+The [automatic placement measurements](validation/automatic_trace_storage.json) use an RTX 3060, a 64 × 64 × 32 grid, 256 steps, diagonal material, two planes with 8 × 8 quadrature, three frequencies and five warmed repeats per path in rotating order. Forward-plus-backward wall time includes admission and is synchronized. Model construction is excluded. All spectra and material VJPs are bitwise equal, with maximum absolute difference zero.
+
+| Requested path | Resolved archive | Median forward + backward (s) | Peak Torch GPU increment (MiB) |
+| --- | --- | ---: | ---: |
+| Explicit device | GPU | 0.205224 | 38.23 |
+| Auto, sufficient GPU budget | GPU | 0.190811 | 38.23 |
+| Explicit asynchronous CPU | CPU | 0.236267 | 27.02 |
+| Auto, constrained GPU budget | CPU | 0.237916 | 27.02 |
+
+The constrained 69,187,276-byte complete GPU budget refuses explicit device storage and admits automatic CPU storage. This fixture saves 11.20 MiB of peak GPU allocation through CPU placement while taking longer than device storage. Both automatic paths execute the same numerical kernels as their explicit counterparts. Timing variability between the automatic and matching explicit paths does not establish a kernel speedup. A longer boundary history changes the archive-to-staging ratio.
 
 `plan(device=..., material_components=1)` performs metadata-only admission for scalar maps. Use `material_components=3` for diagonal maps. It reports interval, trace shape, terminal bytes, complete conservative resident/host/GPU reservations, and allocation scope. It includes solver working buffers and transfer allowances, and checks explicit budgets and available memory before creating effective material or fields. Caller input ownership, optimizer state, external autograd graphs, and CUDA context are distinct from solver-owned allocations. The report identifies retained caller-input sizes. The estimate is an engineering reservation, not a platform-independent measurement of peak process memory.
 

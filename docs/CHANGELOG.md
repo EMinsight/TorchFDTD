@@ -9,6 +9,8 @@ Commits that only record validation evidence or documentation ("Record ...",
 
 ## Unreleased
 
+- Recorded CPML point and plane models accept optional `trace_storage="auto"`, selecting a complete device reservation or a bounded asynchronous CPU archive before allocating fields. Selection, budgets and denied candidates are reported per solve. The existing default remains `"device"` ([REVERSIBLE_CPML.md](REVERSIBLE_CPML.md#automatic-boundary-history-placement), 86e3d01).
+
 ## 1.1.3 (2026-10-01)
 
 ### Performance
