@@ -1,5 +1,12 @@
 # Experimental resident and streamed adjoint selection
 
+For an already selected recorded CPML CUDA solver,
+[`ReversibleCPMLOptions(cells_per_thread='auto', block_size='auto')`](REVERSIBLE_CPML.md#multiple-entries-per-cuda-thread)
+calibrates split kernel launches. This is a per-kernel block/count choice and
+does not select resident versus streamed execution. The default remains one
+entry per thread. Supported real/Bloch fields, scratch admission, first-call
+cost and device-dependent performance are documented with the option.
+
 `tune_adjoint_execution` compares resident and spatially streamed execution
 under common solver-memory budgets. It covers dielectric and Drude/Lorentz
 ADE point histories, point spectra or fixed spectral detection planes. It uses the existing bounded reference

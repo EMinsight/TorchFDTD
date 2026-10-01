@@ -254,6 +254,7 @@ class InteriorReconstruction:
             self._fused = adjoint_class(system, gradient, self.signal_bar,
                                         direct_views=True, material_gradient=False)
             requested = getattr(options, 'block_size', None)
+            cells_per_thread = getattr(options, 'cells_per_thread', 1)
             from .reversible_cuda_fused import eligibility_reason, OnePassFieldAdjoint
             reason = eligibility_reason(system)
             if getattr(options, 'adjoint_kernel', 'split') == 'one_pass' and reason is None:
@@ -267,9 +268,10 @@ class InteriorReconstruction:
                 else:
                     if report is not None:
                         report['adjoint_kernel_used'] = 'one_pass'
-            if requested is not None and reason is None and getattr(self._fused, 'one_pass', None) is None:
+            if (requested is not None or cells_per_thread != 1) and (
+                    reason is None or cells_per_thread != 1) and getattr(self._fused, 'one_pass', None) is None:
                 from .reversible_cuda_tuning import tune_adjoint
-                tune_adjoint(self._fused, requested, report)
+                tune_adjoint(self._fused, requested, report, cells_per_thread=cells_per_thread)
             if field_dtype == torch.float32 and requested is not None and reason is None:
                 self._inverse = inverse_class(system, a, b, gradient, self._fused.e_bar,
                                               block_size=requested, report=report)

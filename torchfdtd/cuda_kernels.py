@@ -65,11 +65,21 @@ class FusedYeeCUDA:
 
     complex_fields = False
 
-    def __init__(self, grid, *, direct_views=False, bindings_cache=None):
+    def __init__(self, grid, *, direct_views=False, bindings_cache=None,
+                 cells_per_thread=1, block_size=None, report=None):
+        from .reversible_cuda_tuning import validate_cells_per_thread
+        validate_cells_per_thread(cells_per_thread)
+        if block_size is not None and block_size != 'auto' and (
+                type(block_size) is not int or block_size not in (128, 256, 512, 1024)):
+            raise ValueError('block_size must be None, auto, 128, 256, 512 or 1024.')
         if not grid.is_torch or not grid.E.is_cuda:
             raise ValueError('The fused CUDA kernel requires backend="cuda" and a CUDA GPU.')
         if grid.E.is_complex() and not self.complex_fields:
             raise ValueError('The fused CUDA kernel currently supports real fields. Select cuda_kernel="torch" for Bloch fields.')
+        # The original per-entry body uses signed 32-bit component offsets.
+        # Multi-cell launch arithmetic does not expand that admission contract.
+        if (6 if self.complex_fields else 3)*math.prod(grid.E.shape[:3]) >= 2**31:
+            raise ValueError('CUDA field indexing exceeds the signed 32-bit range.')
         try:
             import cupy
         except ImportError as exc:
@@ -91,6 +101,9 @@ class FusedYeeCUDA:
                 view = lambda t: _direct_cuda_view(cupy, t) if direct_views else cupy.from_dlpack(t.detach())
                 arrays = bindings_cache.cuda_arguments(source, tensors, view) if bindings_cache is not None else tuple(view(t) for t in tensors)
                 self.launches[forward] = kernel, arrays, module
+        if cells_per_thread != 1 or block_size is not None:
+            from .reversible_cuda_tuning import tune_yee
+            tune_yee(self, block_size, report, cells_per_thread=cells_per_thread)
 
     @property
     def grid(self):

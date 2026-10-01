@@ -9,12 +9,19 @@ class FusedComplexYeeCUDA(FusedYeeCUDA):
     """Two real lanes per cell, complex Bloch seams, real material coefficients."""
     complex_fields=True
 
-    def __init__(self,grid,*,direct_views=False,bindings_cache=None):
+    def __init__(self,grid,*,direct_views=False,bindings_cache=None,
+                 cells_per_thread=1,block_size=None,report=None):
         if grid.E.dtype not in (torch.complex64,torch.complex128):
             raise ValueError('Complex fused updates require complex64/complex128 fields.')
         if grid.material_states or getattr(grid,'subpixel',None) is not None:
             raise ValueError('Complex fused updates currently require real diagonal dielectric coefficients.')
-        super().__init__(grid,direct_views=direct_views,bindings_cache=bindings_cache)
+        super().__init__(grid,direct_views=direct_views,bindings_cache=bindings_cache,
+                         cells_per_thread=cells_per_thread,block_size=block_size,report=report)
+
+    @staticmethod
+    def launch_count(grid,forward):
+        # The unchanged complex forward body owns one real lane per entry.
+        return 2*math.prod(grid.E.shape[:3])
 
     def _source(self,forward):
         g=self.grid
@@ -91,6 +98,4 @@ class FusedComplexYeeCUDA(FusedYeeCUDA):
         return lines
 
     def update(self,forward):
-        kernel,arrays,_=self.launches[forward]
-        with self.cp.cuda.Device(self.device),self._stream():
-            kernel(((2*math.prod(self.grid.E.shape[:3])+255)//256,),(256,),arrays)
+        super().update(forward)

@@ -49,9 +49,14 @@ class ReversibleCPMLOptions(ReversibleOptions):
     block_size: int | str | None = None
     forward_kernel: str = 'split'
     adjoint_kernel: str = 'split'
+    cells_per_thread: int | str = 1
 
     def __post_init__(self):
         super().__post_init__()
+        from .reversible_cuda_tuning import validate_cells_per_thread
+        validate_cells_per_thread(self.cells_per_thread)
+        if self.cells_per_thread != 1 and (self.forward_kernel != 'split' or self.adjoint_kernel != 'split'):
+            raise ValueError('Multi-cell tuning requires split E/H and split field-adjoint launches.')
         if self.block_size is not None and self.block_size != 'auto' and (
                 type(self.block_size) is not int or self.block_size not in (128, 256, 512, 1024)):
             raise ValueError('block_size must be None, auto, 128, 256, 512 or 1024.')
@@ -240,6 +245,7 @@ def _recorded_system(epsilon, project, spectral, options=None, report=None):
                       forward_kernel_requested=options.forward_kernel,
                       adjoint_kernel_requested=options.adjoint_kernel,
                       block_size_requested=options.block_size,
+                      cells_per_thread_requested=options.cells_per_thread,
                       fallback_reason={}, cuda_launches={})
         if options.forward_kernel == 'fused_eh':
             from .reversible_cuda_fused import make_forward
@@ -248,14 +254,19 @@ def _recorded_system(epsilon, project, spectral, options=None, report=None):
                 # The fused engine owns both parity bindings. Release the
                 # unused split bindings before entering the time loop.
                 system.kernel = None
-        if options.block_size is not None:
+        if options.block_size is not None or options.cells_per_thread != 1:
             from .reversible_cuda_fused import eligibility_reason
-            reason = eligibility_reason(system)
+            # The per-entry split bodies also support Bloch fields. Preserve
+            # the historical block-only fallback when no multi-cell option
+            # was requested; other fused-physics restrictions remain separate.
+            reason = (None if epsilon.is_cuda and options.cells_per_thread != 1
+                      else eligibility_reason(system))
             if reason:
-                report['fallback_reason']['block_size'] = reason
+                report['fallback_reason']['block_size' if options.cells_per_thread == 1 else 'cells_per_thread'] = reason
             elif system.kernel is not None:
                 from .reversible_cuda_tuning import tune_yee
-                tune_yee(system.kernel, options.block_size, report)
+                tune_yee(system.kernel, options.block_size, report,
+                         cells_per_thread=options.cells_per_thread)
         if options.adjoint_kernel == 'one_pass':
             from .reversible_cuda_fused import eligibility_reason
             reason = eligibility_reason(system)

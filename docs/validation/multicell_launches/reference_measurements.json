@@ -1,0 +1,164 @@
+{
+  "implementation": "Supplied separate runtime prototype; no new remote measurement",
+  "implementation_sha256": "4008d8e65b26f7f81e042dca1ef925b53d84ffeb72877a71b7f50877bb578f4d",
+  "source_archive": "h200_tune/pod_results",
+  "measurements": {
+    "diagonal": {
+      "benchmark_input_sha256": "40e87bfd4d4addb692157974ea224837d5398a44b3232eae3d5015bb1abdb6f6",
+      "shape": [
+        1040,
+        1040,
+        125
+      ],
+      "steps": 1200,
+      "device": "NVIDIA H200",
+      "trace_storage": "device",
+      "selected_call_rows": [
+        {
+          "mode": "auto",
+          "round": 0,
+          "forward_s": 4.845847211778164,
+          "backward_s": 7.105136800557375,
+          "solver_forward_s": 4.72714863717556,
+          "solver_backward_s": 7.096576565876603,
+          "peak_alloc_gib": 27.76266860961914
+        },
+        {
+          "mode": "prod",
+          "round": 1,
+          "forward_s": 5.437604544684291,
+          "backward_s": 7.28501314856112,
+          "solver_forward_s": 5.3229792676866055,
+          "solver_backward_s": 7.276890296489,
+          "peak_alloc_gib": 37.38842725753784
+        },
+        {
+          "mode": "auto",
+          "round": 1,
+          "forward_s": 4.85682937130332,
+          "backward_s": 7.1499009151011705,
+          "solver_forward_s": 4.74278680048883,
+          "solver_backward_s": 7.140693444758654,
+          "peak_alloc_gib": 37.38842725753784
+        }
+      ],
+      "forward_seconds": {
+        "split": 5.437604544684291,
+        "tuned": 4.845847211778164
+      },
+      "backward_seconds": {
+        "split": 7.28501314856112,
+        "tuned": 7.105136800557375
+      },
+      "kernel_profiles": {
+        "base_t": {
+          "per_kernel_min_ms": {
+            "yee_E": 2.1973729042212167,
+            "yee_H": 1.7923064798116684,
+            "rev_h": 0.4695328797399998,
+            "adj_Ht": 1.6793745326002438,
+            "adj_Et": 2.0578538405895235,
+            "rev_eg": 1.5709963204463322
+          },
+          "sum_of_min_ms": 9.767436957408984
+        },
+        "auto_t": {
+          "per_kernel_min_ms": {
+            "yee_E": 1.898429920276006,
+            "yee_H": 1.5997819729646048,
+            "rev_h": 0.47111976020038127,
+            "adj_Ht": 1.6312058413028716,
+            "adj_Et": 2.0372314942876497,
+            "rev_eg": 1.555037439763546
+          },
+          "sum_of_min_ms": 9.192806428795059
+        }
+      },
+      "equality": {
+        "passed": 45,
+        "total": 45,
+        "input_sha256": "a8b6db50c17148c22740b8ef294cf23de265aa78dafa9492ef9beba7e735e422"
+      }
+    },
+    "scalar": {
+      "benchmark_input_sha256": "26dbb744809d29c554b115a655983e98d1f370edc10b787508f907946879427f",
+      "shape": [
+        1040,
+        1040,
+        125
+      ],
+      "steps": 1200,
+      "device": "NVIDIA H200",
+      "trace_storage": "device",
+      "selected_call_rows": [
+        {
+          "mode": "auto",
+          "round": 0,
+          "forward_s": 4.851181464269757,
+          "backward_s": 6.053294302895665,
+          "solver_forward_s": 4.739541633054614,
+          "solver_backward_s": 6.043849913403392,
+          "peak_alloc_gib": 13.853829383850098
+        },
+        {
+          "mode": "prod",
+          "round": 1,
+          "forward_s": 5.443822976201773,
+          "backward_s": 6.172056440263987,
+          "solver_forward_s": 5.330980695784092,
+          "solver_backward_s": 6.165418108925223,
+          "peak_alloc_gib": 13.853829383850098
+        },
+        {
+          "mode": "auto",
+          "round": 1,
+          "forward_s": 4.843453448265791,
+          "backward_s": 6.051525566726923,
+          "solver_forward_s": 4.735471511259675,
+          "solver_backward_s": 6.04400815628469,
+          "peak_alloc_gib": 13.853829383850098
+        }
+      ],
+      "forward_seconds": {
+        "split": 5.443822976201773,
+        "tuned": 4.843453448265791
+      },
+      "backward_seconds": {
+        "split": 6.172056440263987,
+        "tuned": 6.051525566726923
+      },
+      "kernel_profiles": {
+        "base_t": {
+          "per_kernel_min_ms": {
+            "yee_E": 2.196770639419556,
+            "yee_H": 1.7969536811113358,
+            "rev_h": 0.47102642603218553,
+            "adj_Ht": 1.709110054075718,
+            "adj_Et": 1.9091778663794199,
+            "rev_eg": 0.8038150141636531
+          },
+          "sum_of_min_ms": 8.886853681181869
+        },
+        "auto_t": {
+          "per_kernel_min_ms": {
+            "yee_E": 1.8973144792517027,
+            "yee_H": 1.6017313609520594,
+            "rev_h": 0.4717361862460772,
+            "adj_Ht": 1.6479811998208365,
+            "adj_Et": 1.8434570389986038,
+            "rev_eg": 0.8043950408697128
+          },
+          "sum_of_min_ms": 8.266615306138993
+        }
+      },
+      "equality": {
+        "passed": 45,
+        "total": 45,
+        "input_sha256": "a8b6db50c17148c22740b8ef294cf23de265aa78dafa9492ef9beba7e735e422"
+      }
+    }
+  },
+  "selection": "Production round 1 excludes cold compile; auto runs occur after earlier modes warmed compilation. Calls use minimum recorded time. Kernel totals are sums of per-kernel minima, not one measured end-to-end step.",
+  "upstream_build_measured": false,
+  "new_h200_run": false
+}

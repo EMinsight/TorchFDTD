@@ -90,6 +90,9 @@ def design(tile, seed=0):
 MODES = {
     'split': {},
     'auto': dict(block_size='auto'),
+    'cells2': dict(cells_per_thread=2),
+    'cells4': dict(cells_per_thread=4),
+    'cells_auto': dict(cells_per_thread='auto', block_size='auto'),
     'fused_eh': dict(forward_kernel='fused_eh'),
     'fused_eh_auto': dict(forward_kernel='fused_eh', block_size='auto'),
     'one_pass': dict(adjoint_kernel='one_pass'),

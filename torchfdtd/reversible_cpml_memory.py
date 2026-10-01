@@ -144,10 +144,12 @@ def _fixed_cpml_reversible_reservation(project, options, device, interval, *,
                      len(getattr(project, 'monitors', ())))
     observation_map = 8*monitor_count if device.type == 'cuda' else 0
     forward_buffers = adjoint_buffers = tuning_scratch = 0
-    if device.type == 'cuda' and not complex_fields and (
+    multi_tuning = (getattr(options, 'cells_per_thread', 1) == 'auto' or (
+        getattr(options, 'cells_per_thread', 1) != 1 and getattr(options, 'block_size', None) == 'auto'))
+    if device.type == 'cuda' and ((not complex_fields and (
             getattr(options, 'forward_kernel', 'split') == 'fused_eh'
             or getattr(options, 'adjoint_kernel', 'split') == 'one_pass'
-            or getattr(options, 'block_size', None) == 'auto'):
+            or getattr(options, 'block_size', None) == 'auto')) or multi_tuning):
         from .boundaries import BoundaryDescription
         descriptors = BoundaryDescription(project.region)
         psi_bytes = electric_psi_bytes = 0
@@ -162,7 +164,7 @@ def _fixed_cpml_reversible_reservation(project, options, device, interval, *,
             forward_buffers = 6*cells*item + electric_psi_bytes
         if getattr(options, 'adjoint_kernel', 'split') == 'one_pass':
             adjoint_buffers = 6*cells*item
-        if getattr(options, 'block_size', None) == 'auto':
+        if getattr(options, 'block_size', None) == 'auto' or multi_tuning:
             # Largest simultaneously writable set: two fields and all CPML
             # memories. Interior E+VJP uses at most the same two-field bound.
             tuning_scratch = 6*cells*item + psi_bytes

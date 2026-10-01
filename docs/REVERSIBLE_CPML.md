@@ -19,6 +19,7 @@ The point and plane APIs accept these settings in `ReversibleCPMLOptions`:
 | Option | Default | Choices |
 |---|---|---|
 | `block_size` | `None` | `None` keeps the existing launch sizes. `128`, `256`, `512`, or `1024` selects a fixed size. `'auto'` measures each kernel on scratch storage. |
+| `cells_per_thread` | `1` | `1`, `2`, or `4` selects the number of block-strided entries per thread in split E/H and field-adjoint kernels. `'auto'` measures all three counts. |
 | `forward_kernel` | `'split'` | `'fused_eh'` combines the E update, soft electric source injection, and H update. |
 | `adjoint_kernel` | `'split'` | `'one_pass'` combines the H and E transposes, using separate input/output cotangent buffers. |
 
@@ -32,7 +33,7 @@ options = ReversibleCPMLOptions(
 model = ReversibleCPMLSimulation(project, options)
 ```
 
-These optimizations require CUDA, real FP32 fields, uniform periodic x/y,
+The fused E/H and one-pass adjoint optimizations require CUDA, real FP32 fields, uniform periodic x/y,
 z-only CPML, scalar or diagonal dielectric permittivity, and constant scalar
 permeability. Fused forward additionally requires contiguous soft electric
 source support without spatial profiles. Jones components are injected in the
@@ -63,6 +64,87 @@ block size is used with `cache_invalidated` and the fallback reason recorded.
 Runtime and allocation errors are not retried as compilation failures. The
 first call includes this setup cost. Tuning must precede CUDA graph capture.
 It is opt-in because its setup cost can outweigh savings on short simulations.
+
+### Multiple entries per CUDA thread
+
+```python
+options = ReversibleCPMLOptions(
+    cells_per_thread='auto',
+    block_size='auto',
+)
+model = ReversibleCPMLSimulation(project, options)
+```
+
+`cells_per_thread` changes launch mapping in the split Yee E/H and field-adjoint
+kernels. It supports the recorded API's real FP32 and fixed-Bloch complex64
+fields, scalar or diagonal permittivity, and device or CPU boundary histories.
+The default remains one entry per thread. Block-only tuning keeps its existing
+candidate set. Request both automatic options to compare the 12 block/count
+pairs independently for each eligible kernel. A fixed block with automatic
+cell count measures only the three counts at that block size.
+
+The flattened field layout has z as its fastest spatial axis. Each unrolled
+iteration accesses `base + iteration * blockDim.x + threadIdx.x`, so adjacent
+threads retain coalesced accesses. Entries can cross a row boundary, and Nz
+need not divide two or four. A complex forward entry is one real lane of a
+complex cell. Each complex adjoint entry remains one complex cell. The
+per-entry arithmetic and IEEE compiler flags are unchanged.
+
+Interior reconstruction remains at one entry per thread. The setting requires
+`forward_kernel='split'` and `adjoint_kernel='split'`. Combining it with fused
+E/H marching/gather or the one-pass field adjoint raises a validation error.
+CPU execution retains its existing solver and reports a CUDA-only fallback.
+The lower-level `FusedYeeCUDA` and `FusedComplexYeeCUDA` constructors also accept
+`cells_per_thread`, `block_size`, and an optional `report` dictionary. These
+constructors also retain real FP64 and complex128 support and can be prepared
+before CUDA graph capture.
+
+`report['cuda_launches']` records requested and selected counts, block size,
+`layout='strided'`, median timings, cache reuse and compilation fallback.
+The cache key includes the candidate settings, source hash and launch extent.
+Automatic selection uses the same bounded scratch copies, reused sequentially
+across candidates. Admission includes this workspace for complex fields as well
+as real fields. Fixed cell counts require no tuning scratch unless the block
+size is automatic. A compilation fallback reports the original one-entry
+launch. Allocation and runtime errors propagate.
+
+Launch-index calculations use 64-bit arithmetic before checking the tail and
+narrowing to the original index type. This does not expand resident capacity.
+The resident guard rejects `3 * cells >= 2**31` for real fields and
+`6 * cells >= 2**31` for complex fields before field allocation. Spatial
+streaming is required beyond these component-offset bounds.
+
+The supplied H200 SXM reference measurements used a separate prototype on a
+1040 x 1040 x 125 diagonal-permittivity tile, 1200 steps and retained traces.
+Its warmed minimum forward call changed from 5.438 to 4.846 seconds and backward
+from 7.285 to 7.105 seconds. The sum of per-kernel minimum times changed from
+9.767 to 9.193 ms per step. These are actual measurements of that reference
+implementation, with selected rows and input hashes in
+[the reference record](validation/multicell_launches/reference_measurements.json).
+They are not measurements of this upstream build or a promise for other GPUs.
+The source data and device record are under the supplied
+`h200_tune/pod_results/` directory. Increased memory concurrency can help a
+latency-limited device, while a device already close to its memory-bandwidth
+limit may gain little or slow down. Check warmed full calls on the target
+hardware before selecting a fixed count.
+
+The upstream RTX 3060 comparison used a 200 x 200 x 125 tile, 256 steps,
+one polarization, the same reconstruction interval, and five alternating
+warmed repetitions. The table gives median full forward/VJP wall times.
+CPU histories used asynchronous transfers. Every mode had bit-identical
+spectra and material gradients and stayed within its admitted memory.
+
+| Material / history | Split | 2 entries | 4 entries | Joint auto |
+| --- | ---: | ---: | ---: | ---: |
+| [Diagonal / device](validation/multicell_launches/diagonal-device.json) | 1.072 s | 1.162 s | 1.335 s | 1.044 s |
+| [Diagonal / CPU](validation/multicell_launches/diagonal-cpu.json) | 1.282 s | 1.354 s | 1.490 s | 1.228 s |
+| [Scalar / device](validation/multicell_launches/scalar-device.json) | 0.937 s | 1.036 s | 1.156 s | 0.942 s |
+| [Scalar / CPU](validation/multicell_launches/scalar-cpu.json) | 1.168 s | 1.300 s | 1.431 s | 1.177 s |
+
+Joint auto selected one entry for every Yee and field-adjoint kernel in these
+runs. Its timing differences also include block-size selection and interior
+block tuning. Fixed multi-entry launches increased total time by 5.6–24.5%
+on this device and workload. The option therefore remains opt-in.
 
 Forward E/H and electric CPML buffers, adjoint E/H buffers, and peak autotuning
 scratch are included in memory admission. The report exposes
