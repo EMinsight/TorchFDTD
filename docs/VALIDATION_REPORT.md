@@ -2,7 +2,7 @@
 
 Internal validation report of the completion program ([COMPLETION_PROGRAM_KO.md](COMPLETION_PROGRAM_KO.md)), rendered by `scripts/build_validation_report.py` from the machine outputs named in each section: the gate file and its evidence runs, the platform, clean-install, physics, cross-solver and Meep comparison records, the suite policy in `scripts/run_suite.py`, the version strings, and the known-limitations list (a hand-maintained JSON whose entries cite their records). No number here is typed into this file; `tests/test_validation_report.py` renders it again and compares. It records what was run and what those runs produced. It is not an attestation by a third party, and a passing gate is evidence for that gate only, never a general statement that the solver is correct for every problem.
 
-Package version `1.1.6` (pyproject.toml). Gate file adopted at commit `f3efd3409aaa` with 83 tasks in 11 stages; newest evidence run `20260929T192043Z-g1-05-526a88ee` recorded 2026-09-29T19:20:43+00:00 at commit `e1ff41e16eb7`.
+Package version `1.1.7` (pyproject.toml). Gate file adopted at commit `f3efd3409aaa` with 83 tasks in 11 stages; newest evidence run `20260929T192043Z-g1-05-526a88ee` recorded 2026-09-29T19:20:43+00:00 at commit `e1ff41e16eb7`.
 
 Release rule of the gate file: `all_required_tasks_verified=True`, `required_skips_allowed=False`, `missing_or_stale_evidence_allowed=False`, `unresolved_required_external_blockers_allowed=False`, `unresolved_P0_P1_defects_allowed=False`, `source_and_release_artifact_identity_required=True`, `public_release_separately_authorized=True`, `machine_gate_does_not_replace_independent_review=True`.
 Technical readiness of a release candidate (every required task VERIFIED with evidence that matches the candidate) and authorization of a public release are separate decisions; this report can only inform the first, and the second is not given by any file in this repository.
@@ -11,8 +11,8 @@ Technical readiness of a release candidate (every required task VERIFIED with ev
 
 | Profile | Required stages | Scope status | Pass | Fail | Optional | FAILED outside the profile | Verdict |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 67 | 9 | 0 | none | NOT RELEASABLE |
-| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 67 | 15 | 0 | none | NOT RELEASABLE |
+| WORKSTATION | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 65 | 11 | 0 | none | NOT RELEASABLE |
+| HPC | G0, G1, G2, G3, G4, G5, G6, G7, G8, G9, H1 | DRAFT_PENDING_RECONCILIATION_WITH_EXISTING_REQUIREMENTS | 65 | 17 | 0 | none | NOT RELEASABLE |
 
 A task passes when it is VERIFIED by an evidence run whose source commit is an ancestor of the current commit and whose test sources, fixture and criteria files are unchanged, with no failed, errored, skipped or absent required test and no external blocker; stale evidence is a failure here, as in `scripts/check_release_gates.py` without `--allow-stale`.
 
@@ -47,8 +47,8 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | G2-01 | 기존 구조를 활용하여 immutable resolved/compiled simulation plan을 만든다 | IMPLEMENTED | VERIFIED | `20260927T214033Z-g2-01-3fe74120` | `a5ae4ef4bec3` | PASS | evidence matches the current checkout |
 | G2-02 | forward/adjoint/streamed/tensor batch/GUI가 서로 다른 규칙으로 물리 입력을 다시 해석하지 않도록 한다 | IMPLEMENTED | VERIFIED | `20260927T214058Z-g2-02-3a9c78de` | `a5ae4ef4bec3` | PASS | evidence matches the current checkout |
-| G2-03 | capability registry를 만들고 dimensions × mesh × materials × boundaries × sources × monitors × forward/backward × resident/streamed × precision/backend의 유효 조합을 명시한다 | IMPLEMENTED | VERIFIED | `20260927T214232Z-g2-03-94a7898a` | `a5ae4ef4bec3` | PASS | evidence matches the current checkout |
-| G2-04 | 전수 조합 대신 위험 기반 pairwise 검사와 고위험 3~4개 기능 조합을 설계한다 | IMPLEMENTED | VERIFIED | `20260927T214354Z-g2-04-d085b376` | `a5ae4ef4bec3` | PASS | evidence matches the current checkout |
+| G2-03 | capability registry를 만들고 dimensions × mesh × materials × boundaries × sources × monitors × forward/backward × resident/streamed × precision/backend의 유효 조합을 명시한다 | IMPLEMENTED | VERIFIED | `20260927T214232Z-g2-03-94a7898a` | `a5ae4ef4bec3` | FAIL | STALE: test source changed since the run: tests/test_capability_pairs.py |
+| G2-04 | 전수 조합 대신 위험 기반 pairwise 검사와 고위험 3~4개 기능 조합을 설계한다 | IMPLEMENTED | VERIFIED | `20260927T214354Z-g2-04-d085b376` | `a5ae4ef4bec3` | FAIL | STALE: test source changed since the run: tests/test_capability_pairs.py |
 | G2-05 | "+/- DFT", Bloch spatial phase, E/H half-step, normal/outward direction, reduced units vs SI calibration, lossy exterior, 2D 단위길이 전력을 공개 specification과 테스트로 고정한다. | IMPLEMENTED | VERIFIED | `20260927T214415Z-g2-05-b35cbf73` | `a5ae4ef4bec3` | PASS | evidence matches the current checkout |
 | G2-06 | cache/reference/restart마다 필요한 동일성 조건을 분리한다 | IMPLEMENTED | VERIFIED | `20260927T214450Z-g2-06-c7b6534d` | `a5ae4ef4bec3` | PASS | evidence matches the current checkout |
 
@@ -144,7 +144,7 @@ One row per task of [validation/completion_gates.json](validation/completion_gat
 | G9-03 | RELEASE_REVIEW의 미해결 계약/배포 질문을 실제 문서에 따라 추적한다 | IMPLEMENTED | VERIFIED | `20260929T042356Z-g9-03-01f0dcda` | `a67e9d08241d` | FAIL | STALE: watched file changed since the run: README.md |
 | G9-04 | API stability/deprecation, project/result/checkpoint version compatibility, changelog, 알려진 한계, bug template, minimal repro, numerical bug severity, release rollback/결과 영향 공지를 준비한다. | IMPLEMENTED | VERIFIED | `20260928T011855Z-g9-04-8424e9ff` | `a5ae4ef4bec3` | FAIL | STALE: watched file changed since the run: docs/CHANGELOG.md |
 | G9-05 | 독립 사용자 또는 독립 설치 환경에서 세 대표 workflow를 실행하고, 실제 발견 이슈를 정리한다 | IMPLEMENTED | VERIFIED | `20260928T011908Z-g9-05-89c5c08e` | `a5ae4ef4bec3` | PASS | evidence was recorded on a dirty tree (11 paths); it is not tied to commit a5ae4ef4bec3 alone |
-| G9-06 | 최종 release candidate의 정확한 source tree와 wheel에서 전체 필수 gate를 실행한다 | IN_PROGRESS | VERIFIED | `20260928T025801Z-g9-06-5712adb4` | `ab6488b57bfe` | FAIL | STALE: test source changed since the run: tests/test_reversible_cpml_kernel_fusion.py |
+| G9-06 | 최종 release candidate의 정확한 source tree와 wheel에서 전체 필수 gate를 실행한다 | IN_PROGRESS | VERIFIED | `20260928T025801Z-g9-06-5712adb4` | `ab6488b57bfe` | FAIL | STALE: test source changed since the run: tests/test_capability_pairs.py |
 | G9-07 | validation report를 기계 산출물에서 생성한다 | IMPLEMENTED | SELF | none | none | self | this report's own gate, recorded after the render; judge it with scripts/check_release_gates.py |
 
 ### H1 실제 단일 문제 multi-GPU (HPC, P1)
@@ -178,32 +178,32 @@ Newest runs that match no platform record: none.
 
 ## Clean-install record
 
-Newest record `20261006T151553Z-1e9aea27.json` (kind `clean_install_record`), taken at commit `1e9aea27ff3f` on 2026-10-06T15:15:53+00:00 with 0 dirty packaging paths; all steps passed: yes.
+Newest record `20261006T185526Z-75a13281.json` (kind `clean_install_record`), taken at commit `75a132811e96` on 2026-10-06T18:55:26+00:00 with 0 dirty packaging paths; all steps passed: yes.
 
-Wheel `torchfdtd-1.1.6-py3-none-any.whl`, SHA-256 `3e25ce3ce2a3834745ee0a8600f5d36f9450b62f088abcdf5f3cff237d07160e`, 1,025,976 bytes, 164 entries, 157 package files; browser assets match the committed ones: yes; frontend assets current: yes.
+Wheel `torchfdtd-1.1.7-py3-none-any.whl`, SHA-256 `e171aeec5a90eeaa2da2c9f04460f81ca3b9df2a9ec49470ee76b04be0602b5b`, 1,044,179 bytes, 166 entries, 159 package files; browser assets match the committed ones: yes; frontend assets current: yes.
 
 | Environment | Python | torch | cupy-cuda12x | numpy | torchfdtd | Packages |
 | --- | --- | --- | --- | --- | --- | --- |
-| g8-cpu | 3.10.2 | 2.14.0+cpu | absent | 2.2.6 | 1.1.6 | 41 |
-| g8-cuda | 3.10.2 | 2.10.0+cu126 | 13.6.0 | 2.2.6 | 1.1.6 | 43 |
+| g8-cpu | 3.10.2 | 2.14.0+cpu | absent | 2.2.6 | 1.1.7 | 41 |
+| g8-cuda | 3.10.2 | 2.10.0+cu126 | 13.6.0 | 2.2.6 | 1.1.7 | 43 |
 
 | Step | Status | Seconds |
 | --- | --- | --- |
-| build_wheel | passed | 21.67 |
-| cpu_venv_create | passed | 12.02 |
-| cpu_pip_install_torch | passed | 85.44 |
-| cpu_pip_install_wheel | passed | 62.57 |
-| cpu_package_list | passed | 1.34 |
-| cpu_import_run_save_load | passed | 11.64 |
+| build_wheel | passed | 14.55 |
+| cpu_venv_create | passed | 8.85 |
+| cpu_pip_install_torch | passed | 84.37 |
+| cpu_pip_install_wheel | passed | 61.62 |
+| cpu_package_list | passed | 1.45 |
+| cpu_import_run_save_load | passed | 11.03 |
 | cpu_server_index_assets_api | passed | 3.98 |
-| cpu_doctor | passed | 4.76 |
-| cuda_venv_create | passed | 8.1 |
-| cuda_pip_install_torch | passed | 134.53 |
-| cuda_pip_install_wheel_extras | passed | 68.21 |
-| cuda_package_list | passed | 1.17 |
-| cuda_fused_forward_run | passed | 20.21 |
-| cuda_doctor | passed | 6.21 |
-| readme_examples | passed | 21.13 |
+| cpu_doctor | passed | 3.73 |
+| cuda_venv_create | passed | 8.87 |
+| cuda_pip_install_torch | passed | 128.28 |
+| cuda_pip_install_wheel_extras | passed | 64.81 |
+| cuda_package_list | passed | 1.55 |
+| cuda_fused_forward_run | passed | 18.38 |
+| cuda_doctor | passed | 4.66 |
+| readme_examples | passed | 16.74 |
 
 ## Suite policy
 
@@ -376,7 +376,7 @@ Each check compares two sources of the same fact; a MISMATCH is reported here an
 
 | Check | Result | Detail |
 | --- | --- | --- |
-| package version | ok | pyproject.toml 1.1.6, COMPATIBILITY.md 1.1.6, CHANGELOG.md 1.1.6, clean-install wheel 1.1.6 |
+| package version | ok | pyproject.toml 1.1.7, COMPATIBILITY.md 1.1.7, CHANGELOG.md 1.1.7, clean-install wheel 1.1.7 |
 | README row check `test_quick_start_selects_the_measured_path_explicitly` | ok | reproduced from its record |
 | README row check `test_readme_a100_row_matches_the_double_precision_record` | ok | reproduced from its record |
 | README row check `test_readme_capacity_row_matches_the_fp32_record` | ok | reproduced from its record |

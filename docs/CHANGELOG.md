@@ -9,6 +9,17 @@ Commits that only record validation evidence or documentation ("Record ...",
 
 ## Unreleased
 
+## 1.1.7 (2026-10-07)
+
+### Added
+
+- Isotropic Lorentz density mixtures in periodic and recorded CPML point/plane adjoints, with packed CUDA pole state, z-dependent fixed backgrounds, retained VJPs, terminal offload and complete pole memory admission ([REVERSIBLE_CPML.md](REVERSIBLE_CPML.md#isotropic-lorentz-density-mixtures), 36589c6).
+- Public `fit_discrete_lorentz` for timestep-specific Sellmeier and oscillator inputs, reported fit errors and optional normal-incidence Yee phase compensation. A small voxel lens example demonstrates the API (36589c6).
+
+### Validation scope
+
+- Changed-code CPU and RTX 3060 regressions, direct bit comparison with the supplied reference and version-specific clean installation are recorded separately. Full legacy RC, RTX 5880 and multiple GPUs remain outside this patch release's validation scope.
+
 ## 1.1.6 (2026-10-06)
 
 ### Added

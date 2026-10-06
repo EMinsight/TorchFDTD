@@ -26,6 +26,11 @@ uses an approved changed-code validation scope.
    choose between explicitly replacing it and issuing a new version.
    Never move a published tag as part of routine record repair.
 
+For v1.1.7, patch validation covers reversible Lorentz density mixtures and
+the related regressions. The [1.1.7 validation scope](RELEASE117_VALIDATION.md)
+defines the completed local checks and the required large regression,
+installation and exact-commit CI checks. It does not claim a full RC pass.
+
 For v1.1.3, patch validation covers fixed observation-table reuse and its
 related regressions. The [1.1.3 validation scope](RELEASE113_VALIDATION.md)
 records completed checks and omitted full-suite work. It does not claim
