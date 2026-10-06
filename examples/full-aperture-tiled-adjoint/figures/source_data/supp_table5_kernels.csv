@@ -1,0 +1,97 @@
+source,key,value
+data/h200_unify/summary.json,[0].item,A1 tab:kernels
+data/h200_unify/summary.json,[0].quantity,default forward (s)
+data/h200_unify/summary.json,[0].new_h200,2.5130302188917994
+data/h200_unify/summary.json,[0].unit,s
+data/h200_unify/summary.json,[1].item,A1 tab:kernels
+data/h200_unify/summary.json,[1].quantity,default forward and reverse call (s)
+data/h200_unify/summary.json,[1].new_h200,7.8287839309778064
+data/h200_unify/summary.json,[1].unit,s
+data/h200_unify/summary.json,[2].item,A1 tab:kernels
+data/h200_unify/summary.json,[2].quantity,"default recorded forward (s, min)"
+data/h200_unify/summary.json,[2].new_h200,2.6117670871317387
+data/h200_unify/summary.json,[2].unit,s
+data/h200_unify/summary.json,[3].item,A1 tab:kernels
+data/h200_unify/summary.json,[3].quantity,"default reverse sweep (s, min)"
+data/h200_unify/summary.json,[3].new_h200,5.205758151831105
+data/h200_unify/summary.json,[3].unit,s
+data/h200_unify/summary.json,[4].item,A1 tab:kernels
+data/h200_unify/summary.json,[4].quantity,default forward rate (cell updates/s)
+data/h200_unify/summary.json,[4].new_h200,24458758807.566273
+data/h200_unify/summary.json,[4].unit,1/s
+data/h200_unify/summary.json,[5].item,A1 tab:kernels
+data/h200_unify/summary.json,[5].quantity,policy forward (s)
+data/h200_unify/summary.json,[5].new_h200,2.4566032299771905
+data/h200_unify/summary.json,[5].unit,s
+data/h200_unify/summary.json,[6].item,A1 tab:kernels
+data/h200_unify/summary.json,[6].quantity,policy forward and reverse call (s)
+data/h200_unify/summary.json,[6].new_h200,5.87859998899512
+data/h200_unify/summary.json,[6].unit,s
+data/h200_unify/summary.json,[7].item,A1 tab:kernels
+data/h200_unify/summary.json,[7].quantity,"policy recorded forward (s, min)"
+data/h200_unify/summary.json,[7].new_h200,2.52228590589948
+data/h200_unify/summary.json,[7].unit,s
+data/h200_unify/summary.json,[8].item,A1 tab:kernels
+data/h200_unify/summary.json,[8].quantity,"policy reverse sweep (s, min)"
+data/h200_unify/summary.json,[8].new_h200,3.335435559041798
+data/h200_unify/summary.json,[8].unit,s
+data/h200_unify/summary.json,[9].item,A1 tab:kernels
+data/h200_unify/summary.json,[9].quantity,policy forward rate (cell updates/s)
+data/h200_unify/summary.json,[9].new_h200,25020564676.44175
+data/h200_unify/summary.json,[9].unit,1/s
+data/h200_unify/summary.json,[10].item,A1 tab:kernels
+data/h200_unify/summary.json,[10].quantity,policy vs default gradient rel L2
+data/h200_unify/summary.json,[10].new_h200,3.9668657336733304e-07
+data/h200_unify/summary.json,[10].unit,
+data/h200_unify/summary.json,[0].item,A1 per-kernel ms/step
+data/h200_unify/summary.json,[0].quantity,off yee_E
+data/h200_unify/summary.json,[0].new_h200,2.0132911682128904
+data/h200_unify/summary.json,[0].unit,ms
+data/h200_unify/summary.json,[1].item,A1 per-kernel ms/step
+data/h200_unify/summary.json,[1].quantity,off yee_H
+data/h200_unify/summary.json,[1].new_h200,1.6463232040405273
+data/h200_unify/summary.json,[1].unit,ms
+data/h200_unify/summary.json,[2].item,A1 per-kernel ms/step
+data/h200_unify/summary.json,[2].quantity,off adj_Ht
+data/h200_unify/summary.json,[2].new_h200,1.5015423774719239
+data/h200_unify/summary.json,[2].unit,ms
+data/h200_unify/summary.json,[3].item,A1 per-kernel ms/step
+data/h200_unify/summary.json,[3].quantity,off adj_Et
+data/h200_unify/summary.json,[3].new_h200,2.3362735748291015
+data/h200_unify/summary.json,[3].unit,ms
+data/h200_unify/summary.json,[4].item,A1 per-kernel ms/step
+data/h200_unify/summary.json,[4].quantity,off rev_h
+data/h200_unify/summary.json,[4].new_h200,1.02925443649292
+data/h200_unify/summary.json,[4].unit,ms
+data/h200_unify/summary.json,[5].item,A1 per-kernel ms/step
+data/h200_unify/summary.json,[5].quantity,off rev_e
+data/h200_unify/summary.json,[5].new_h200,1.7713232040405273
+data/h200_unify/summary.json,[5].unit,ms
+data/h200_unify/summary.json,[6].item,A1 per-kernel ms/step
+data/h200_unify/summary.json,[6].quantity,off rev_g
+data/h200_unify/summary.json,[6].new_h200,1.060593605041504
+data/h200_unify/summary.json,[6].unit,ms
+data/h200_unify/summary.json,[7].item,A1 per-kernel ms/step
+data/h200_unify/summary.json,[7].quantity,on yee_E
+data/h200_unify/summary.json,[7].new_h200,1.955998420715332
+data/h200_unify/summary.json,[7].unit,ms
+data/h200_unify/summary.json,[8].item,A1 per-kernel ms/step
+data/h200_unify/summary.json,[8].quantity,on yee_H
+data/h200_unify/summary.json,[8].new_h200,1.5943120002746582
+data/h200_unify/summary.json,[8].unit,ms
+data/h200_unify/summary.json,[9].item,A1 per-kernel ms/step
+data/h200_unify/summary.json,[9].quantity,on adj_Ht
+data/h200_unify/summary.json,[9].new_h200,1.4148256301879882
+data/h200_unify/summary.json,[9].unit,ms
+data/h200_unify/summary.json,[10].item,A1 per-kernel ms/step
+data/h200_unify/summary.json,[10].quantity,on adj_Et
+data/h200_unify/summary.json,[10].new_h200,1.5586527824401855
+data/h200_unify/summary.json,[10].unit,ms
+data/h200_unify/summary.json,[11].item,A1 per-kernel ms/step
+data/h200_unify/summary.json,[11].quantity,on rev_h
+data/h200_unify/summary.json,[11].new_h200,0.41321120262145994
+data/h200_unify/summary.json,[11].unit,ms
+data/h200_unify/summary.json,[12].item,A1 per-kernel ms/step
+data/h200_unify/summary.json,[12].quantity,on rev_eg
+data/h200_unify/summary.json,[12].new_h200,0.7087808132171631
+data/h200_unify/summary.json,[12].unit,ms

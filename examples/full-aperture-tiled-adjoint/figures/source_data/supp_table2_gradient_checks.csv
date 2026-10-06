@@ -1,0 +1,462 @@
+source,key,value
+data/h200_unify/summary.json,[0].item,A4 tab:gradverify
+data/h200_unify/summary.json,[0].quantity,case 0 focus off gradient-aligned relative error
+data/h200_unify/summary.json,[0].new_h200,7.424359747756444e-08
+data/h200_unify/summary.json,[0].unit,
+data/h200_unify/summary.json,[1].item,A4 tab:gradverify
+data/h200_unify/summary.json,[1].quantity,case 0 focus off gradient-aligned elapsed (s)
+data/h200_unify/summary.json,[1].new_h200,21.851856231689453
+data/h200_unify/summary.json,[1].unit,s
+data/h200_unify/summary.json,[2].item,A4 tab:gradverify
+data/h200_unify/summary.json,[2].quantity,case 1 focus off random relative error
+data/h200_unify/summary.json,[2].new_h200,0.00014735532059594376
+data/h200_unify/summary.json,[2].unit,
+data/h200_unify/summary.json,[3].item,A4 tab:gradverify
+data/h200_unify/summary.json,[3].quantity,case 1 focus off random elapsed (s)
+data/h200_unify/summary.json,[3].new_h200,21.304851055145264
+data/h200_unify/summary.json,[3].unit,s
+data/h200_unify/summary.json,[4].item,A4 tab:gradverify
+data/h200_unify/summary.json,[4].quantity,case 2 splitter off gradient-aligned relative error
+data/h200_unify/summary.json,[4].new_h200,1.5029501419171428e-06
+data/h200_unify/summary.json,[4].unit,
+data/h200_unify/summary.json,[5].item,A4 tab:gradverify
+data/h200_unify/summary.json,[5].quantity,case 2 splitter off gradient-aligned elapsed (s)
+data/h200_unify/summary.json,[5].new_h200,21.188060760498047
+data/h200_unify/summary.json,[5].unit,s
+data/h200_unify/summary.json,[6].item,A4 tab:gradverify
+data/h200_unify/summary.json,[6].quantity,case 3 splitter off random relative error
+data/h200_unify/summary.json,[6].new_h200,4.4741957071646155e-05
+data/h200_unify/summary.json,[6].unit,
+data/h200_unify/summary.json,[7].item,A4 tab:gradverify
+data/h200_unify/summary.json,[7].quantity,case 3 splitter off random elapsed (s)
+data/h200_unify/summary.json,[7].new_h200,21.232696533203125
+data/h200_unify/summary.json,[7].unit,s
+data/h200_unify/summary.json,[8].item,A4 tab:gradverify
+data/h200_unify/summary.json,[8].quantity,case 4 hologram off gradient-aligned relative error
+data/h200_unify/summary.json,[8].new_h200,2.4827417203418927e-06
+data/h200_unify/summary.json,[8].unit,
+data/h200_unify/summary.json,[9].item,A4 tab:gradverify
+data/h200_unify/summary.json,[9].quantity,case 4 hologram off gradient-aligned elapsed (s)
+data/h200_unify/summary.json,[9].new_h200,21.223389863967896
+data/h200_unify/summary.json,[9].unit,s
+data/h200_unify/summary.json,[10].item,A4 tab:gradverify
+data/h200_unify/summary.json,[10].quantity,case 5 hologram off random relative error
+data/h200_unify/summary.json,[10].new_h200,7.607181909483124e-05
+data/h200_unify/summary.json,[10].unit,
+data/h200_unify/summary.json,[11].item,A4 tab:gradverify
+data/h200_unify/summary.json,[11].quantity,case 5 hologram off random elapsed (s)
+data/h200_unify/summary.json,[11].new_h200,21.179357528686523
+data/h200_unify/summary.json,[11].unit,s
+data/h200_unify/summary.json,[12].item,A4 tab:gradverify
+data/h200_unify/summary.json,[12].quantity,case 6 focus on gradient-aligned relative error
+data/h200_unify/summary.json,[12].new_h200,2.800477399632792e-06
+data/h200_unify/summary.json,[12].unit,
+data/h200_unify/summary.json,[13].item,A4 tab:gradverify
+data/h200_unify/summary.json,[13].quantity,case 6 focus on gradient-aligned elapsed (s)
+data/h200_unify/summary.json,[13].new_h200,19.264857530593872
+data/h200_unify/summary.json,[13].unit,s
+data/h200_unify/summary.json,[14].item,A4 tab:gradverify
+data/h200_unify/summary.json,[14].quantity,case 7 focus off gradient-aligned relative error
+data/h200_unify/summary.json,[14].new_h200,1.9473311485770762e-06
+data/h200_unify/summary.json,[14].unit,
+data/h200_unify/summary.json,[15].item,A4 tab:gradverify
+data/h200_unify/summary.json,[15].quantity,case 7 focus off gradient-aligned elapsed (s)
+data/h200_unify/summary.json,[15].new_h200,21.10825204849243
+data/h200_unify/summary.json,[15].unit,s
+data/fig2_update/fig2_update.json,256.relL2,0.02435640386461947
+data/fig2_update/fig2_update.json,256.cosine,0.9997040096510648
+data/fig2_update/fig2_update.json,512.relL2,0.03106907615152928
+data/fig2_update/fig2_update.json,512.cosine,0.9995186223304754
+data/fig2_update/fig2_update.json,768.relL2,0.03897247516645727
+data/fig2_update/fig2_update.json,768.cosine,0.9992470342149079
+data/h200_unify/summary.json,[0].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[0].quantity,focus Ex relative error (rep 1)
+data/h200_unify/summary.json,[0].new_h200,2.5757529315793024e-06
+data/h200_unify/summary.json,[0].unit,
+data/h200_unify/summary.json,[1].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[1].quantity,"focus Ex time to gradient (s, median of 3)"
+data/h200_unify/summary.json,[1].new_h200,3.8019457310438156
+data/h200_unify/summary.json,[1].unit,s
+data/h200_unify/summary.json,[2].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[2].quantity,focus Ex peak allocation (GB)
+data/h200_unify/summary.json,[2].new_h200,4.258103296
+data/h200_unify/summary.json,[2].unit,GB
+data/h200_unify/summary.json,[3].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[3].quantity,splitter Ex relative error (rep 1)
+data/h200_unify/summary.json,[3].new_h200,1.8085827498359952e-06
+data/h200_unify/summary.json,[3].unit,
+data/h200_unify/summary.json,[4].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[4].quantity,"splitter Ex time to gradient (s, median of 3)"
+data/h200_unify/summary.json,[4].new_h200,2.137243442935869
+data/h200_unify/summary.json,[4].unit,s
+data/h200_unify/summary.json,[5].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[5].quantity,splitter Ex peak allocation (GB)
+data/h200_unify/summary.json,[5].new_h200,4.291657728
+data/h200_unify/summary.json,[5].unit,GB
+data/h200_unify/summary.json,[6].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[6].quantity,hologram Ex relative error (rep 1)
+data/h200_unify/summary.json,[6].new_h200,4.035279286854177e-07
+data/h200_unify/summary.json,[6].unit,
+data/h200_unify/summary.json,[7].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[7].quantity,"hologram Ex time to gradient (s, median of 3)"
+data/h200_unify/summary.json,[7].new_h200,2.142057773191482
+data/h200_unify/summary.json,[7].unit,s
+data/h200_unify/summary.json,[8].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[8].quantity,hologram Ex peak allocation (GB)
+data/h200_unify/summary.json,[8].new_h200,4.291657728
+data/h200_unify/summary.json,[8].unit,GB
+data/h200_unify/summary.json,[9].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[9].quantity,focus Ey relative error (rep 1)
+data/h200_unify/summary.json,[9].new_h200,4.644616902794848e-06
+data/h200_unify/summary.json,[9].unit,
+data/h200_unify/summary.json,[10].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[10].quantity,"focus Ey time to gradient (s, median of 3)"
+data/h200_unify/summary.json,[10].new_h200,2.139404078712687
+data/h200_unify/summary.json,[10].unit,s
+data/h200_unify/summary.json,[11].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[11].quantity,focus Ey peak allocation (GB)
+data/h200_unify/summary.json,[11].new_h200,4.291657728
+data/h200_unify/summary.json,[11].unit,GB
+data/h200_unify/summary.json,[12].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[12].quantity,splitter Ey relative error (rep 1)
+data/h200_unify/summary.json,[12].new_h200,2.003269817610249e-06
+data/h200_unify/summary.json,[12].unit,
+data/h200_unify/summary.json,[13].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[13].quantity,"splitter Ey time to gradient (s, median of 3)"
+data/h200_unify/summary.json,[13].new_h200,2.1400315680075437
+data/h200_unify/summary.json,[13].unit,s
+data/h200_unify/summary.json,[14].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[14].quantity,splitter Ey peak allocation (GB)
+data/h200_unify/summary.json,[14].new_h200,4.291657728
+data/h200_unify/summary.json,[14].unit,GB
+data/h200_unify/summary.json,[15].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[15].quantity,hologram Ey relative error (rep 1)
+data/h200_unify/summary.json,[15].new_h200,1.1258027089051167e-06
+data/h200_unify/summary.json,[15].unit,
+data/h200_unify/summary.json,[16].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[16].quantity,"hologram Ey time to gradient (s, median of 3)"
+data/h200_unify/summary.json,[16].new_h200,2.1441294038668275
+data/h200_unify/summary.json,[16].unit,s
+data/h200_unify/summary.json,[17].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[17].quantity,hologram Ey peak allocation (GB)
+data/h200_unify/summary.json,[17].new_h200,4.291657728
+data/h200_unify/summary.json,[17].unit,GB
+data/h200_unify/summary.json,[0].item,A3 tab:overlap
+data/h200_unify/summary.json,[0].quantity,"full time to gradient (s, median of 3)"
+data/h200_unify/summary.json,[0].new_h200,153.42659084917977
+data/h200_unify/summary.json,[0].unit,s
+data/h200_unify/summary.json,[1].item,A3 tab:overlap
+data/h200_unify/summary.json,[1].quantity,full peak allocation (GB)
+data/h200_unify/summary.json,[1].new_h200,5.84797696
+data/h200_unify/summary.json,[1].unit,GB
+data/h200_unify/summary.json,[2].item,A3 tab:overlap
+data/h200_unify/summary.json,[2].quantity,full directional FD rel error
+data/h200_unify/summary.json,[2].new_h200,5.428190339866061e-05
+data/h200_unify/summary.json,[2].unit,
+data/h200_unify/summary.json,[3].item,A3 tab:overlap
+data/h200_unify/summary.json,[3].quantity,"0.5 time to gradient (s, median of 3)"
+data/h200_unify/summary.json,[3].new_h200,164.59495269483887
+data/h200_unify/summary.json,[3].unit,s
+data/h200_unify/summary.json,[4].item,A3 tab:overlap
+data/h200_unify/summary.json,[4].quantity,0.5 peak allocation (GB)
+data/h200_unify/summary.json,[4].new_h200,2.901580288
+data/h200_unify/summary.json,[4].unit,GB
+data/h200_unify/summary.json,[5].item,A3 tab:overlap
+data/h200_unify/summary.json,[5].quantity,0.5 complex_field_relative_l2
+data/h200_unify/summary.json,[5].new_h200,0.12442802741171403
+data/h200_unify/summary.json,[5].unit,
+data/h200_unify/summary.json,[6].item,A3 tab:overlap
+data/h200_unify/summary.json,[6].quantity,0.5 focal_intensity_relative_l2
+data/h200_unify/summary.json,[6].new_h200,0.04603506362343724
+data/h200_unify/summary.json,[6].unit,
+data/h200_unify/summary.json,[7].item,A3 tab:overlap
+data/h200_unify/summary.json,[7].quantity,0.5 objective_relative_error
+data/h200_unify/summary.json,[7].new_h200,0.006017361599765181
+data/h200_unify/summary.json,[7].unit,
+data/h200_unify/summary.json,[8].item,A3 tab:overlap
+data/h200_unify/summary.json,[8].quantity,0.5 gradient_relative_l2
+data/h200_unify/summary.json,[8].new_h200,0.04038216015007029
+data/h200_unify/summary.json,[8].unit,
+data/h200_unify/summary.json,[9].item,A3 tab:overlap
+data/h200_unify/summary.json,[9].quantity,0.5 gradient_cosine
+data/h200_unify/summary.json,[9].new_h200,0.9992014765739441
+data/h200_unify/summary.json,[9].unit,
+data/h200_unify/summary.json,[10].item,A3 tab:overlap
+data/h200_unify/summary.json,[10].quantity,"1.0 time to gradient (s, median of 3)"
+data/h200_unify/summary.json,[10].new_h200,188.85874410090037
+data/h200_unify/summary.json,[10].unit,s
+data/h200_unify/summary.json,[11].item,A3 tab:overlap
+data/h200_unify/summary.json,[11].quantity,1.0 peak allocation (GB)
+data/h200_unify/summary.json,[11].new_h200,3.208816128
+data/h200_unify/summary.json,[11].unit,GB
+data/h200_unify/summary.json,[12].item,A3 tab:overlap
+data/h200_unify/summary.json,[12].quantity,1.0 complex_field_relative_l2
+data/h200_unify/summary.json,[12].new_h200,0.10268423801475221
+data/h200_unify/summary.json,[12].unit,
+data/h200_unify/summary.json,[13].item,A3 tab:overlap
+data/h200_unify/summary.json,[13].quantity,1.0 focal_intensity_relative_l2
+data/h200_unify/summary.json,[13].new_h200,0.03536113214464623
+data/h200_unify/summary.json,[13].unit,
+data/h200_unify/summary.json,[14].item,A3 tab:overlap
+data/h200_unify/summary.json,[14].quantity,1.0 objective_relative_error
+data/h200_unify/summary.json,[14].new_h200,0.003728597583097182
+data/h200_unify/summary.json,[14].unit,
+data/h200_unify/summary.json,[15].item,A3 tab:overlap
+data/h200_unify/summary.json,[15].quantity,1.0 gradient_relative_l2
+data/h200_unify/summary.json,[15].new_h200,0.03339129015674105
+data/h200_unify/summary.json,[15].unit,
+data/h200_unify/summary.json,[16].item,A3 tab:overlap
+data/h200_unify/summary.json,[16].quantity,1.0 gradient_cosine
+data/h200_unify/summary.json,[16].new_h200,0.9994586706161499
+data/h200_unify/summary.json,[16].unit,
+data/h200_unify/summary.json,[17].item,A3 tab:overlap
+data/h200_unify/summary.json,[17].quantity,"1.5 time to gradient (s, median of 3)"
+data/h200_unify/summary.json,[17].new_h200,211.7006970650982
+data/h200_unify/summary.json,[17].unit,s
+data/h200_unify/summary.json,[18].item,A3 tab:overlap
+data/h200_unify/summary.json,[18].quantity,1.5 peak allocation (GB)
+data/h200_unify/summary.json,[18].new_h200,3.528391168
+data/h200_unify/summary.json,[18].unit,GB
+data/h200_unify/summary.json,[19].item,A3 tab:overlap
+data/h200_unify/summary.json,[19].quantity,1.5 complex_field_relative_l2
+data/h200_unify/summary.json,[19].new_h200,0.08751395703672343
+data/h200_unify/summary.json,[19].unit,
+data/h200_unify/summary.json,[20].item,A3 tab:overlap
+data/h200_unify/summary.json,[20].quantity,1.5 focal_intensity_relative_l2
+data/h200_unify/summary.json,[20].new_h200,0.029696244880286472
+data/h200_unify/summary.json,[20].unit,
+data/h200_unify/summary.json,[21].item,A3 tab:overlap
+data/h200_unify/summary.json,[21].quantity,1.5 objective_relative_error
+data/h200_unify/summary.json,[21].new_h200,0.0023477355212265794
+data/h200_unify/summary.json,[21].unit,
+data/h200_unify/summary.json,[22].item,A3 tab:overlap
+data/h200_unify/summary.json,[22].quantity,1.5 gradient_relative_l2
+data/h200_unify/summary.json,[22].new_h200,0.02891435021124402
+data/h200_unify/summary.json,[22].unit,
+data/h200_unify/summary.json,[23].item,A3 tab:overlap
+data/h200_unify/summary.json,[23].quantity,1.5 gradient_cosine
+data/h200_unify/summary.json,[23].new_h200,0.9995996356010437
+data/h200_unify/summary.json,[23].unit,
+data/h200_unify/summary.json,[24].item,A3 tab:overlap
+data/h200_unify/summary.json,[24].quantity,1.5 directional FD rel error
+data/h200_unify/summary.json,[24].new_h200,5.512510051267273e-05
+data/h200_unify/summary.json,[24].unit,
+data/h200_unify/summary.json,[25].item,A3 tab:overlap
+data/h200_unify/summary.json,[25].quantity,"2.0 time to gradient (s, median of 3)"
+data/h200_unify/summary.json,[25].new_h200,233.71902890712954
+data/h200_unify/summary.json,[25].unit,s
+data/h200_unify/summary.json,[26].item,A3 tab:overlap
+data/h200_unify/summary.json,[26].quantity,2.0 peak allocation (GB)
+data/h200_unify/summary.json,[26].new_h200,3.874318336
+data/h200_unify/summary.json,[26].unit,GB
+data/h200_unify/summary.json,[27].item,A3 tab:overlap
+data/h200_unify/summary.json,[27].quantity,2.0 complex_field_relative_l2
+data/h200_unify/summary.json,[27].new_h200,0.07577873548563656
+data/h200_unify/summary.json,[27].unit,
+data/h200_unify/summary.json,[28].item,A3 tab:overlap
+data/h200_unify/summary.json,[28].quantity,2.0 focal_intensity_relative_l2
+data/h200_unify/summary.json,[28].new_h200,0.025333264380560064
+data/h200_unify/summary.json,[28].unit,
+data/h200_unify/summary.json,[29].item,A3 tab:overlap
+data/h200_unify/summary.json,[29].quantity,2.0 objective_relative_error
+data/h200_unify/summary.json,[29].new_h200,0.001888600235734783
+data/h200_unify/summary.json,[29].unit,
+data/h200_unify/summary.json,[30].item,A3 tab:overlap
+data/h200_unify/summary.json,[30].quantity,2.0 gradient_relative_l2
+data/h200_unify/summary.json,[30].new_h200,0.024886507098370012
+data/h200_unify/summary.json,[30].unit,
+data/h200_unify/summary.json,[31].item,A3 tab:overlap
+data/h200_unify/summary.json,[31].quantity,2.0 gradient_cosine
+data/h200_unify/summary.json,[31].new_h200,0.9997069239616394
+data/h200_unify/summary.json,[31].unit,
+data/si_note2_tests/summary.json,gpu,"NVIDIA H200 SXM (2026-10-02 14:13-14:27 UTC)"
+data/si_note2_tests/summary.json,fixture,"d6 fixture: 6 um aperture, 9 tiles of 2 um cores, 1.8 um overlap, 20 nm mesh, x input, 450/540/635 nm, stub e2 objective, B200 kernel patches on, 1200 steps"
+data/si_note2_tests/summary.json,code,"src/ns_run.py (--fd-check; 1 and 2 ranks, gloo) with torchfdtd_src; script src/run_note2.sh"
+data/si_note2_tests/summary.json,window_map_transpose_rel[0],5.055049525164138e-09
+data/si_note2_tests/summary.json,window_map_transpose_rel[1],4.311263215531818e-08
+data/si_note2_tests/summary.json,window_map_transpose_rel[2],8.47605058114762e-09
+data/si_note2_tests/summary.json,quoted_window_map,"5e-9 to 7e-8 (RTX 3060, 2026-09-30: 5.13e-9, 7.42e-8, 9.56e-9)"
+data/si_note2_tests/summary.json,central_difference.0.02,0.0006481782718670738
+data/si_note2_tests/summary.json,central_difference.0.005,3.864249688759479e-05
+data/si_note2_tests/summary.json,quoted_cd,4.1e-5 at delta 0.005 (RTX 3060: 4.064e-5)
+data/si_note2_tests/summary.json,ranks_all_arrays_bitwise_equal,True
+data/si_note2_tests/summary.json,ranks_arrays_compared,30
+data/si_note2_tests/summary.json,ranks_history_differs_only_in[0],t_forward_adjoint_s
+data/si_note2_tests/summary.json,ranks_history_differs_only_in[1],t_optimizer_s
+data/si_note2_tests/summary.json,ranks_history_differs_only_in[2],t_step_s
+data/si_note2_tests/summary.json,I_tar,0.1761622910608845
+data/si_note2_tests/summary.json,I_binary,0.06122246441932361
+data/si_v1_checks/summary.json,pairs.torchfdtd_vs_fdtdx_checkpointed.rel_l2,7.055018616920795e-08
+data/si_v1_checks/summary.json,pairs.torchfdtd_vs_fdtdx_checkpointed.max_abs,2.2737367544323206e-13
+data/si_v1_checks/summary.json,pairs.torchfdtd_vs_fdtdx_checkpointed.cosine,0.9999999999999991
+data/si_v1_checks/summary.json,pairs.torchfdtd_vs_fdtdx_reversible.rel_l2,1.0322483457961208e-07
+data/si_v1_checks/summary.json,pairs.torchfdtd_vs_fdtdx_reversible.max_abs,4.547473508864641e-13
+data/si_v1_checks/summary.json,pairs.torchfdtd_vs_fdtdx_reversible.cosine,0.9999999999999972
+data/si_v1_checks/summary.json,pairs.fdtdx_checkpointed_vs_fdtdx_reversible.rel_l2,1.0715051719699253e-07
+data/si_v1_checks/summary.json,pairs.fdtdx_checkpointed_vs_fdtdx_reversible.max_abs,4.547473508864641e-13
+data/si_v1_checks/summary.json,pairs.fdtdx_checkpointed_vs_fdtdx_reversible.cosine,0.9999999999999967
+data/si_v1_checks/summary.json,l2.torchfdtd,5.507867438979702e-06
+data/si_v1_checks/summary.json,l2.fdtdx_checkpointed,5.5078674773946436e-06
+data/si_v1_checks/summary.json,l2.fdtdx_reversible,5.507867792128228e-06
+data/si_v1_checks/summary.json,rtx3060_record.torchfdtd_vs_fdtdx_checkpointed,7.055018567715159e-08
+data/si_v1_checks/summary.json,rtx3060_record.torchfdtd_vs_fdtdx_reversible,1.0322482796113474e-07
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[0].complex_fields,True
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[0].zero_phase,False
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[0].storage,device
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[0].history_bitwise_equal,True
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[0].gradient_relative_l2,1.59953699876637e-07
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[0].retained_seed_relative_l2[0],5.068410753429391e-07
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[0].retained_seed_relative_l2[1],2.654382416336126e-07
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[0].initial_relative_l2,4.720339989300884e-07
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[0].source_kind,z-normal soft E plane
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[0].material_shape[0],6
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[0].material_shape[1],7
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[0].material_shape[2],20
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[0].material_shape[3],3
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[0].trace_bytes,64512
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[0].terminal_bytes,22176
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[1].complex_fields,True
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[1].zero_phase,False
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[1].storage,cpu
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[1].history_bitwise_equal,True
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[1].gradient_relative_l2,1.59953699876637e-07
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[1].retained_seed_relative_l2[0],5.068410753429391e-07
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[1].retained_seed_relative_l2[1],2.654382416336126e-07
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[1].initial_relative_l2,4.720339989300884e-07
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[1].source_kind,z-normal soft E plane
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[1].material_shape[0],6
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[1].material_shape[1],7
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[1].material_shape[2],20
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[1].material_shape[3],3
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[1].trace_bytes,64512
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[1].terminal_bytes,22176
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[2].complex_fields,True
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[2].zero_phase,True
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[2].storage,device
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[2].history_bitwise_equal,True
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[2].gradient_relative_l2,2.58029824205853e-07
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[2].retained_seed_relative_l2[0],2.7461194285157103e-07
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[2].retained_seed_relative_l2[1],2.446272509567487e-07
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[2].initial_relative_l2,2.929128928224695e-07
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[2].source_kind,z-normal soft E plane
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[2].material_shape[0],6
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[2].material_shape[1],7
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[2].material_shape[2],20
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[2].material_shape[3],3
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[2].trace_bytes,64512
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[2].terminal_bytes,22176
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[3].complex_fields,False
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[3].zero_phase,True
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[3].storage,device
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[3].history_bitwise_equal,True
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[3].gradient_relative_l2,2.58029824205853e-07
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[3].retained_seed_relative_l2[0],7.308898515377078e-07
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[3].retained_seed_relative_l2[1],3.6445009702667777e-07
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[3].initial_relative_l2,2.929128928224695e-07
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[3].source_kind,z-normal soft E plane
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[3].material_shape[0],6
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[3].material_shape[1],7
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[3].material_shape[2],20
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[3].material_shape[3],3
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[3].trace_bytes,32256
+data/si_v1_checks/reversible_cpml_extended_workflow.json,[3].terminal_bytes,11088
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N256.json,initial_max_abs,2.5462627490924206e-06
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N256.json,initial_l2,0.0011704021823623074
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N256.json,initial_relative_peak,4.658451484969991e-07
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N256.json,initial_relative_l2,5.734516497574278e-07
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N256.json,regenerated_seed_blocks,38
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N256.json,seed_buffer_shape[0],32
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N256.json,seed_buffer_shape[1],37632
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N256.json,inverse_steps,1200
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N256.json,transpose_steps,1200
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N256.json,seconds,0.46464809495955706
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N512.json,initial_max_abs,3.102641812802176e-06
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N512.json,initial_l2,0.002316102311170082
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N512.json,initial_relative_peak,4.308680401330757e-07
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N512.json,initial_relative_l2,5.692756677349896e-07
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N512.json,regenerated_seed_blocks,38
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N512.json,seed_buffer_shape[0],32
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N512.json,seed_buffer_shape[1],221952
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N512.json,inverse_steps,1200
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N512.json,transpose_steps,1200
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N512.json,seconds,1.733258193358779
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N640.json,initial_max_abs,2.8044819373462815e-06
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N640.json,initial_l2,0.002889329431718904
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N640.json,initial_relative_peak,3.9311767612181695e-07
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N640.json,initial_relative_l2,5.683283160613973e-07
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N640.json,regenerated_seed_blocks,38
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N640.json,seed_buffer_shape[0],32
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N640.json,seed_buffer_shape[1],371712
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N640.json,inverse_steps,1200
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N640.json,transpose_steps,1200
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N640.json,seconds,2.6982455775141716
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N768.json,initial_max_abs,2.7973801479674876e-06
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N768.json,initial_l2,0.003452000651283265
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N768.json,initial_relative_peak,4.689241493222927e-07
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N768.json,initial_relative_l2,5.662313365167945e-07
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N768.json,regenerated_seed_blocks,38
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N768.json,seed_buffer_shape[0],32
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N768.json,seed_buffer_shape[1],580800
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N768.json,inverse_steps,1200
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N768.json,transpose_steps,1200
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N768.json,seconds,3.8730487851426005
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N1040.json,initial_max_abs,2.9648851977981394e-06
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N1040.json,initial_l2,0.004679042182189035
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N1040.json,initial_relative_peak,4.947410848736776e-07
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N1040.json,initial_relative_l2,5.667759732974482e-07
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N1040.json,regenerated_seed_blocks,38
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N1040.json,seed_buffer_shape[0],32
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N1040.json,seed_buffer_shape[1],1108992
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N1040.json,inverse_steps,1200
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N1040.json,transpose_steps,1200
+data/fdtdx_adjoint_scaling/raw/out/tfd_device_N1040.json,seconds,7.0937669314444065
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N256.json,initial_max_abs,2.5462627490924206e-06
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N256.json,initial_l2,0.0011704021823623074
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N256.json,initial_relative_peak,4.658451484969991e-07
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N256.json,initial_relative_l2,5.734516497574278e-07
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N256.json,regenerated_seed_blocks,38
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N256.json,seed_buffer_shape[0],32
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N256.json,seed_buffer_shape[1],37632
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N256.json,inverse_steps,1200
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N256.json,transpose_steps,1200
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N256.json,seconds,0.46902351919561625
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N512.json,initial_max_abs,3.102641812802176e-06
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N512.json,initial_l2,0.002316102311170082
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N512.json,initial_relative_peak,4.308680401330757e-07
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N512.json,initial_relative_l2,5.692756677349896e-07
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N512.json,regenerated_seed_blocks,38
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N512.json,seed_buffer_shape[0],32
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N512.json,seed_buffer_shape[1],221952
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N512.json,inverse_steps,1200
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N512.json,transpose_steps,1200
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N512.json,seconds,1.746937290765345
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N640.json,initial_max_abs,2.8044819373462815e-06
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N640.json,initial_l2,0.002889329431718904
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N640.json,initial_relative_peak,3.9311767612181695e-07
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N640.json,initial_relative_l2,5.683283160613973e-07
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N640.json,regenerated_seed_blocks,38
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N640.json,seed_buffer_shape[0],32
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N640.json,seed_buffer_shape[1],371712
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N640.json,inverse_steps,1200
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N640.json,transpose_steps,1200
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N640.json,seconds,2.7154100639745593
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N768.json,initial_max_abs,2.7973801479674876e-06
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N768.json,initial_l2,0.003452000651283265
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N768.json,initial_relative_peak,4.689241493222927e-07
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N768.json,initial_relative_l2,5.662313365167945e-07
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N768.json,regenerated_seed_blocks,38
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N768.json,seed_buffer_shape[0],32
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N768.json,seed_buffer_shape[1],580800
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N768.json,inverse_steps,1200
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N768.json,transpose_steps,1200
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N768.json,seconds,3.8969140592962503
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N1040.json,initial_max_abs,2.9648851977981394e-06
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N1040.json,initial_l2,0.004679042182189035
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N1040.json,initial_relative_peak,4.947410848736776e-07
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N1040.json,initial_relative_l2,5.667759732974482e-07
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N1040.json,regenerated_seed_blocks,38
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N1040.json,seed_buffer_shape[0],32
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N1040.json,seed_buffer_shape[1],1108992
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N1040.json,inverse_steps,1200
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N1040.json,transpose_steps,1200
+data/fdtdx_adjoint_scaling/raw/out/tfd_host_N1040.json,seconds,7.129744944162667

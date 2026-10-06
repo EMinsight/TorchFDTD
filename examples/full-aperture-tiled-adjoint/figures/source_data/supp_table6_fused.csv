@@ -1,0 +1,125 @@
+source,key,value
+data/fused_kernel_bench/summary.json,fused.gpu,NVIDIA H200
+data/fused_kernel_bench/summary.json,fused.shape[0],1040
+data/fused_kernel_bench/summary.json,fused.shape[1],1040
+data/fused_kernel_bench/summary.json,fused.shape[2],125
+data/fused_kernel_bench/summary.json,fused.cells,135200000
+data/fused_kernel_bench/summary.json,fused.steps,512
+data/fused_kernel_bench/summary.json,fused.reps,3
+data/fused_kernel_bench/summary.json,fused.interval_z[0],13
+data/fused_kernel_bench/summary.json,fused.interval_z[1],111
+data/fused_kernel_bench/summary.json,fused.interval_cells,107078400
+data/fused_kernel_bench/summary.json,fused.forward_ms_per_step,4.368619495835446
+data/fused_kernel_bench/summary.json,fused.forward_gcell_per_s,30.947991723445945
+data/fused_kernel_bench/summary.json,fused.forward_eff_bw_tb_s,2.5996313047694595
+data/fused_kernel_bench/summary.json,fused.forward_eff_bw_pct,54.15898551603041
+data/fused_kernel_bench/summary.json,fused.forward_wall_s,3.279472379013896
+data/fused_kernel_bench/summary.json,fused.forward_peak_gib,9.952203273773193
+data/fused_kernel_bench/summary.json,fused.recorded_forward_ms_per_step,4.618809175553906
+data/fused_kernel_bench/summary.json,fused.reverse_ms_per_step,10.465329837643367
+data/fused_kernel_bench/summary.json,fused.reverse_min_bytes_per_step,26776089600
+data/fused_kernel_bench/summary.json,fused.reverse_eff_bw_tb_s,2.5585519057113224
+data/fused_kernel_bench/summary.json,fused.reverse_eff_bw_pct,53.30316470231922
+data/fused_kernel_bench/summary.json,fused.gradient_wall_s,10.882577197160572
+data/fused_kernel_bench/summary.json,fused.gradient_loops_s,7.723079174757004
+data/fused_kernel_bench/summary.json,fused.gradient_peak_gib,25.923677444458008
+data/fused_kernel_bench/summary.json,fused.forward_loop_s_all[0],2.2419918817467988
+data/fused_kernel_bench/summary.json,fused.forward_loop_s_all[1],2.2367331818677485
+data/fused_kernel_bench/summary.json,fused.forward_loop_s_all[2],2.2364221094176173
+data/fused_kernel_bench/summary.json,fused.reverse_loop_s_all[0],5.355636516120285
+data/fused_kernel_bench/summary.json,fused.reverse_loop_s_all[1],5.358248876873404
+data/fused_kernel_bench/summary.json,fused.reverse_loop_s_all[2],5.360084334854037
+data/fused_kernel_bench/summary.json,fused.gradient_wall_s_all[0],11.159390011802316
+data/fused_kernel_bench/summary.json,fused.gradient_wall_s_all[1],10.706108178943396
+data/fused_kernel_bench/summary.json,fused.gradient_wall_s_all[2],10.882577197160572
+data/fused_kernel_bench/summary.json,fused.profile_forward_kernels_per_step,10.51171875
+data/fused_kernel_bench/summary.json,fused.profile_forward_kernel_ms_per_step,4.36457626757811
+data/fused_kernel_bench/summary.json,fused.profile_gradient_kernels_per_step,29.044921875
+data/fused_kernel_bench/summary.json,fused.profile_gradient_kernel_ms_per_step,15.204041187499893
+data/fused_kernel_bench/summary.json,unfused.gpu,NVIDIA H200
+data/fused_kernel_bench/summary.json,unfused.shape[0],1040
+data/fused_kernel_bench/summary.json,unfused.shape[1],1040
+data/fused_kernel_bench/summary.json,unfused.shape[2],125
+data/fused_kernel_bench/summary.json,unfused.cells,135200000
+data/fused_kernel_bench/summary.json,unfused.steps,512
+data/fused_kernel_bench/summary.json,unfused.reps,3
+data/fused_kernel_bench/summary.json,unfused.interval_z[0],13
+data/fused_kernel_bench/summary.json,unfused.interval_z[1],111
+data/fused_kernel_bench/summary.json,unfused.interval_cells,107078400
+data/fused_kernel_bench/summary.json,unfused.forward_ms_per_step,37.001516892814834
+data/fused_kernel_bench/summary.json,unfused.forward_gcell_per_s,3.653904254564599
+data/fused_kernel_bench/summary.json,unfused.forward_eff_bw_tb_s,0.3069279573834263
+data/fused_kernel_bench/summary.json,unfused.forward_eff_bw_pct,6.394332445488048
+data/fused_kernel_bench/summary.json,unfused.forward_wall_s,20.047761291265488
+data/fused_kernel_bench/summary.json,unfused.forward_peak_gib,14.664732933044434
+data/fused_kernel_bench/summary.json,unfused.recorded_forward_ms_per_step,37.2374248554479
+data/fused_kernel_bench/summary.json,unfused.reverse_ms_per_step,85.30420276565565
+data/fused_kernel_bench/summary.json,unfused.reverse_min_bytes_per_step,26776089600
+data/fused_kernel_bench/summary.json,unfused.reverse_eff_bw_tb_s,0.3138894536481188
+data/fused_kernel_bench/summary.json,unfused.reverse_eff_bw_pct,6.539363617669143
+data/fused_kernel_bench/summary.json,unfused.gradient_wall_s,63.824728074949235
+data/fused_kernel_bench/summary.json,unfused.gradient_loops_s,62.741313342005014
+data/fused_kernel_bench/summary.json,unfused.gradient_peak_gib,32.34115505218506
+data/fused_kernel_bench/summary.json,unfused.forward_loop_s_all[0],18.944776649121195
+data/fused_kernel_bench/summary.json,unfused.forward_loop_s_all[1],18.945369362365454
+data/fused_kernel_bench/summary.json,unfused.forward_loop_s_all[2],18.938409776892513
+data/fused_kernel_bench/summary.json,unfused.reverse_loop_s_all[0],43.67575181601569
+data/fused_kernel_bench/summary.json,unfused.reverse_loop_s_all[1],43.703491965308785
+data/fused_kernel_bench/summary.json,unfused.reverse_loop_s_all[2],43.6745809786953
+data/fused_kernel_bench/summary.json,unfused.gradient_wall_s_all[0],63.824728074949235
+data/fused_kernel_bench/summary.json,unfused.gradient_wall_s_all[1],63.85858710715547
+data/fused_kernel_bench/summary.json,unfused.gradient_wall_s_all[2],63.77374961273745
+data/fused_kernel_bench/summary.json,unfused.profile_forward_kernels_per_step,151.51171875
+data/fused_kernel_bench/summary.json,unfused.profile_forward_kernel_ms_per_step,36.92252626953195
+data/fused_kernel_bench/summary.json,unfused.profile_gradient_kernels_per_step,333.02734375
+data/fused_kernel_bench/summary.json,unfused.profile_gradient_kernel_ms_per_step,123.34005858398285
+data/fused_kernel_bench/summary.json,prod.gpu,NVIDIA H200
+data/fused_kernel_bench/summary.json,prod.shape[0],1040
+data/fused_kernel_bench/summary.json,prod.shape[1],1040
+data/fused_kernel_bench/summary.json,prod.shape[2],125
+data/fused_kernel_bench/summary.json,prod.cells,135200000
+data/fused_kernel_bench/summary.json,prod.steps,512
+data/fused_kernel_bench/summary.json,prod.reps,3
+data/fused_kernel_bench/summary.json,prod.interval_z[0],45
+data/fused_kernel_bench/summary.json,prod.interval_z[1],79
+data/fused_kernel_bench/summary.json,prod.interval_cells,37856000
+data/fused_kernel_bench/summary.json,prod.forward_ms_per_step,4.2443446754987235
+data/fused_kernel_bench/summary.json,prod.forward_gcell_per_s,31.854151897810603
+data/fused_kernel_bench/summary.json,prod.forward_eff_bw_tb_s,2.675748759416091
+data/fused_kernel_bench/summary.json,prod.forward_eff_bw_pct,55.74476582116856
+data/fused_kernel_bench/summary.json,prod.forward_wall_s,2.298974378965795
+data/fused_kernel_bench/summary.json,prod.forward_peak_gib,9.990235805511475
+data/fused_kernel_bench/summary.json,prod.recorded_forward_ms_per_step,4.388870113871235
+data/fused_kernel_bench/summary.json,prod.reverse_ms_per_step,5.92664609393978
+data/fused_kernel_bench/summary.json,prod.reverse_min_bytes_per_step,15899520000
+data/fused_kernel_bench/summary.json,prod.reverse_eff_bw_tb_s,2.682717973704868
+data/fused_kernel_bench/summary.json,prod.reverse_eff_bw_pct,55.88995778551809
+data/fused_kernel_bench/summary.json,prod.gradient_wall_s,5.426416262052953
+data/fused_kernel_bench/summary.json,prod.gradient_loops_s,5.28154429839924
+data/fused_kernel_bench/summary.json,prod.gradient_peak_gib,25.896507740020752
+data/fused_kernel_bench/summary.json,prod.forward_loop_s_all[0],2.1731044738553464
+data/fused_kernel_bench/summary.json,prod.forward_loop_s_all[1],2.173146227840334
+data/fused_kernel_bench/summary.json,prod.forward_loop_s_all[2],2.1715690190903842
+data/fused_kernel_bench/summary.json,prod.reverse_loop_s_all[0],3.0435939538292587
+data/fused_kernel_bench/summary.json,prod.reverse_loop_s_all[1],3.0344428000971675
+data/fused_kernel_bench/summary.json,prod.reverse_loop_s_all[2],3.0342669333331287
+data/fused_kernel_bench/summary.json,prod.gradient_wall_s_all[0],5.436031043995172
+data/fused_kernel_bench/summary.json,prod.gradient_wall_s_all[1],5.426416262052953
+data/fused_kernel_bench/summary.json,prod.gradient_wall_s_all[2],5.423076558392495
+data/fused_kernel_bench/summary.json,prod.profile_forward_kernels_per_step,10.50390625
+data/fused_kernel_bench/summary.json,prod.profile_forward_kernel_ms_per_step,4.2252773984374965
+data/fused_kernel_bench/summary.json,prod.profile_gradient_kernels_per_step,22.923828125
+data/fused_kernel_bench/summary.json,prod.profile_gradient_kernel_ms_per_step,10.3728713105469
+data/fused_kernel_bench/summary.json,speedup_fused_over_unfused.forward,8.469842001137417
+data/fused_kernel_bench/summary.json,speedup_fused_over_unfused.recorded_forward,8.06212671710609
+data/fused_kernel_bench/summary.json,speedup_fused_over_unfused.reverse,8.151124148884433
+data/fused_kernel_bench/summary.json,speedup_fused_over_unfused.gradient_loops,8.123872864993526
+data/fused_kernel_bench/summary.json,speedup_fused_over_unfused.gradient_wall,5.864854153444652
+data/fused_kernel_bench/summary.json,agreement.full_fused vs full_unfused.fields_fwd.pt,0.0
+data/fused_kernel_bench/summary.json,agreement.full_fused vs full_unfused.fields_grad.pt,0.0
+data/fused_kernel_bench/summary.json,agreement.full_fused vs full_unfused.grad.pt,2.690119686772923e-07
+data/fused_kernel_bench/summary.json,agreement.full_fused vs full_unfused.grad_cosine,0.9999999999998205
+data/fused_kernel_bench/summary.json,agreement.full_fused vs full_prod.fields_fwd.pt,0.0
+data/fused_kernel_bench/summary.json,agreement.full_fused vs full_prod.fields_grad.pt,0.0
+data/fused_kernel_bench/summary.json,agreement.full_fused vs full_prod.grad.pt,2.855191574115331e-07
+data/fused_kernel_bench/summary.json,agreement.full_fused vs full_prod.grad_cosine,0.9999999999998062

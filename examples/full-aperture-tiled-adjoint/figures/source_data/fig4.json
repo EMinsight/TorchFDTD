@@ -1,0 +1,564 @@
+{
+ "arrays_from": [
+  "data/e2_final/e2_final_arrays.npz",
+  "data/e3_final/e3_final_arrays.npz"
+ ],
+ "records": {
+  "data/e2_final/e2_final_metrics.json": {
+   "design": "E2 RGB colour hologram, 150 um square aperture, z 300 um, 96 x 96 px of 1.25 um, x polarization, 450/540/635 nm",
+   "run": "designs/runs/e2_full",
+   "best_binary_step": 158,
+   "steps_completed": 159,
+   "run_values": {
+    "I_binary_step158": 0.6761390270598296,
+    "I_grey_step158": 0.6789039738351734,
+    "beta_step158": 256.0,
+    "grey_fraction_step158": 0.0680777058005333,
+    "fill_step158": 0.39854681491851807,
+    "best_binary": {
+     "step": 158,
+     "value": 0.6761390270598296
+    }
+   },
+   "stop_rule": "stopped at step 159: binary gain <= 0.3 % at beta 256",
+   "beta_schedule": "adaptive x1.3 on stall until step 94, x1.1 per step to step 122, x1.005 for steps 123-126, x1.05 from step 127 to 256",
+   "hardware": "H200 x6 steps 0-9, H100 x8 steps 10-158",
+   "optimized": {
+    "o0p9": {
+     "source": "data/baselines_fullwave/e2_final_o0.9_repro/eval_e2_opt_final/metrics.json (overlap 0.9 um, core 19.0 um, 64 tiles, binary fill 0.3982)",
+     "J": 0.6761390271003574,
+     "channels": {
+      "450": {
+       "efficiency": 0.7416008945265611,
+       "similarity": 0.9107564326865142,
+       "crosstalk_excess_terms": {
+        "540": 0.0,
+        "635": 0.0026251050220749694
+       },
+       "crosstalk_excess_sum": 0.0026251050220749694,
+       "crosstalk_penalty": 0.0013125525110374847,
+       "J_channel": 0.6744443950598402,
+       "pearson": 0.9467624447073777,
+       "psnr_db": 18.784199036848253
+      },
+      "540": {
+       "efficiency": 0.7984651350532688,
+       "similarity": 0.8569565423043353,
+       "crosstalk_excess_terms": {
+        "450": 0.01038184944104023,
+        "635": 0.006920472284189877
+       },
+       "crosstalk_excess_sum": 0.017302321725230108,
+       "crosstalk_penalty": 0.008651160862615054,
+       "J_channel": 0.6773422709592778,
+       "pearson": 0.9064110116018028,
+       "psnr_db": 17.672315972310113
+      },
+      "635": {
+       "efficiency": 0.7691164582451355,
+       "similarity": 0.8799044157805986,
+       "crosstalk_excess_terms": {
+        "450": 0.0,
+        "540": 0.0
+       },
+       "crosstalk_excess_sum": 0.0,
+       "crosstalk_penalty": 0.0,
+       "J_channel": 0.6767489678594292,
+       "pearson": 0.9233029448607298,
+       "psnr_db": 16.858906154203893
+      }
+     },
+     "similarity_matrix": [
+      [
+       0.9107564326865142,
+       0.1059703291083395,
+       -0.33562805950994257
+      ],
+      [
+       0.1739334020109258,
+       0.8569565423043353,
+       0.14187595601684616
+      ],
+      [
+       -0.09776155224813118,
+       0.2391211906767216,
+       0.8799044157805986
+      ]
+     ],
+     "similarity_targets": [
+      [
+       1.0,
+       0.11022124735231255,
+       -0.33825316453201754
+      ],
+      [
+       0.16355155256988557,
+       0.9999999999999999,
+       0.13495548373265628
+      ],
+      [
+       -0.0888137978175084,
+       0.2513192864672065,
+       1.0
+      ]
+     ],
+     "crosstalk_excess_matrix": [
+      [
+       0.0,
+       0.0,
+       0.0026251050220749694
+      ],
+      [
+       0.01038184944104023,
+       0.0,
+       0.006920472284189877
+      ],
+      [
+       0.0,
+       0.0,
+       0.0
+      ]
+     ]
+    },
+    "o3p6": {
+     "source": "data/baselines_fullwave/e2_final_o3.6/eval_e2_opt_final/metrics.json (overlap 3.6 um, core 15.0 um, 100 tiles, binary fill 0.3982)",
+     "J": 0.6729735633963294,
+     "channels": {
+      "450": {
+       "efficiency": 0.7392716602293237,
+       "similarity": 0.9105106727564979,
+       "crosstalk_excess_terms": {
+        "540": 0.0,
+        "635": 0.003414916198025808
+       },
+       "crosstalk_excess_sum": 0.003414916198025808,
+       "crosstalk_penalty": 0.001707458099012904,
+       "J_channel": 0.6718524613215853,
+       "pearson": 0.9466593847826714,
+       "psnr_db": 18.773771293459326
+      },
+      "540": {
+       "efficiency": 0.7958730792401651,
+       "similarity": 0.8563238108319183,
+       "crosstalk_excess_terms": {
+        "450": 0.011572265582589392,
+        "635": 0.007356675099093879
+       },
+       "crosstalk_excess_sum": 0.01892894068168327,
+       "crosstalk_penalty": 0.009464470340841635,
+       "J_channel": 0.6739925509999287,
+       "pearson": 0.90599068237726,
+       "psnr_db": 17.658862736914056
+      },
+      "635": {
+       "efficiency": 0.7656123791163683,
+       "similarity": 0.8792097374107135,
+       "crosstalk_excess_terms": {
+        "450": 0.0,
+        "540": 0.0
+       },
+       "crosstalk_excess_sum": 0.0,
+       "crosstalk_penalty": 0.0,
+       "J_channel": 0.6731338588012937,
+       "pearson": 0.9228262889619474,
+       "psnr_db": 16.83982733704071
+      }
+     },
+     "similarity_matrix": [
+      [
+       0.9105106727564979,
+       0.10707284007967934,
+       -0.33483824833399173
+      ],
+      [
+       0.17512381815247496,
+       0.8563238108319183,
+       0.14231215883175016
+      ],
+      [
+       -0.09750875359204646,
+       0.23965393259953172,
+       0.8792097374107135
+      ]
+     ],
+     "similarity_targets": [
+      [
+       1.0,
+       0.11022124735231255,
+       -0.33825316453201754
+      ],
+      [
+       0.16355155256988557,
+       0.9999999999999999,
+       0.13495548373265628
+      ],
+      [
+       -0.0888137978175084,
+       0.2513192864672065,
+       1.0
+      ]
+     ],
+     "crosstalk_excess_matrix": [
+      [
+       0.0,
+       0.0,
+       0.003414916198025808
+      ],
+      [
+       0.011572265582589392,
+       0.0,
+       0.007356675099093879
+      ],
+      [
+       0.0,
+       0.0,
+       0.0
+      ]
+     ]
+    }
+   },
+   "baseline": {
+    "name": "e2sq_rgb_jointgs_lut (Gerchberg-Saxton iterated with the square SiN post library)",
+    "fullwave_o3p6": {
+     "source": "data/baselines_fullwave/e2_lut_o3.6/eval_e2_lut/metrics.json (overlap 3.6 um, core 15.0 um, 100 tiles, binary fill 0.2607)",
+     "J": 0.40910093994211283,
+     "channels": {
+      "450": {
+       "efficiency": 0.7116209525934073,
+       "similarity": 0.7759662086884284,
+       "crosstalk_excess_terms": {
+        "540": 0.23034188272394163,
+        "635": 0.2332974288087443
+       },
+       "crosstalk_excess_sum": 0.4636393115326859,
+       "crosstalk_penalty": 0.23181965576634295,
+       "J_channel": 0.3872260883408334,
+       "pearson": 0.818188090297841,
+       "psnr_db": 18.200441149197644
+      },
+      "540": {
+       "efficiency": 0.7865142050566861,
+       "similarity": 0.7391696043110222,
+       "crosstalk_excess_terms": {
+        "450": 0.1320854972604566,
+        "635": 0.0489031893158787
+       },
+       "crosstalk_excess_sum": 0.1809886865763353,
+       "crosstalk_penalty": 0.09049434328816765,
+       "J_channel": 0.5101923072633289,
+       "pearson": 0.7956176507160726,
+       "psnr_db": 16.859650088518006
+      },
+      "635": {
+       "efficiency": 0.687646492945321,
+       "similarity": 0.7550274968167856,
+       "crosstalk_excess_terms": {
+        "450": 0.007954920969885412,
+        "540": 0.03277172954113111
+       },
+       "crosstalk_excess_sum": 0.040726650511016524,
+       "crosstalk_penalty": 0.020363325255508262,
+       "J_channel": 0.505189241066692,
+       "pearson": 0.8198413192207877,
+       "psnr_db": 15.084505855588743
+      }
+     },
+     "similarity_matrix": [
+      [
+       0.7759662086884284,
+       0.34056313007625416,
+       -0.10495573572327324
+      ],
+      [
+       0.29563704983034217,
+       0.7391696043110222,
+       0.18385867304853498
+      ],
+      [
+       -0.08085887684762298,
+       0.28409101600833764,
+       0.7550274968167856
+      ]
+     ],
+     "similarity_targets": [
+      [
+       1.0,
+       0.11022124735231255,
+       -0.33825316453201754
+      ],
+      [
+       0.16355155256988557,
+       0.9999999999999999,
+       0.13495548373265628
+      ],
+      [
+       -0.0888137978175084,
+       0.2513192864672065,
+       1.0
+      ]
+     ],
+     "crosstalk_excess_matrix": [
+      [
+       0.0,
+       0.23034188272394163,
+       0.2332974288087443
+      ],
+      [
+       0.1320854972604566,
+       0.0,
+       0.0489031893158787
+      ],
+      [
+       0.007954920969885412,
+       0.03277172954113111,
+       0.0
+      ]
+     ]
+    },
+    "lpa": {
+     "source": "data/baselines_v2/e2sq_rgb_jointgs_lut/lpa.json (locally periodic pupil, not full-wave)",
+     "J": 0.4555016669426638,
+     "channels": {
+      "450": {
+       "efficiency": 0.7682277347417327,
+       "similarity": 0.7860150041185585,
+       "crosstalk_excess_terms": {
+        "540": 0.22234435471362282,
+        "635": 0.21946869594088764
+       },
+       "crosstalk_excess_sum": 0.4418130506545105,
+       "crosstalk_penalty": 0.22090652532725524,
+       "J_channel": 0.43413200654518935,
+       "pearson": 0.8261494781734039,
+       "psnr_db": 18.428753954644833
+      },
+      "540": {
+       "efficiency": 0.8001569754732504,
+       "similarity": 0.7409063940516646,
+       "crosstalk_excess_terms": {
+        "450": 0.1360158781245171,
+        "635": 0.040831251640863125
+       },
+       "crosstalk_excess_sum": 0.17684712976538022,
+       "crosstalk_penalty": 0.08842356488269011,
+       "J_channel": 0.5220886871360761,
+       "pearson": 0.79709759291076,
+       "psnr_db": 16.863361956477817
+      },
+      "635": {
+       "efficiency": 0.702141595725561,
+       "similarity": 0.7580297265194001,
+       "crosstalk_excess_terms": {
+        "450": 0.009744853533832393,
+        "540": 0.04174727881708473
+       },
+       "crosstalk_excess_sum": 0.051492132350917125,
+       "crosstalk_penalty": 0.025746066175458562,
+       "J_channel": 0.5141668177976498,
+       "pearson": 0.8224380496703615,
+       "psnr_db": 15.095826930449402
+      }
+     },
+     "similarity_matrix": [
+      [
+       0.7860150041185585,
+       0.3325656020659352,
+       -0.11878446859112994
+      ],
+      [
+       0.29956743069440256,
+       0.7409063940516646,
+       0.1757867353735194
+      ],
+      [
+       -0.079068944283676,
+       0.29306656528429126,
+       0.7580297265194001
+      ]
+     ],
+     "similarity_targets": [
+      [
+       1.0,
+       0.1102212473523124,
+       -0.3382531645320176
+      ],
+      [
+       0.16355155256988546,
+       0.9999999999999997,
+       0.13495548373265628
+      ],
+      [
+       -0.0888137978175084,
+       0.2513192864672065,
+       1.0
+      ]
+     ],
+     "crosstalk_excess_matrix": [
+      [
+       0.0,
+       0.22234435471362282,
+       0.21946869594088764
+      ],
+      [
+       0.1360158781245171,
+       0.0,
+       0.040831251640863125
+      ],
+      [
+       0.009744853533832393,
+       0.04174727881708473,
+       0.0
+      ]
+     ]
+    }
+   },
+   "repro_check": {
+    "run": 0.6761390270598296,
+    "eval_o0p9": 0.6761390271003574,
+    "rel": 5.99400529210925e-11
+   },
+   "ratios": {
+    "opt_o3p6_over_base_o3p6": 1.645006152984039,
+    "opt_o3p6_over_base_lpa": 1.4774338103158684
+   },
+   "cost": {
+    "compute_h": 9.25612692627642,
+    "compute_gpu_h": 72.7925108411577,
+    "compute_cost_usd": 258.19232791351743,
+    "n_steps": 159,
+    "segments": [
+     {
+      "gpu_sku": "NVIDIA H200",
+      "gpu_count": 6,
+      "first_step": 0,
+      "last_step": 9,
+      "s_per_step": {
+       "n": 10,
+       "median": 221.9980113506317,
+       "mean": 226.170822429657,
+       "min": 191.55328750610352,
+       "max": 293.8957169055939,
+       "sum": 2261.70822429657
+      },
+      "split_s_per_step_mean": {
+       "tile_forward": 60.73981665633619,
+       "tile_adjoint": 132.07164580412208,
+       "assembly_propagation_objective": 0.16273798942565917,
+       "communication": 0.1508642815053463,
+       "optimizer": 0.2575149774551392,
+       "binary_evaluation": 29.186673735827206,
+       "file_output": 3.2140680313110352,
+       "other": 0.3875009536743164,
+       "gpu_idle_mean": 11.772661047490935
+      },
+      "compute_h": 0.6282522845268249
+     },
+     {
+      "gpu_sku": "NVIDIA H100 80GB HBM3",
+      "gpu_count": 8,
+      "first_step": 10,
+      "last_step": 158,
+      "s_per_step": {
+       "n": 149,
+       "median": 217.46925377845764,
+       "mean": 208.45871617650025,
+       "min": 165.1271002292633,
+       "max": 273.0620422363281,
+       "sum": 31060.34871029854
+      },
+      "split_s_per_step_mean": {
+       "tile_forward": 57.91052022660089,
+       "tile_adjoint": 119.26121240978648,
+       "assembly_propagation_objective": 0.3612546344731478,
+       "communication": 0.1953265049163527,
+       "optimizer": 0.5165675886525404,
+       "binary_evaluation": 27.868674538973345,
+       "file_output": 2.015209300406027,
+       "other": 0.32995097269147833,
+       "gpu_idle_mean": 11.783934293885952
+      },
+      "compute_h": 8.627874641749594
+     }
+    ]
+   }
+  },
+  "data/e3_final/e3_final_metrics.json": {
+   "design": "E3 polarization-switched hologram, 100 um square aperture, 540 nm, x input -> CNU, y input -> PHY, total S_z at z = 200 um, 64 x 64 px of 1.25 um",
+   "run": "designs/runs/e3_full (overlap 0.9 um)",
+   "best_binary": {
+    "step": 189,
+    "value_run": 0.8479491083499667,
+    "grey_same_step": 0.8508283421350338
+   },
+   "optimized_fullwave_o3p6": {
+    "source": "data/baselines_fullwave/e3_opt189_o3.6/eval_e3_opt_step0189/metrics.json (overlap 3.6 um, core 15.0 um, 49 tiles, fill 0.3995)",
+    "J": 0.8439241581726773,
+    "channels": [
+     "x -> CNU",
+     "y -> PHY"
+    ],
+    "similarity_own": [
+     0.9750687044031866,
+     0.9752374294799965
+    ],
+    "leak": [
+     0.05892984176825756,
+     0.07253551146231065
+    ],
+    "J_channel": [
+     0.84223115465397,
+     0.8457738397378716
+    ]
+   },
+   "meta_atom_fullwave_o3p6": {
+    "source": "data/baselines_fullwave/e3_lut_o3.6/eval_e3_lut/metrics.json (overlap 3.6 um, core 15.0 um, 49 tiles, fill 0.2736)",
+    "J": 0.680197847698185,
+    "channels": [
+     "x -> CNU",
+     "y -> PHY"
+    ],
+    "similarity_own": [
+     0.9197374227056496,
+     0.9355617348586606
+    ],
+    "leak": [
+     0.09287884788469271,
+     0.12998746834735525
+    ],
+    "J_channel": [
+     0.6725262632288764,
+     0.6928023398785884
+    ]
+   },
+   "meta_atom_lpa": {
+    "source": "data/baselines_v2/e3_polholo_jointgs_lut_sq100/lpa.json (locally periodic pupil, not full-wave)",
+    "J": 0.6794010216311509,
+    "similarity_own": [
+     0.9212176921787595,
+     0.9372070971491309
+    ],
+    "leak": [
+     0.09724432311054276,
+     0.13302452371469653
+    ]
+   },
+   "ratio_fullwave": 1.240703952575781,
+   "windows_um": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     25.0,
+     25.0
+    ],
+    [
+     45.0,
+     0.0
+    ]
+   ],
+   "leak_definition": "power in the letter pixels of the other word / power in the own word's letter pixels"
+  }
+ },
+ "references": {}
+}

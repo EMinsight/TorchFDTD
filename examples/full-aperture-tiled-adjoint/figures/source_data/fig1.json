@@ -1,0 +1,24 @@
+{
+ "arrays_from": [
+  "data/fig1_redesign/e2_scene.npz"
+ ],
+ "records": {
+  "experiments/figures_fa/fig1_html/assets/meta.json": {
+   "aperture_um": 150.0,
+   "core_um": 19.0,
+   "over_um": 0.9,
+   "z_um": 300.0,
+   "window_um": 120.0,
+   "n_side": 8,
+   "zoom_center_um": [
+    35.0,
+    35.0
+   ],
+   "source": {
+    "data/fig1_redesign/e2_scene.npz": "d00c68190a15bb7a478fa57d3b96b1fc08dac643b643bdf2641b5b2561596511"
+   }
+  },
+  "experiments/figures_fa/fig1_html/assets/cube_size_mm.txt": "6.0000 8.6000\n"
+ },
+ "references": {}
+}

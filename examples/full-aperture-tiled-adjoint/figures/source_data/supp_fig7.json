@@ -1,0 +1,8 @@
+{
+ "arrays_from": [
+  "data/fig3_slab/compare_both/focal_threeway.npz",
+  "data/fig3_slab/compare_both/xz_threeway.npz"
+ ],
+ "records": {},
+ "references": {}
+}

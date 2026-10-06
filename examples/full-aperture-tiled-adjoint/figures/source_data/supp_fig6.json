@@ -1,0 +1,10 @@
+{
+ "arrays_from": [
+  "designs/runs/e3_full/optical/T_binary_step0189.npz",
+  "data/verify_tidy3d/T_tidy3d_e3f.npz",
+  "data/verify_tidy3d/score_e3f_torchfdtd.arrays.npz",
+  "data/verify_tidy3d/score_e3f_tidy3d.arrays.npz"
+ ],
+ "records": {},
+ "references": {}
+}

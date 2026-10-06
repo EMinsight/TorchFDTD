@@ -1,0 +1,73 @@
+source,key,value
+data/h200_unify/summary.json,[0].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[0].quantity,focus Ex relative error (rep 1)
+data/h200_unify/summary.json,[0].new_h200,2.5757529315793024e-06
+data/h200_unify/summary.json,[0].unit,
+data/h200_unify/summary.json,[1].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[1].quantity,"focus Ex time to gradient (s, median of 3)"
+data/h200_unify/summary.json,[1].new_h200,3.8019457310438156
+data/h200_unify/summary.json,[1].unit,s
+data/h200_unify/summary.json,[2].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[2].quantity,focus Ex peak allocation (GB)
+data/h200_unify/summary.json,[2].new_h200,4.258103296
+data/h200_unify/summary.json,[2].unit,GB
+data/h200_unify/summary.json,[3].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[3].quantity,splitter Ex relative error (rep 1)
+data/h200_unify/summary.json,[3].new_h200,1.8085827498359952e-06
+data/h200_unify/summary.json,[3].unit,
+data/h200_unify/summary.json,[4].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[4].quantity,"splitter Ex time to gradient (s, median of 3)"
+data/h200_unify/summary.json,[4].new_h200,2.137243442935869
+data/h200_unify/summary.json,[4].unit,s
+data/h200_unify/summary.json,[5].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[5].quantity,splitter Ex peak allocation (GB)
+data/h200_unify/summary.json,[5].new_h200,4.291657728
+data/h200_unify/summary.json,[5].unit,GB
+data/h200_unify/summary.json,[6].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[6].quantity,hologram Ex relative error (rep 1)
+data/h200_unify/summary.json,[6].new_h200,4.035279286854177e-07
+data/h200_unify/summary.json,[6].unit,
+data/h200_unify/summary.json,[7].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[7].quantity,"hologram Ex time to gradient (s, median of 3)"
+data/h200_unify/summary.json,[7].new_h200,2.142057773191482
+data/h200_unify/summary.json,[7].unit,s
+data/h200_unify/summary.json,[8].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[8].quantity,hologram Ex peak allocation (GB)
+data/h200_unify/summary.json,[8].new_h200,4.291657728
+data/h200_unify/summary.json,[8].unit,GB
+data/h200_unify/summary.json,[9].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[9].quantity,focus Ey relative error (rep 1)
+data/h200_unify/summary.json,[9].new_h200,4.644616902794848e-06
+data/h200_unify/summary.json,[9].unit,
+data/h200_unify/summary.json,[10].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[10].quantity,"focus Ey time to gradient (s, median of 3)"
+data/h200_unify/summary.json,[10].new_h200,2.139404078712687
+data/h200_unify/summary.json,[10].unit,s
+data/h200_unify/summary.json,[11].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[11].quantity,focus Ey peak allocation (GB)
+data/h200_unify/summary.json,[11].new_h200,4.291657728
+data/h200_unify/summary.json,[11].unit,GB
+data/h200_unify/summary.json,[12].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[12].quantity,splitter Ey relative error (rep 1)
+data/h200_unify/summary.json,[12].new_h200,2.003269817610249e-06
+data/h200_unify/summary.json,[12].unit,
+data/h200_unify/summary.json,[13].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[13].quantity,"splitter Ey time to gradient (s, median of 3)"
+data/h200_unify/summary.json,[13].new_h200,2.1400315680075437
+data/h200_unify/summary.json,[13].unit,s
+data/h200_unify/summary.json,[14].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[14].quantity,splitter Ey peak allocation (GB)
+data/h200_unify/summary.json,[14].new_h200,4.291657728
+data/h200_unify/summary.json,[14].unit,GB
+data/h200_unify/summary.json,[15].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[15].quantity,hologram Ey relative error (rep 1)
+data/h200_unify/summary.json,[15].new_h200,1.1258027089051167e-06
+data/h200_unify/summary.json,[15].unit,
+data/h200_unify/summary.json,[16].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[16].quantity,"hologram Ey time to gradient (s, median of 3)"
+data/h200_unify/summary.json,[16].new_h200,2.1441294038668275
+data/h200_unify/summary.json,[16].unit,s
+data/h200_unify/summary.json,[17].item,A2 tab:objectivefd
+data/h200_unify/summary.json,[17].quantity,hologram Ey peak allocation (GB)
+data/h200_unify/summary.json,[17].new_h200,4.291657728
+data/h200_unify/summary.json,[17].unit,GB

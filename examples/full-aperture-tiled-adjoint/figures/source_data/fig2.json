@@ -1,0 +1,1335 @@
+{
+ "arrays_from": [],
+ "records": {
+  "data/h200_unify/raw/bandwidth_modes_16um_h200.json": {
+   "device": "NVIDIA H200",
+   "capability": [
+    9,
+    0
+   ],
+   "shape": [
+    980,
+    980,
+    125
+   ],
+   "cells": 120050000,
+   "steps": 512,
+   "trace": "device",
+   "diagonal": false,
+   "modes": {
+    "off": {
+     "forward_nograd_s": 2.5093491869047284,
+     "adjoint_call_s": 7.828464132966474,
+     "adjoint_forward_s": 2.6117670871317387,
+     "adjoint_backward_s": 5.205758151831105,
+     "interval": [
+      13,
+      111
+     ],
+     "drift_rel_peak": 3.04746458542003e-07,
+     "all_forward_s": [
+      2.5130302188917994,
+      2.5196454911492765,
+      2.5093491869047284
+     ],
+     "all_adjoint_s": [
+      7.8287839309778064,
+      7.828464132966474,
+      7.829203898087144
+     ],
+     "forward_Gcells_per_s": 24.49463802039347,
+     "adjoint_over_forward": 3.119718919080708,
+     "kernels": {
+      "yee_E": {
+       "ms": 2.0132911682128904,
+       "bytes_per_cell": 48,
+       "cells": 120050000,
+       "GBps": 2862.1791477459406
+      },
+      "yee_H": {
+       "ms": 1.6463232040405273,
+       "bytes_per_cell": 36,
+       "cells": 120050000,
+       "GBps": 2625.1224482489956
+      },
+      "adj_Ht": {
+       "ms": 1.5015423774719239,
+       "bytes_per_cell": 36,
+       "cells": 120050000,
+       "GBps": 2878.240444519728
+      },
+      "adj_Et": {
+       "ms": 2.3362735748291015,
+       "bytes_per_cell": 40,
+       "cells": 120050000,
+       "GBps": 2055.4099707057067
+      },
+      "rev_h": {
+       "ms": 1.02925443649292,
+       "bytes_per_cell": 36,
+       "cells": 95079600,
+       "GBps": 3325.5776984193208
+      },
+      "rev_e": {
+       "ms": 1.7713232040405273,
+       "bytes_per_cell": 40,
+       "cells": 95079600,
+       "GBps": 2147.0864217917083
+      },
+      "rev_g": {
+       "ms": 1.060593605041504,
+       "bytes_per_cell": 32,
+       "cells": 95079600,
+       "GBps": 2868.721049737931
+      },
+      "_interval": [
+       13,
+       111
+      ]
+     }
+    },
+    "on": {
+     "forward_nograd_s": 2.4543123089242727,
+     "adjoint_call_s": 5.861645135097206,
+     "adjoint_forward_s": 2.52228590589948,
+     "adjoint_backward_s": 3.335435559041798,
+     "interval": [
+      45,
+      79
+     ],
+     "drift_rel_peak": 3.4159518065685703e-07,
+     "all_forward_s": [
+      2.478572949068621,
+      2.4543123089242727,
+      2.4566032299771905
+     ],
+     "all_adjoint_s": [
+      5.861645135097206,
+      5.87859998899512,
+      5.936337525956333
+     ],
+     "forward_Gcells_per_s": 25.043919543776575,
+     "adjoint_over_forward": 2.3883045013396726,
+     "kernels": {
+      "yee_E": {
+       "ms": 1.955998420715332,
+       "bytes_per_cell": 48,
+       "cells": 120050000,
+       "GBps": 2946.0146485663427
+      },
+      "yee_H": {
+       "ms": 1.5943120002746582,
+       "bytes_per_cell": 36,
+       "cells": 120050000,
+       "GBps": 2710.761757582874
+      },
+      "adj_Ht": {
+       "ms": 1.4148256301879882,
+       "bytes_per_cell": 36,
+       "cells": 120050000,
+       "GBps": 3054.6520417683982
+      },
+      "adj_Et": {
+       "ms": 1.5586527824401855,
+       "bytes_per_cell": 40,
+       "cells": 120050000,
+       "GBps": 3080.865766961976
+      },
+      "rev_h": {
+       "ms": 0.41321120262145994,
+       "bytes_per_cell": 36,
+       "cells": 33614000,
+       "GBps": 2928.536284406036
+      },
+      "rev_eg": {
+       "ms": 0.7087808132171631,
+       "bytes_per_cell": 56,
+       "cells": 33614000,
+       "GBps": 2655.805525344063
+      },
+      "_interval": [
+       45,
+       79
+      ]
+     }
+    },
+    "eh": {
+     "forward_nograd_s": 2.8912118750158697,
+     "adjoint_call_s": 6.3281894298270345,
+     "adjoint_forward_s": 2.966254486935213,
+     "adjoint_backward_s": 3.3445783080533147,
+     "interval": [
+      45,
+      79
+     ],
+     "drift_rel_peak": 3.4159518065685703e-07,
+     "all_forward_s": [
+      2.8912118750158697,
+      2.914186401059851,
+      2.8980909639503807
+     ],
+     "all_adjoint_s": [
+      6.3281894298270345,
+      6.383804763900116,
+      6.367324942024425
+     ],
+     "forward_Gcells_per_s": 21.25945889028372,
+     "adjoint_over_forward": 2.1887670995375594,
+     "kernels": {
+      "eh_march": {
+       "ms": 4.5105712890625,
+       "bytes_per_cell": 60,
+       "cells": 120050000,
+       "GBps": 1596.915232770239
+      },
+      "yee_E": {
+       "ms": 1.954193687438965,
+       "bytes_per_cell": 48,
+       "cells": 120050000,
+       "GBps": 2948.7353464700905
+      },
+      "yee_H": {
+       "ms": 1.595364761352539,
+       "bytes_per_cell": 36,
+       "cells": 120050000,
+       "GBps": 2708.972960099738
+      },
+      "adj_Ht": {
+       "ms": 1.414134407043457,
+       "bytes_per_cell": 36,
+       "cells": 120050000,
+       "GBps": 3056.145143258076
+      },
+      "adj_Et": {
+       "ms": 1.569859218597412,
+       "bytes_per_cell": 40,
+       "cells": 120050000,
+       "GBps": 3058.87301428872
+      },
+      "rev_h": {
+       "ms": 0.41264638900756834,
+       "bytes_per_cell": 36,
+       "cells": 33614000,
+       "GBps": 2932.544745903024
+      },
+      "rev_eg": {
+       "ms": 0.7106304168701172,
+       "bytes_per_cell": 56,
+       "cells": 33614000,
+       "GBps": 2648.8930888868013
+      },
+      "_interval": [
+       45,
+       79
+      ]
+     }
+    },
+    "adj": {
+     "forward_nograd_s": 2.4626063159666955,
+     "adjoint_call_s": 6.742620723089203,
+     "adjoint_forward_s": 2.5076495059765875,
+     "adjoint_backward_s": 4.234971217112616,
+     "interval": [
+      45,
+      79
+     ],
+     "drift_rel_peak": 3.4159518065685703e-07,
+     "all_forward_s": [
+      2.484847590792924,
+      2.4705719240009785,
+      2.4626063159666955
+     ],
+     "all_adjoint_s": [
+      6.844446722883731,
+      6.770098375156522,
+      6.742620723089203
+     ],
+     "forward_Gcells_per_s": 24.95957214170942,
+     "adjoint_over_forward": 2.738001880110662,
+     "kernels": {
+      "yee_E": {
+       "ms": 1.955124855041504,
+       "bytes_per_cell": 48,
+       "cells": 120050000,
+       "GBps": 2947.330951852522
+      },
+      "yee_H": {
+       "ms": 1.594591999053955,
+       "bytes_per_cell": 36,
+       "cells": 120050000,
+       "GBps": 2710.2857674966713
+      },
+      "rev_h": {
+       "ms": 0.410862398147583,
+       "bytes_per_cell": 36,
+       "cells": 33614000,
+       "GBps": 2945.27804310125
+      },
+      "rev_eg": {
+       "ms": 0.7089151859283447,
+       "bytes_per_cell": 56,
+       "cells": 33614000,
+       "GBps": 2655.3021255073895
+      },
+      "adj_one": {
+       "ms": 4.981315231323242,
+       "bytes_per_cell": 60,
+       "cells": 120050000,
+       "GBps": 1446.0036487364778
+      },
+      "_interval": [
+       45,
+       79
+      ]
+     }
+    },
+    "all": {
+     "forward_nograd_s": 2.906680763931945,
+     "adjoint_call_s": 7.304061111062765,
+     "adjoint_forward_s": 2.967372286133468,
+     "adjoint_backward_s": 4.336688824929297,
+     "interval": [
+      45,
+      79
+     ],
+     "drift_rel_peak": 3.4159518065685703e-07,
+     "all_forward_s": [
+      2.9176120420452207,
+      2.9129895090591162,
+      2.906680763931945
+     ],
+     "all_adjoint_s": [
+      7.304061111062765,
+      7.3868226951453835,
+      7.358034273143858
+     ],
+     "forward_Gcells_per_s": 21.146319459194356,
+     "adjoint_over_forward": 2.512852873867843,
+     "kernels": {
+      "eh_march": {
+       "ms": 4.515848159790039,
+       "bytes_per_cell": 60,
+       "cells": 120050000,
+       "GBps": 1595.0492011969902
+      },
+      "yee_E": {
+       "ms": 1.9558351516723633,
+       "bytes_per_cell": 48,
+       "cells": 120050000,
+       "GBps": 2946.2605757304145
+      },
+      "yee_H": {
+       "ms": 1.5946656227111817,
+       "bytes_per_cell": 36,
+       "cells": 120050000,
+       "GBps": 2710.1606370947293
+      },
+      "rev_h": {
+       "ms": 0.4109216213226318,
+       "bytes_per_cell": 36,
+       "cells": 33614000,
+       "GBps": 2944.85356138001
+      },
+      "rev_eg": {
+       "ms": 0.7091951847076416,
+       "bytes_per_cell": 56,
+       "cells": 33614000,
+       "GBps": 2654.253780327052
+      },
+      "adj_one": {
+       "ms": 4.979886245727539,
+       "bytes_per_cell": 60,
+       "cells": 120050000,
+       "GBps": 1446.4185815850244
+      },
+      "_interval": [
+       45,
+       79
+      ]
+     }
+    }
+   },
+   "autotune": [
+    {
+     "label": "yee_E",
+     "bs": 128,
+     "ms": {
+      "128": 1.9601279497146606,
+      "256": 2.0207040309906006,
+      "512": 2.161151885986328,
+      "1024": 2.3104960918426514
+     },
+     "count": 120050000
+    },
+    {
+     "label": "yee_H",
+     "bs": 128,
+     "ms": {
+      "128": 1.594912052154541,
+      "256": 1.6487040519714355,
+      "512": 1.7639679908752441,
+      "1024": 1.9027520418167114
+     },
+     "count": 120050000
+    },
+    {
+     "label": "adj_Ht",
+     "bs": 128,
+     "ms": {
+      "128": 1.4167040586471558,
+      "256": 1.5039360523223877,
+      "512": 1.619871973991394,
+      "1024": 1.8136639595031738
+     },
+     "count": 120050000
+    },
+    {
+     "label": "adj_Et",
+     "bs": 128,
+     "ms": {
+      "128": 1.5446399450302124,
+      "256": 1.605407953262329,
+      "512": 1.7047040462493896,
+      "1024": 1.925536036491394
+     },
+     "count": 120050000
+    },
+    {
+     "label": "rev_h",
+     "bs": 256,
+     "ms": {
+      "128": 0.42876800894737244,
+      "256": 0.4127039909362793,
+      "512": 0.417279988527298,
+      "1024": 0.4570240080356598
+     },
+     "count": 33614000
+    },
+    {
+     "label": "rev_eg",
+     "bs": 128,
+     "ms": {
+      "128": 0.7071679830551147,
+      "256": 0.7073919773101807,
+      "512": 0.7255679965019226,
+      "1024": 0.7471680045127869
+     },
+     "count": 33614000
+    },
+    {
+     "label": "adj_one",
+     "bs": 128,
+     "ms": {
+      "128": 4.980576038360596,
+      "256": 5.2585601806640625,
+      "512": 7.27023983001709,
+      "1024": 7.777120113372803
+     },
+     "count": 120050000
+    }
+   ],
+   "check_on": {
+    "nograd_fields_equal": true,
+    "fields": {
+     "equal": true,
+     "max_abs": 0.0,
+     "rel_l2": 0.0,
+     "ref_max": 5.6950916659177005e-15
+    },
+    "grad": {
+     "equal": false,
+     "max_abs": 5.409761206096801e-21,
+     "rel_l2": 3.9668657336733304e-07,
+     "ref_max": 1.0294660564009843e-14
+    }
+   },
+   "speedup_on": {
+    "forward": 1.0224245617724903,
+    "adjoint_call": 1.3355404417256065,
+    "backward": 1.560743135246364
+   },
+   "check_eh": {
+    "nograd_fields_equal": true,
+    "fields": {
+     "equal": true,
+     "max_abs": 0.0,
+     "rel_l2": 0.0,
+     "ref_max": 5.6950916659177005e-15
+    },
+    "grad": {
+     "equal": false,
+     "max_abs": 5.409761206096801e-21,
+     "rel_l2": 3.9668657336733304e-07,
+     "ref_max": 1.0294660564009843e-14
+    }
+   },
+   "speedup_eh": {
+    "forward": 0.8679229663481355,
+    "adjoint_call": 1.2370780331050308,
+    "backward": 1.5564766832626729
+   },
+   "check_adj": {
+    "nograd_fields_equal": true,
+    "fields": {
+     "equal": true,
+     "max_abs": 0.0,
+     "rel_l2": 0.0,
+     "ref_max": 5.6950916659177005e-15
+    },
+    "grad": {
+     "equal": false,
+     "max_abs": 5.409761206096801e-21,
+     "rel_l2": 3.9668657336733304e-07,
+     "ref_max": 1.0294660564009843e-14
+    }
+   },
+   "speedup_adj": {
+    "forward": 1.0189810570349667,
+    "adjoint_call": 1.1610417454090136,
+    "backward": 1.229231058477032
+   },
+   "check_all": {
+    "nograd_fields_equal": true,
+    "fields": {
+     "equal": true,
+     "max_abs": 0.0,
+     "rel_l2": 0.0,
+     "ref_max": 5.6950916659177005e-15
+    },
+    "grad": {
+     "equal": false,
+     "max_abs": 5.409761206096801e-21,
+     "rel_l2": 3.9668657336733304e-07,
+     "ref_max": 1.0294660564009843e-14
+    }
+   },
+   "speedup_all": {
+    "forward": 0.8633040194996386,
+    "adjoint_call": 1.0717960890427718,
+    "backward": 1.2003992820296432
+   }
+  },
+  "data/fig2_update/seam_200um.json": {
+   "source": "data\\fig3_slab\\compare_both\\fig3_data.npz",
+   "source_sha256": "94bc8cbf6b3ee26ff27e989b0b5663fda7315c95654c7dc4ff51ad9060a89981",
+   "lam_nm": [
+    450,
+    540,
+    635
+   ],
+   "bin_edges_um": [
+    0.0,
+    0.5,
+    1.0,
+    1.5,
+    2.0,
+    2.5,
+    3.0,
+    3.5,
+    4.0,
+    4.5,
+    5.0,
+    5.5,
+    6.0,
+    6.5,
+    7.0,
+    7.5
+   ],
+   "metric": "sqrt(mean |dT|^2) / sqrt(mean |T_slab|^2) per bin, pooled over the three wavelengths",
+   "runs": {
+    "tile0.9": {
+     "overlap_um": 0.9,
+     "core_um": 19.0,
+     "seam_lattice_origin_um": -100.0,
+     "rms_relative_error": [
+      0.1335347552248108,
+      0.08438190175258431,
+      0.06196677337625723,
+      0.048636494294246005,
+      0.03917366946033344,
+      0.03241318790070522,
+      0.027282558367547075,
+      0.023654630251723617,
+      0.020626175009433787,
+      0.018044382977556367,
+      0.015663460935403706,
+      0.01367391339473016,
+      0.012093797714518226,
+      0.010555508900672122,
+      0.008962787695807157
+     ],
+     "cells_per_bin": [
+      153417,
+      145752,
+      137694,
+      129600,
+      121380,
+      112998,
+      104628,
+      96270,
+      87936,
+      79584,
+      71214,
+      62832,
+      54504,
+      46152,
+      37638
+     ],
+     "whole_aperture_rms_relative_error": 0.058417875319719315
+    },
+    "tile3.6": {
+     "overlap_um": 3.6,
+     "core_um": 15.0,
+     "seam_lattice_origin_um": -100.0,
+     "rms_relative_error": [
+      0.02946529252915516,
+      0.025140280334246798,
+      0.021836576977666087,
+      0.019016348747015008,
+      0.016800761155830332,
+      0.01446456674439629,
+      0.012480010672531272,
+      0.010872568707093947,
+      0.009179180833903415,
+      0.0076953332813457205,
+      0.005818143449318121,
+      0.003828374111999002,
+      0.001991922257459433,
+      0.0007977770305905183,
+      0.00036184477292703206
+     ],
+     "cells_per_bin": [
+      193836,
+      180909,
+      167730,
+      154434,
+      141078,
+      127584,
+      114018,
+      100488,
+      86940,
+      73614,
+      60132,
+      46839,
+      33474,
+      20124,
+      6756
+     ],
+     "whole_aperture_rms_relative_error": 0.01872999593615532
+    }
+   }
+  },
+  "data/fig2_update/fig2_update.json": {
+   "sources": "Collect every number used by the Fig. 2 (c, d) update and the cost paragraph of main.tex into one JSON.\n\nSources\n  data/fdtdx_adjoint_scaling/summary.json + raw/out/*.json   TorchFDTD and FDTDX gradients of N x N x 125 tiles, H200\n  data/fig3_slab/slab_lens/meta.json                     slab-decomposed single domain, 200 um lens, 4 x H100\n  data/fig3_slab/tiled_o0.9/phase_events.rank*.jsonl      tiles with 0.9 um overlaps, same lens, same GPUs\n  data/fig3_slab/tiled_o0.9.log                          eval wall time\n  data/h200_unify/a5/fit.json                         single-domain forward + reverse memory, production tile\n  manuscript/supplementary.tex (tab:overlap)                 50 nm, 30 um test: full domain 5.80 GB, tiles 2.86-3.83 GB\n  data/fdtdx_adjoint_scaling/raw/out/nvidia_smi.csv          H200 memory\nOutput: data/fig2_update/fig2_update.json\n",
+   "tile_gradients_h200": [
+    {
+     "series": "fdtdx_checkpointed8",
+     "N": 256,
+     "cells": 8192000,
+     "steps": 1200,
+     "lam_nm": [
+      450,
+      540,
+      635
+     ],
+     "shape": [
+      256,
+      256,
+      125
+     ],
+     "status": "ok",
+     "time_to_gradient_s": 41.42929969727993,
+     "peak_alloc_GiB": 20.15282440185547,
+     "xla_required_GiB": 19.351467824541032,
+     "device": "NVIDIA H200",
+     "relL2_vs_torchfdtd": 0.024356401640137762,
+     "cos_vs_torchfdtd": 0.9997040097389148
+    },
+    {
+     "series": "fdtdx_checkpointed8",
+     "N": 512,
+     "cells": 32768000,
+     "steps": 1200,
+     "lam_nm": [
+      450,
+      540,
+      635
+     ],
+     "shape": [
+      512,
+      512,
+      125
+     ],
+     "status": "ok",
+     "time_to_gradient_s": 163.80190998781472,
+     "peak_alloc_GiB": 79.74808096885681,
+     "xla_required_GiB": 77.40610957797617,
+     "device": "NVIDIA H200",
+     "relL2_vs_torchfdtd": 0.031069078276741918,
+     "cos_vs_torchfdtd": 0.9995186222961753
+    },
+    {
+     "series": "fdtdx_checkpointed8",
+     "N": 1040,
+     "cells": 135200000,
+     "steps": 1200,
+     "lam_nm": [
+      450,
+      540,
+      635
+     ],
+     "shape": [
+      1040,
+      1040,
+      125
+     ],
+     "status": "OOM: allocate 308.72GiB with allocator GPU_0_bfc on device 0. [tf",
+     "time_to_gradient_s": null,
+     "peak_alloc_GiB": null,
+     "xla_required_GiB": 319.3764846390113,
+     "device": "NVIDIA H200",
+     "relL2_vs_torchfdtd": null,
+     "cos_vs_torchfdtd": null
+    },
+    {
+     "series": "fdtdx_reversible",
+     "N": 256,
+     "cells": 8192000,
+     "steps": 1200,
+     "lam_nm": [
+      450,
+      540,
+      635
+     ],
+     "shape": [
+      256,
+      256,
+      125
+     ],
+     "status": "ok",
+     "time_to_gradient_s": 5.842096226289868,
+     "peak_alloc_GiB": 10.440843105316162,
+     "xla_required_GiB": 9.696624998003244,
+     "device": "NVIDIA H200",
+     "relL2_vs_torchfdtd": 0.02435640386461947,
+     "cos_vs_torchfdtd": 0.9997040096510648
+    },
+    {
+     "series": "fdtdx_reversible",
+     "N": 512,
+     "cells": 32768000,
+     "steps": 1200,
+     "lam_nm": [
+      450,
+      540,
+      635
+     ],
+     "shape": [
+      512,
+      512,
+      125
+     ],
+     "status": "ok",
+     "time_to_gradient_s": 22.108171011321247,
+     "peak_alloc_GiB": 40.39937448501587,
+     "xla_required_GiB": 38.0456947311759,
+     "device": "NVIDIA H200",
+     "relL2_vs_torchfdtd": 0.03106907615152928,
+     "cos_vs_torchfdtd": 0.9995186223304754
+    },
+    {
+     "series": "fdtdx_reversible",
+     "N": 768,
+     "cells": 73728000,
+     "steps": 1200,
+     "lam_nm": [
+      450,
+      540,
+      635
+     ],
+     "shape": [
+      768,
+      768,
+      125
+     ],
+     "status": "ok",
+     "time_to_gradient_s": 53.94485461479053,
+     "peak_alloc_GiB": 91.69865703582764,
+     "xla_required_GiB": 86.42492689937353,
+     "device": "NVIDIA H200",
+     "relL2_vs_torchfdtd": 0.03897247516645727,
+     "cos_vs_torchfdtd": 0.9992470342149079
+    },
+    {
+     "series": "fdtdx_reversible",
+     "N": 1040,
+     "cells": 135200000,
+     "steps": 1200,
+     "lam_nm": [
+      450,
+      540,
+      635
+     ],
+     "shape": [
+      1040,
+      1040,
+      125
+     ],
+     "status": "OOM: allocate 91.83GiB with allocator GPU_0_bfc on device 0. [tf-",
+     "time_to_gradient_s": null,
+     "peak_alloc_GiB": null,
+     "xla_required_GiB": 160.501757373102,
+     "device": "NVIDIA H200",
+     "relL2_vs_torchfdtd": null,
+     "cos_vs_torchfdtd": null
+    },
+    {
+     "series": "torchfdtd_device",
+     "N": 256,
+     "cells": 8192000,
+     "steps": 1200,
+     "lam_nm": [
+      450,
+      540,
+      635
+     ],
+     "shape": [
+      256,
+      256,
+      125
+     ],
+     "status": "ok",
+     "time_to_gradient_s": 0.8596863178536296,
+     "peak_alloc_GiB": 3.4743757247924805,
+     "tile_um": 3.32,
+     "over_um": 0.9
+    },
+    {
+     "series": "torchfdtd_device",
+     "N": 512,
+     "cells": 32768000,
+     "steps": 1200,
+     "lam_nm": [
+      450,
+      540,
+      635
+     ],
+     "shape": [
+      512,
+      512,
+      125
+     ],
+     "status": "ok",
+     "time_to_gradient_s": 3.101391532458365,
+     "peak_alloc_GiB": 9.218964099884033,
+     "tile_um": 8.44,
+     "over_um": 0.9
+    },
+    {
+     "series": "torchfdtd_device",
+     "N": 640,
+     "cells": 51200000,
+     "steps": 1200,
+     "lam_nm": [
+      450,
+      540,
+      635
+     ],
+     "shape": [
+      640,
+      640,
+      125
+     ],
+     "status": "ok",
+     "time_to_gradient_s": 4.788003608584404,
+     "peak_alloc_GiB": 14.364762783050537,
+     "tile_um": 11.0,
+     "over_um": 0.9
+    },
+    {
+     "series": "torchfdtd_device",
+     "N": 768,
+     "cells": 73728000,
+     "steps": 1200,
+     "lam_nm": [
+      450,
+      540,
+      635
+     ],
+     "shape": [
+      768,
+      768,
+      125
+     ],
+     "status": "ok",
+     "time_to_gradient_s": 6.867367154918611,
+     "peak_alloc_GiB": 20.66563367843628,
+     "tile_um": 13.56,
+     "over_um": 0.9
+    },
+    {
+     "series": "torchfdtd_device",
+     "N": 1040,
+     "cells": 135200000,
+     "steps": 1200,
+     "lam_nm": [
+      450,
+      540,
+      635
+     ],
+     "shape": [
+      1040,
+      1040,
+      125
+     ],
+     "status": "ok",
+     "time_to_gradient_s": 12.530494532547891,
+     "peak_alloc_GiB": 36.967548847198486,
+     "tile_um": 19.0,
+     "over_um": 0.9
+    },
+    {
+     "series": "torchfdtd_host",
+     "N": 256,
+     "cells": 8192000,
+     "steps": 1200,
+     "lam_nm": [
+      450,
+      540,
+      635
+     ],
+     "shape": [
+      256,
+      256,
+      125
+     ],
+     "status": "ok",
+     "time_to_gradient_s": 1.5448702536523342,
+     "peak_alloc_GiB": 1.2408409118652344,
+     "tile_um": 3.32,
+     "over_um": 0.9
+    },
+    {
+     "series": "torchfdtd_host",
+     "N": 512,
+     "cells": 32768000,
+     "steps": 1200,
+     "lam_nm": [
+      450,
+      540,
+      635
+     ],
+     "shape": [
+      512,
+      512,
+      125
+     ],
+     "status": "ok",
+     "time_to_gradient_s": 5.849596854299307,
+     "peak_alloc_GiB": 4.788465976715088,
+     "tile_um": 8.44,
+     "over_um": 0.9
+    },
+    {
+     "series": "torchfdtd_host",
+     "N": 640,
+     "cells": 51200000,
+     "steps": 1200,
+     "lam_nm": [
+      450,
+      540,
+      635
+     ],
+     "shape": [
+      640,
+      640,
+      125
+     ],
+     "status": "ok",
+     "time_to_gradient_s": 8.604183097369969,
+     "peak_alloc_GiB": 7.433133125305176,
+     "tile_um": 11.0,
+     "over_um": 0.9
+    },
+    {
+     "series": "torchfdtd_host",
+     "N": 768,
+     "cells": 73728000,
+     "steps": 1200,
+     "lam_nm": [
+      450,
+      540,
+      635
+     ],
+     "shape": [
+      768,
+      768,
+      125
+     ],
+     "status": "ok",
+     "time_to_gradient_s": 12.705789885483682,
+     "peak_alloc_GiB": 10.681767463684082,
+     "tile_um": 13.56,
+     "over_um": 0.9
+    },
+    {
+     "series": "torchfdtd_host",
+     "N": 1040,
+     "cells": 135200000,
+     "steps": 1200,
+     "lam_nm": [
+      450,
+      540,
+      635
+     ],
+     "shape": [
+      1040,
+      1040,
+      125
+     ],
+     "status": "ok",
+     "time_to_gradient_s": 23.51888540200889,
+     "peak_alloc_GiB": 18.65470600128174,
+     "tile_um": 19.0,
+     "over_um": 0.9
+    }
+   ],
+   "fdtdx_vs_torchfdtd_gradient": {
+    "256": {
+     "relL2": 0.02435640386461947,
+     "cosine": 0.9997040096510648
+    },
+    "512": {
+     "relL2": 0.03106907615152928,
+     "cosine": 0.9995186223304754
+    },
+    "768": {
+     "relL2": 0.03897247516645727,
+     "cosine": 0.9992470342149079
+    }
+   },
+   "h200_memory": {
+    "MiB": 143771.0,
+    "GiB": 140.4013671875,
+    "GB": 150.754820096,
+    "nominal_GB": 141
+   },
+   "lens200_forward_4xH100": {
+    "slab": {
+     "device": "NVIDIA H100 80GB HBM3",
+     "world": 4,
+     "global_shape": [
+      5113,
+      5113,
+      125
+     ],
+     "domain": "D4 quarter",
+     "steps": 1200,
+     "lam": "450,540,635",
+     "run_s_per_rank": [
+      202.21147274971008,
+      202.2151279449463,
+      202.21505093574524,
+      202.1929931640625
+     ],
+     "peak_GiB_per_rank": [
+      51.548604011535645,
+      51.548604011535645,
+      51.548604011535645,
+      51.690003871917725
+     ],
+     "run_s_max": 202.2151279449463,
+     "peak_GiB_rank0": 51.548604011535645,
+     "peak_GiB_max": 51.690003871917725
+    },
+    "tiles": {
+     "device": "NVIDIA H100 80GB HBM3",
+     "tiles": 106,
+     "core_um": 19.0,
+     "overlap_um": 0.9,
+     "shape": [
+      1040,
+      1040,
+      125
+     ],
+     "steps": 1200,
+     "lam_nm": [
+      450,
+      540,
+      635
+     ],
+     "domain": "whole aperture",
+     "ranks": [
+      {
+       "rank": 0,
+       "tiles": 26,
+       "tile_solution_s": 200.30050918273628,
+       "peak_alloc_GiB": null,
+       "peak_reserved_GiB": null
+      },
+      {
+       "rank": 1,
+       "tiles": 26,
+       "tile_solution_s": 199.90488479100168,
+       "peak_alloc_GiB": 9.944785594940186,
+       "peak_reserved_GiB": 10.701171875
+      },
+      {
+       "rank": 2,
+       "tiles": 27,
+       "tile_solution_s": 207.53834039811045,
+       "peak_alloc_GiB": 9.9460768699646,
+       "peak_reserved_GiB": 10.701171875
+      },
+      {
+       "rank": 3,
+       "tiles": 27,
+       "tile_solution_s": 207.2959360536188,
+       "peak_alloc_GiB": 9.9460768699646,
+       "peak_reserved_GiB": 10.701171875
+      }
+     ],
+     "peak_alloc_GiB_max": 9.9460768699646,
+     "note_peak": "rank 0 telemetry carries no allocation record",
+     "tile_solution_s_mean": 203.7599176063668,
+     "tile_solution_s_max": 207.53834039811045,
+     "eval_wall_s": 214.0
+    }
+   },
+   "adjoint_memory_probe": {
+    "bytes_per_cell_largest": 315.3414314666667,
+    "bytes_per_cell_marginal": 314.93467428571427,
+    "domains_um": "8 to 24 (device trace)",
+    "production_tile": {
+     "name": "L20p8_s1200_l3",
+     "nx": 1040,
+     "nz": 125,
+     "cells": 135200000,
+     "steps": 1200,
+     "nlam": 3,
+     "peak_GiB": 39.72312831878662,
+     "edge_um": 20.8
+    },
+    "extrapolation_TB": {
+     "d200_quarter": 1.0264600516432065,
+     "s150_full": 2.2616806776849194
+    }
+   },
+   "test_30um_50nm": {
+    "full_GB": 5.85,
+    "tiles_GB_by_overlap": {
+     "0.5": 2.9,
+     "1.0": 3.21,
+     "1.5": 3.53,
+     "2.0": 3.87
+    },
+    "ratio_full_over_tiles": {
+     "0.5": 2.0172413793103448,
+     "1.0": 1.822429906542056,
+     "1.5": 1.6572237960339944,
+     "2.0": 1.511627906976744
+    }
+   },
+   "abstract_ratio_source": {
+    "note": "2.4 = 33.8 GB / 14.0 GB of the deleted 20 nm production-mesh test; the 50 nm test gives 1.5 to 2.0",
+    "deleted_20nm_ratio": 2.414285714285714
+   }
+  },
+  "data/fused_kernel_bench/summary.json": {
+   "fused": {
+    "gpu": "NVIDIA H200",
+    "shape": [
+     1040,
+     1040,
+     125
+    ],
+    "cells": 135200000,
+    "steps": 512,
+    "reps": 3,
+    "interval_z": [
+     13,
+     111
+    ],
+    "interval_cells": 107078400,
+    "forward_ms_per_step": 4.368619495835446,
+    "forward_gcell_per_s": 30.947991723445945,
+    "forward_eff_bw_tb_s": 2.5996313047694595,
+    "forward_eff_bw_pct": 54.15898551603041,
+    "forward_wall_s": 3.279472379013896,
+    "forward_peak_gib": 9.952203273773193,
+    "recorded_forward_ms_per_step": 4.618809175553906,
+    "reverse_ms_per_step": 10.465329837643367,
+    "reverse_min_bytes_per_step": 26776089600,
+    "reverse_eff_bw_tb_s": 2.5585519057113224,
+    "reverse_eff_bw_pct": 53.30316470231922,
+    "gradient_wall_s": 10.882577197160572,
+    "gradient_loops_s": 7.723079174757004,
+    "gradient_peak_gib": 25.923677444458008,
+    "forward_loop_s_all": [
+     2.2419918817467988,
+     2.2367331818677485,
+     2.2364221094176173
+    ],
+    "reverse_loop_s_all": [
+     5.355636516120285,
+     5.358248876873404,
+     5.360084334854037
+    ],
+    "gradient_wall_s_all": [
+     11.159390011802316,
+     10.706108178943396,
+     10.882577197160572
+    ],
+    "profile_forward_kernels_per_step": 10.51171875,
+    "profile_forward_kernel_ms_per_step": 4.36457626757811,
+    "profile_gradient_kernels_per_step": 29.044921875,
+    "profile_gradient_kernel_ms_per_step": 15.204041187499893
+   },
+   "unfused": {
+    "gpu": "NVIDIA H200",
+    "shape": [
+     1040,
+     1040,
+     125
+    ],
+    "cells": 135200000,
+    "steps": 512,
+    "reps": 3,
+    "interval_z": [
+     13,
+     111
+    ],
+    "interval_cells": 107078400,
+    "forward_ms_per_step": 37.001516892814834,
+    "forward_gcell_per_s": 3.653904254564599,
+    "forward_eff_bw_tb_s": 0.3069279573834263,
+    "forward_eff_bw_pct": 6.394332445488048,
+    "forward_wall_s": 20.047761291265488,
+    "forward_peak_gib": 14.664732933044434,
+    "recorded_forward_ms_per_step": 37.2374248554479,
+    "reverse_ms_per_step": 85.30420276565565,
+    "reverse_min_bytes_per_step": 26776089600,
+    "reverse_eff_bw_tb_s": 0.3138894536481188,
+    "reverse_eff_bw_pct": 6.539363617669143,
+    "gradient_wall_s": 63.824728074949235,
+    "gradient_loops_s": 62.741313342005014,
+    "gradient_peak_gib": 32.34115505218506,
+    "forward_loop_s_all": [
+     18.944776649121195,
+     18.945369362365454,
+     18.938409776892513
+    ],
+    "reverse_loop_s_all": [
+     43.67575181601569,
+     43.703491965308785,
+     43.6745809786953
+    ],
+    "gradient_wall_s_all": [
+     63.824728074949235,
+     63.85858710715547,
+     63.77374961273745
+    ],
+    "profile_forward_kernels_per_step": 151.51171875,
+    "profile_forward_kernel_ms_per_step": 36.92252626953195,
+    "profile_gradient_kernels_per_step": 333.02734375,
+    "profile_gradient_kernel_ms_per_step": 123.34005858398285
+   },
+   "prod": {
+    "gpu": "NVIDIA H200",
+    "shape": [
+     1040,
+     1040,
+     125
+    ],
+    "cells": 135200000,
+    "steps": 512,
+    "reps": 3,
+    "interval_z": [
+     45,
+     79
+    ],
+    "interval_cells": 37856000,
+    "forward_ms_per_step": 4.2443446754987235,
+    "forward_gcell_per_s": 31.854151897810603,
+    "forward_eff_bw_tb_s": 2.675748759416091,
+    "forward_eff_bw_pct": 55.74476582116856,
+    "forward_wall_s": 2.298974378965795,
+    "forward_peak_gib": 9.990235805511475,
+    "recorded_forward_ms_per_step": 4.388870113871235,
+    "reverse_ms_per_step": 5.92664609393978,
+    "reverse_min_bytes_per_step": 15899520000,
+    "reverse_eff_bw_tb_s": 2.682717973704868,
+    "reverse_eff_bw_pct": 55.88995778551809,
+    "gradient_wall_s": 5.426416262052953,
+    "gradient_loops_s": 5.28154429839924,
+    "gradient_peak_gib": 25.896507740020752,
+    "forward_loop_s_all": [
+     2.1731044738553464,
+     2.173146227840334,
+     2.1715690190903842
+    ],
+    "reverse_loop_s_all": [
+     3.0435939538292587,
+     3.0344428000971675,
+     3.0342669333331287
+    ],
+    "gradient_wall_s_all": [
+     5.436031043995172,
+     5.426416262052953,
+     5.423076558392495
+    ],
+    "profile_forward_kernels_per_step": 10.50390625,
+    "profile_forward_kernel_ms_per_step": 4.2252773984374965,
+    "profile_gradient_kernels_per_step": 22.923828125,
+    "profile_gradient_kernel_ms_per_step": 10.3728713105469
+   },
+   "speedup_fused_over_unfused": {
+    "forward": 8.469842001137417,
+    "recorded_forward": 8.06212671710609,
+    "reverse": 8.151124148884433,
+    "gradient_loops": 8.123872864993526,
+    "gradient_wall": 5.864854153444652
+   },
+   "agreement": {
+    "full_fused vs full_unfused": {
+     "fields_fwd.pt": 0.0,
+     "fields_grad.pt": 0.0,
+     "grad.pt": 2.690119686772923e-07,
+     "grad_cosine": 0.9999999999998205
+    },
+    "full_fused vs full_prod": {
+     "fields_fwd.pt": 0.0,
+     "fields_grad.pt": 0.0,
+     "grad.pt": 2.855191574115331e-07,
+     "grad_cosine": 0.9999999999998062
+    }
+   }
+  },
+  "data/fig2_update/kernels_h200.json": {
+   "source": "data\\fused_kernel_bench\\raw\\full_prod\\bench.json",
+   "source_sha256": "a62d9c117420e7af3fc083f04d2cdf83031ca3a43ae490808a5f0e2b32502396",
+   "gpu": "NVIDIA H200",
+   "shape": [
+    1040,
+    1040,
+    125
+   ],
+   "steps": 512,
+   "policy": "fused kernels, reverse-sweep policy (prod)",
+   "reconstruction_interval_z": [
+    45,
+    79
+   ],
+   "forward_ms_per_step": {
+    "yee": 4.023324613281253,
+    "other": 0.2019527851562435
+   },
+   "reverse_ms_per_step": {
+    "transposed": 3.7367333613281373,
+    "reconstruction": 2.031503669921877,
+    "other": 0.3832862050781465
+   }
+  }
+ },
+ "references": {}
+}

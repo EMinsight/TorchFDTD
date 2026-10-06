@@ -1,0 +1,66 @@
+source,key,value
+data/memory_schemes/memschemes.json,description,"Ways of supplying the forward fields to the reverse sweep for the production tile (Supplementary Table 1). Computed from the tile shape, single precision; checkpoint state = six field components plus four CPML memory variables per cell in the two 12-cell z faces."
+data/memory_schemes/memschemes.json,tile[0],1040
+data/memory_schemes/memschemes.json,tile[1],1040
+data/memory_schemes/memschemes.json,tile[2],125
+data/memory_schemes/memschemes.json,steps,1200
+data/memory_schemes/memschemes.json,cpml_cells,12
+data/memory_schemes/memschemes.json,design_layers,35
+data/memory_schemes/memschemes.json,lossless_layers,99
+data/memory_schemes/memschemes.json,checkpoint_state_bytes,3660134400
+data/memory_schemes/memschemes.json,binomial_C,8
+data/memory_schemes/memschemes.json,binomial_max_recomputations,5
+data/memory_schemes/memschemes.json,rows[0].scheme,"full forward history, whole tile"
+data/memory_schemes/memschemes.json,rows[0].device_bytes,3893760000000
+data/memory_schemes/memschemes.json,rows[0].host_bytes,0
+data/memory_schemes/memschemes.json,rows[0].extra_forward,none
+data/memory_schemes/memschemes.json,rows[0].gradient,exact
+data/memory_schemes/memschemes.json,rows[0].device_GB,3893.76
+data/memory_schemes/memschemes.json,rows[0].host_GB,0.0
+data/memory_schemes/memschemes.json,rows[1].scheme,electric history of the design layers
+data/memory_schemes/memschemes.json,rows[1].device_bytes,545126400000
+data/memory_schemes/memschemes.json,rows[1].host_bytes,0
+data/memory_schemes/memschemes.json,rows[1].extra_forward,none
+data/memory_schemes/memschemes.json,rows[1].gradient,exact
+data/memory_schemes/memschemes.json,rows[1].device_GB,545.13
+data/memory_schemes/memschemes.json,rows[1].host_GB,0.0
+data/memory_schemes/memschemes.json,rows[2].scheme,binomial checkpoints C=8
+data/memory_schemes/memschemes.json,rows[2].device_bytes,29281075200
+data/memory_schemes/memschemes.json,rows[2].host_bytes,0
+data/memory_schemes/memschemes.json,rows[2].extra_forward,<= 5 per step
+data/memory_schemes/memschemes.json,rows[2].gradient,exact
+data/memory_schemes/memschemes.json,rows[2].note,or the same amount in host memory
+data/memory_schemes/memschemes.json,rows[2].device_GB,29.28
+data/memory_schemes/memschemes.json,rows[2].host_GB,0.0
+data/memory_schemes/memschemes.json,rows[3].scheme,"recorded interfaces, 99 lossless layers"
+data/memory_schemes/memschemes.json,rows[3].device_bytes,23336601600
+data/memory_schemes/memschemes.json,rows[3].host_bytes,0
+data/memory_schemes/memschemes.json,rows[3].extra_forward,none
+data/memory_schemes/memschemes.json,rows[3].gradient,round-off
+data/memory_schemes/memschemes.json,rows[3].device_GB,23.34
+data/memory_schemes/memschemes.json,rows[3].host_GB,0.0
+data/memory_schemes/memschemes.json,rows[4].scheme,"recorded interfaces, 35 design layers"
+data/memory_schemes/memschemes.json,rows[4].device_bytes,21675264000
+data/memory_schemes/memschemes.json,rows[4].host_bytes,0
+data/memory_schemes/memschemes.json,rows[4].extra_forward,none
+data/memory_schemes/memschemes.json,rows[4].gradient,round-off
+data/memory_schemes/memschemes.json,rows[4].device_GB,21.68
+data/memory_schemes/memschemes.json,rows[4].host_GB,0.0
+data/memory_schemes/memschemes.json,rows[5].scheme,"recorded interfaces, 35 design layers, planes in host memory"
+data/memory_schemes/memschemes.json,rows[5].device_bytes,2016102400
+data/memory_schemes/memschemes.json,rows[5].host_bytes,20766720000
+data/memory_schemes/memschemes.json,rows[5].extra_forward,none
+data/memory_schemes/memschemes.json,rows[5].gradient,round-off
+data/memory_schemes/memschemes.json,rows[5].device_GB,2.02
+data/memory_schemes/memschemes.json,rows[5].host_GB,20.77
+data/memory_schemes/memschemes.json,measured_h200.source,"data/fdtdx_adjoint_scaling/raw/out/tfd_{device,host}_N1040.json"
+data/memory_schemes/memschemes.json,measured_h200.device.peak_alloc_GiB,36.967548847198486
+data/memory_schemes/memschemes.json,measured_h200.device.median_total_s,12.530494532547891
+data/memory_schemes/memschemes.json,measured_h200.device.reconstruction_interval_z[0],45
+data/memory_schemes/memschemes.json,measured_h200.device.reconstruction_interval_z[1],79
+data/memory_schemes/memschemes.json,measured_h200.device.initial_relative_l2,5.667759732974482e-07
+data/memory_schemes/memschemes.json,measured_h200.host.peak_alloc_GiB,18.65470600128174
+data/memory_schemes/memschemes.json,measured_h200.host.median_total_s,23.51888540200889
+data/memory_schemes/memschemes.json,measured_h200.host.reconstruction_interval_z[0],45
+data/memory_schemes/memschemes.json,measured_h200.host.reconstruction_interval_z[1],79
+data/memory_schemes/memschemes.json,measured_h200.host.initial_relative_l2,5.667759732974482e-07

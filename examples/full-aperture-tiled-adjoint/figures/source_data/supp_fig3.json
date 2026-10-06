@@ -1,0 +1,646 @@
+{
+ "arrays_from": [],
+ "records": {
+  "data/h200_unify/raw/a3_record_rep1.json": {
+   "stage": "complete",
+   "pilot": true,
+   "production_equivalent": false,
+   "scope": "FA pilot adapting TorchFDTD tiled_stitching to a saved freeform density.\n\nThis CPML, 50-nm-mesh pilot is not validation of the production periodic tiles.\nAll fields and gradients are saved before figure generation.\n",
+   "project": {
+    "schema_version": 1,
+    "name": "Untitled",
+    "region": {
+     "dimension": "3d",
+     "size": [
+      31.0,
+      31.0,
+      3.0
+     ],
+     "mesh": 0.05,
+     "mesh_steps": null,
+     "mesh_coordinates": null,
+     "material_sampling": "cell",
+     "interface_method": "staircase",
+     "subpixel_quadrature": 8,
+     "mesh_type": "uniform",
+     "mesh_max": 0.15,
+     "mesh_grading": 1.25,
+     "mesh_ppw": 24.0,
+     "mesh_auto_refine": true,
+     "mesh_refinements": [],
+     "courant_factor": 0.99,
+     "time_step_override": null,
+     "steps": 600,
+     "run_control": {
+      "auto_shutoff": false,
+      "decay_threshold": 1e-06,
+      "check_interval": 50,
+      "consecutive_checks": 3,
+      "min_steps": 100,
+      "source_tail_amplitude": 1e-08,
+      "after_source_s": 0.0,
+      "divergence_check": true,
+      "growth_limit": 1000000.0,
+      "field_limit": null
+     },
+     "pml_cells": 10,
+     "pml_dispersion": "ade",
+     "boundaries": {
+      "x_min": {
+       "kind": "pml",
+       "layers": null,
+       "sigma_scale": 1.0,
+       "kappa": 1.0,
+       "alpha": 1e-08,
+       "polynomial": 3.0,
+       "alpha_polynomial": 0.0
+      },
+      "x_max": {
+       "kind": "pml",
+       "layers": null,
+       "sigma_scale": 1.0,
+       "kappa": 1.0,
+       "alpha": 1e-08,
+       "polynomial": 3.0,
+       "alpha_polynomial": 0.0
+      },
+      "y_min": {
+       "kind": "pml",
+       "layers": null,
+       "sigma_scale": 1.0,
+       "kappa": 1.0,
+       "alpha": 1e-08,
+       "polynomial": 3.0,
+       "alpha_polynomial": 0.0
+      },
+      "y_max": {
+       "kind": "pml",
+       "layers": null,
+       "sigma_scale": 1.0,
+       "kappa": 1.0,
+       "alpha": 1e-08,
+       "polynomial": 3.0,
+       "alpha_polynomial": 0.0
+      },
+      "z_min": {
+       "kind": "pml",
+       "layers": null,
+       "sigma_scale": 1.0,
+       "kappa": 1.0,
+       "alpha": 1e-08,
+       "polynomial": 3.0,
+       "alpha_polynomial": 0.0
+      },
+      "z_max": {
+       "kind": "pml",
+       "layers": null,
+       "sigma_scale": 1.0,
+       "kappa": 1.0,
+       "alpha": 1e-08,
+       "polynomial": 3.0,
+       "alpha_polynomial": 0.0
+      }
+     },
+     "bloch_phase": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "background_index": 1.0,
+     "backend": "cuda",
+     "memory_mode": "resident",
+     "execution_mode": "auto",
+     "tiling": {
+      "size_um": 20.0,
+      "overlap_um": 2.0,
+      "max_angle_deg": 45.0,
+      "propagation_um": null,
+      "allow_approximate": false
+     },
+     "cuda_kernel": "fused",
+     "cuda_monitor_kernel": "torch",
+     "precision": "float32",
+     "snapshot_interval": 20,
+     "field": "Ez",
+     "slice_axis": "z",
+     "slice_position": 0.0,
+     "complex_display": "real"
+    },
+    "materials": [
+     {
+      "name": "Air",
+      "index": 1.0,
+      "color": "#b7c5d7",
+      "model": "dielectric",
+      "epsilon_tensor": [
+       2.25,
+       2.25,
+       2.25,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "epsilon_inf": 1.0,
+      "plasma_rad_s": 2000000000000000.0,
+      "collision_rad_s": 100000000000000.0,
+      "resonance_rad_s": 2000000000000000.0,
+      "linewidth_rad_s": 100000000000000.0,
+      "delta_epsilon": 1.0,
+      "poles": [],
+      "samples": null,
+      "fit_band_um": null,
+      "fit_dt_s": null,
+      "provenance": null
+     },
+     {
+      "name": "SiO2 (constant n)",
+      "index": 1.444,
+      "color": "#80c4d7",
+      "model": "dielectric",
+      "epsilon_tensor": [
+       2.25,
+       2.25,
+       2.25,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "epsilon_inf": 1.0,
+      "plasma_rad_s": 2000000000000000.0,
+      "collision_rad_s": 100000000000000.0,
+      "resonance_rad_s": 2000000000000000.0,
+      "linewidth_rad_s": 100000000000000.0,
+      "delta_epsilon": 1.0,
+      "poles": [],
+      "samples": null,
+      "fit_band_um": null,
+      "fit_dt_s": null,
+      "provenance": null
+     },
+     {
+      "name": "SiN (constant n)",
+      "index": 2.0,
+      "color": "#69a1e8",
+      "model": "dielectric",
+      "epsilon_tensor": [
+       2.25,
+       2.25,
+       2.25,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "epsilon_inf": 1.0,
+      "plasma_rad_s": 2000000000000000.0,
+      "collision_rad_s": 100000000000000.0,
+      "resonance_rad_s": 2000000000000000.0,
+      "linewidth_rad_s": 100000000000000.0,
+      "delta_epsilon": 1.0,
+      "poles": [],
+      "samples": null,
+      "fit_band_um": null,
+      "fit_dt_s": null,
+      "provenance": null
+     },
+     {
+      "name": "Si (constant n)",
+      "index": 3.48,
+      "color": "#cc8bdc",
+      "model": "dielectric",
+      "epsilon_tensor": [
+       2.25,
+       2.25,
+       2.25,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "epsilon_inf": 1.0,
+      "plasma_rad_s": 2000000000000000.0,
+      "collision_rad_s": 100000000000000.0,
+      "resonance_rad_s": 2000000000000000.0,
+      "linewidth_rad_s": 100000000000000.0,
+      "delta_epsilon": 1.0,
+      "poles": [],
+      "samples": null,
+      "fit_band_um": null,
+      "fit_dt_s": null,
+      "provenance": null
+     }
+    ],
+    "structures": [],
+    "sources": [
+     {
+      "wavelength": 0.54,
+      "pulse": "broadband",
+      "pulse_cycles": 3.0,
+      "time_definition": "wavelength",
+      "pulse_length": 2e-14,
+      "pulse_offset": 5e-14,
+      "signal": null,
+      "wavelength_start": 0.4,
+      "wavelength_stop": 0.7,
+      "optimize_for_short_pulse": true,
+      "eliminate_discontinuities": false,
+      "chirp_bandwidth_hz": 100000000000000.0,
+      "id": "352a2ecee635",
+      "name": "source",
+      "center": [
+       0.0,
+       0.0,
+       -0.85
+      ],
+      "enabled": true,
+      "kind": "plane",
+      "injection": "soft",
+      "normal": "z",
+      "direction": "+",
+      "incident_pml_cells": 96,
+      "size": [
+       31.0,
+       31.0,
+       0.0
+      ],
+      "component": "Ex",
+      "theta": null,
+      "phi": 0.0,
+      "amplitude": 1.0,
+      "phase": 0.0,
+      "use_global_source": false,
+      "extend_through_pml": true
+     }
+    ],
+    "global_source": {
+     "wavelength": 1.55,
+     "pulse": "gaussian",
+     "pulse_cycles": 3.0,
+     "time_definition": "cycles",
+     "pulse_length": 2e-14,
+     "pulse_offset": 5e-14,
+     "signal": null,
+     "wavelength_start": 1.3,
+     "wavelength_stop": 1.8,
+     "optimize_for_short_pulse": true,
+     "eliminate_discontinuities": false,
+     "chirp_bandwidth_hz": 100000000000000.0
+    },
+    "monitors": [
+     {
+      "id": "out",
+      "name": "frequency monitor",
+      "center": [
+       0.0,
+       0.0,
+       0.5
+      ],
+      "enabled": true,
+      "kind": "field",
+      "component": "Ez",
+      "spectrum": {
+       "sampling": "custom",
+       "chebyshev_wavelength": false,
+       "chebyshev_nodes": "roots",
+       "use_source_limits": false,
+       "custom_frequencies_hz": [
+        447451429850746.25,
+        472114107086614.2,
+        499654096666666.7,
+        525951680701754.44,
+        555171218518518.5,
+        587828349019607.9,
+        637856293617021.4,
+        666205462222222.2,
+        713791566666666.8
+       ],
+       "wavelength_start": 1.3,
+       "wavelength_stop": 1.8,
+       "frequency_points": 101,
+       "apodization": "none",
+       "apodization_center": 2e-14,
+       "apodization_time_width": 1e-14
+      },
+      "use_global_monitor": false,
+      "inherit_apodization": true,
+      "time_downsample": 1,
+      "normal": "z",
+      "size": [
+       30.0,
+       30.0,
+       0.0
+      ],
+      "downsample": 1,
+      "downsample_xyz": null,
+      "record_fields": [
+       "Ex",
+       "Ey",
+       "Ez",
+       "Hx",
+       "Hy",
+       "Hz"
+      ],
+      "record_poynting": [
+       "x",
+       "y",
+       "z"
+      ],
+      "record_flux": true,
+      "dft_precision": "field",
+      "spatial_interpolation": "specified"
+     }
+    ],
+    "global_monitor": {
+     "sampling": "frequency",
+     "chebyshev_wavelength": false,
+     "chebyshev_nodes": "roots",
+     "use_source_limits": false,
+     "custom_frequencies_hz": [],
+     "wavelength_start": 1.3,
+     "wavelength_stop": 1.8,
+     "frequency_points": 101,
+     "apodization": "none",
+     "apodization_center": 2e-14,
+     "apodization_time_width": 1e-14
+    },
+    "import_provenance": null,
+    "revision": 0,
+    "content_sha256": null
+   },
+   "mesh_um": 0.05,
+   "footprint_um": 30.0,
+   "tile_um": 10.0,
+   "wavelength_um": [
+    0.67,
+    0.635,
+    0.6,
+    0.57,
+    0.54,
+    0.51,
+    0.47,
+    0.45,
+    0.42
+   ],
+   "independent_variables": 360000,
+   "symmetry": "none",
+   "gpu": "NVIDIA H200",
+   "torch_version": "2.8.0+cu128",
+   "actual_execution": "DifferentiablePlaneSimulation resident fields, two host checkpoints per model",
+   "source_sha256": "56b4e32bd414e44bf0fc6434843d2e1c0e97b0420f863e177c4808e770b4b37a",
+   "results": {
+    "full": {
+     "objective": 17.65958595275879,
+     "forward_seconds": 34.9812991048675,
+     "backward_seconds": 121.40492545603774,
+     "time_to_gradient_seconds": 156.38622456090525,
+     "peak_torch_cuda_allocated_bytes": 5847976960,
+     "peak_torch_cuda_reserved_bytes": 7247757312,
+     "tile_count": 1,
+     "directional_fd": {
+      "delta": 0.005,
+      "adjoint": 82.08644104003906,
+      "central_difference": 82.08198547363281,
+      "relative_error": 5.428190339866061e-05
+     }
+    },
+    "0.5": {
+     "objective": 17.553321838378906,
+     "forward_seconds": 39.783756993943825,
+     "backward_seconds": 117.74876672099344,
+     "time_to_gradient_seconds": 157.53252371493727,
+     "peak_torch_cuda_allocated_bytes": 2901580288,
+     "peak_torch_cuda_reserved_bytes": 3235905536,
+     "tile_count": 9,
+     "complex_field_relative_l2": 0.12442802741171403,
+     "focal_intensity_relative_l2": 0.04603506362343724,
+     "objective_relative_error": 0.006017361599765181,
+     "gradient_relative_l2": 0.04038216015007029,
+     "gradient_cosine": 0.9992014765739441,
+     "field_error_by_seam_distance": [
+      {
+       "distance_um": [
+        0,
+        0.25
+       ],
+       "rms_relative_error": 0.22233068943023682
+      },
+      {
+       "distance_um": [
+        0.25,
+        0.5
+       ],
+       "rms_relative_error": 0.19257000088691711
+      },
+      {
+       "distance_um": [
+        0.5,
+        1.0
+       ],
+       "rms_relative_error": 0.16404111683368683
+      },
+      {
+       "distance_um": [
+        1.0,
+        1.5
+       ],
+       "rms_relative_error": 0.13792386651039124
+      },
+      {
+       "distance_um": [
+        1.5,
+        2.0
+       ],
+       "rms_relative_error": 0.1201850101351738
+      },
+      {
+       "distance_um": [
+        2.0,
+        3.0
+       ],
+       "rms_relative_error": 0.09950600564479828
+      }
+     ]
+    },
+    "1.0": {
+     "objective": 17.593740463256836,
+     "forward_seconds": 44.98328942898661,
+     "backward_seconds": 141.12146872002631,
+     "time_to_gradient_seconds": 186.10475814901292,
+     "peak_torch_cuda_allocated_bytes": 3208816128,
+     "peak_torch_cuda_reserved_bytes": 3873439744,
+     "tile_count": 9,
+     "complex_field_relative_l2": 0.10268423801475221,
+     "focal_intensity_relative_l2": 0.03536113214464623,
+     "objective_relative_error": 0.003728597583097182,
+     "gradient_relative_l2": 0.03339129015674105,
+     "gradient_cosine": 0.9994586706161499,
+     "field_error_by_seam_distance": [
+      {
+       "distance_um": [
+        0,
+        0.25
+       ],
+       "rms_relative_error": 0.16978269815444946
+      },
+      {
+       "distance_um": [
+        0.25,
+        0.5
+       ],
+       "rms_relative_error": 0.15481553971767426
+      },
+      {
+       "distance_um": [
+        0.5,
+        1.0
+       ],
+       "rms_relative_error": 0.1366964727640152
+      },
+      {
+       "distance_um": [
+        1.0,
+        1.5
+       ],
+       "rms_relative_error": 0.1177193745970726
+      },
+      {
+       "distance_um": [
+        1.5,
+        2.0
+       ],
+       "rms_relative_error": 0.10292943567037582
+      },
+      {
+       "distance_um": [
+        2.0,
+        3.0
+       ],
+       "rms_relative_error": 0.08589879423379898
+      }
+     ]
+    },
+    "1.5": {
+     "objective": 17.618125915527344,
+     "forward_seconds": 49.58460053708404,
+     "backward_seconds": 159.2399871898815,
+     "time_to_gradient_seconds": 208.82458772696555,
+     "peak_torch_cuda_allocated_bytes": 3528391168,
+     "peak_torch_cuda_reserved_bytes": 4282384384,
+     "tile_count": 9,
+     "complex_field_relative_l2": 0.08751395703672343,
+     "focal_intensity_relative_l2": 0.029696244880286472,
+     "objective_relative_error": 0.0023477355212265794,
+     "gradient_relative_l2": 0.02891435021124402,
+     "gradient_cosine": 0.9995996356010437,
+     "field_error_by_seam_distance": [
+      {
+       "distance_um": [
+        0,
+        0.25
+       ],
+       "rms_relative_error": 0.14025510847568512
+      },
+      {
+       "distance_um": [
+        0.25,
+        0.5
+       ],
+       "rms_relative_error": 0.12987995147705078
+      },
+      {
+       "distance_um": [
+        0.5,
+        1.0
+       ],
+       "rms_relative_error": 0.11672575026750565
+      },
+      {
+       "distance_um": [
+        1.0,
+        1.5
+       ],
+       "rms_relative_error": 0.1020844429731369
+      },
+      {
+       "distance_um": [
+        1.5,
+        2.0
+       ],
+       "rms_relative_error": 0.08940538763999939
+      },
+      {
+       "distance_um": [
+        2.0,
+        3.0
+       ],
+       "rms_relative_error": 0.07439211755990982
+      }
+     ],
+     "directional_fd": {
+      "delta": 0.005,
+      "adjoint": 82.07659149169922,
+      "central_difference": 82.07206726074219,
+      "relative_error": 5.512510051267273e-05
+     }
+    },
+    "2.0": {
+     "objective": 17.62623405456543,
+     "forward_seconds": 55.471440870082006,
+     "backward_seconds": 178.24758803704754,
+     "time_to_gradient_seconds": 233.71902890712954,
+     "peak_torch_cuda_allocated_bytes": 3874318336,
+     "peak_torch_cuda_reserved_bytes": 4571791360,
+     "tile_count": 9,
+     "complex_field_relative_l2": 0.07577873548563656,
+     "focal_intensity_relative_l2": 0.025333264380560064,
+     "objective_relative_error": 0.001888600235734783,
+     "gradient_relative_l2": 0.024886507098370012,
+     "gradient_cosine": 0.9997069239616394,
+     "field_error_by_seam_distance": [
+      {
+       "distance_um": [
+        0,
+        0.25
+       ],
+       "rms_relative_error": 0.12031279504299164
+      },
+      {
+       "distance_um": [
+        0.25,
+        0.5
+       ],
+       "rms_relative_error": 0.11224823445081711
+      },
+      {
+       "distance_um": [
+        0.5,
+        1.0
+       ],
+       "rms_relative_error": 0.10159474611282349
+      },
+      {
+       "distance_um": [
+        1.0,
+        1.5
+       ],
+       "rms_relative_error": 0.0888889878988266
+      },
+      {
+       "distance_um": [
+        1.5,
+        2.0
+       ],
+       "rms_relative_error": 0.07768527418375015
+      },
+      {
+       "distance_um": [
+        2.0,
+        3.0
+       ],
+       "rms_relative_error": 0.06435968726873398
+      }
+     ]
+    }
+   }
+  }
+ },
+ "references": {}
+}

@@ -1,0 +1,69 @@
+{
+ "files": {
+  "e1_achromat_focus.npz": {
+   "sha256": "bedc3fbb0245968e4000b72167534a2f296c26983722195b0c7e2be997d932e4",
+   "bytes": 1973,
+   "description": "E1 achromatic lens focal definition: common focal point (0, 0, 333.333 um), 9 wavelengths, on-axis S_z normalized by the lossless ideal lens, soft-min q = -8, efficiency disk 1.5 Airy radii",
+   "lam_nm": [
+    420,
+    450,
+    470,
+    510,
+    540,
+    570,
+    600,
+    635,
+    670
+   ],
+   "focal_um": 333.33333333333337,
+   "na_nominal": 0.3,
+   "na_geometric": 0.28734788556634544,
+   "disk_radius_um": [
+    1.3374032637914413,
+    1.432932068347973,
+    1.4966179380523275,
+    1.623989677461036,
+    1.7195184820175675,
+    1.8150472865740992,
+    1.9105760911306306,
+    2.022026363113251,
+    2.133476635095871
+   ]
+  },
+  "e2_parrot_rgb.npz": {
+   "sha256": "9be4f26ecb4d9cba4472f856bef11bc13b321b0a1929bd980c8476e9c334b2ac",
+   "bytes": 9798,
+   "production_note": "production geometry: 150 um square aperture, z = 300 um (objective cfg); the NPZ z_um field (400) is legacy",
+   "description": "E2 RGB hologram target (default): procedural macaw-style parrot on black, red body and head, yellow/green/cyan/blue wing bands, blue and red tail, white eye patch, pale beak, brown branch, linear RGB, 96 x 96 px, 1.25 um pixels, 120 um window at z = 400 um",
+   "lam_nm": [
+    450,
+    540,
+    635
+   ],
+   "channel_of_lam": [
+    "B",
+    "G",
+    "R"
+   ],
+   "linear_channel_mean": [
+    0.12567816840277773,
+    0.06820421006944444,
+    0.05166194661458333
+   ],
+   "zero_background_fraction": 0.7740885416666666,
+   "source": "procedural, no licence"
+  },
+  "e3_cnu_phy_sq100.npz": {
+   "sha256": "079622464d6652bdc4153c98fedae6d442490260db70a01bfaf2c8629e9f13d4",
+   "bytes": 6759,
+   "description": "E3 polarization-switched hologram target: x input -> 'CNU', y input -> 'PHY', DejaVu Sans Bold, equal font size, centred, zero background, 64 x 64 px, 1.25 um pixels, 80 um window; production geometry 100 um square aperture, z = 200 um, 540 nm",
+   "fill_fraction": [
+    0.084,
+    0.077
+   ],
+   "letter_height_px": 20
+  }
+ },
+ "updated_utc": "2026-09-30T17:12:32Z",
+ "note": "the three targets of examples E1-E3; sha256 is checked by src/fa_objectives.py when a target is loaded"
+}

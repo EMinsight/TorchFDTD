@@ -1,0 +1,7 @@
+{
+ "arrays_from": [
+  "data/optics_calibration/calibration.npz"
+ ],
+ "records": {},
+ "references": {}
+}

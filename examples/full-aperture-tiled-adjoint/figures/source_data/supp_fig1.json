@@ -1,0 +1,24 @@
+{
+ "arrays_from": [],
+ "records": {
+  "data/runs_final/e1_d200_h200x8/geometry.json": {
+   "name": "d200",
+   "D_UM": 200.0,
+   "R_AP": 100.0,
+   "F_UM": 333.33333333333337,
+   "OBJ_DIST_UM": 0.0,
+   "PUPIL_GRID": 800,
+   "PITCH_UM": 0.25,
+   "NPX": 10000,
+   "XG0": -100.0,
+   "H10": 10000,
+   "latent_pitch_um": 0.01,
+   "fdtd_pitch_um": 0.02
+  },
+  "launch/common.env": "export FF_LENS=d200 FF_APERTURE_UM=200 FF_FOCAL_UM=333.3333333333 FF_OVER=0.9 FF_ALGO=zonec FF_INIT_DESIGN=w240\nexport FF_L9_DUALPOL=1 FF_L9_ANISO=1 FF_OWNGRAD=0\nexport FF_TRACE=device FF_GPU_GIB=72 FF_HOST_GIB=110\nexport FF_FAST_DIAG=1 FF_FAST_SYNC=1 FF_FAST_NOGRAD=1 FF_FAST_SPEC=1\nexport FF_B200_KERNELS=1 FF_B200_INTERVAL=pil FF_B200_FUSE_EG=1 FF_B200_HYGIENE=1 FF_B200_AUTOTUNE=1 FF_B200_FUSED_EH=0 FF_B200_FUSED_ADJ=0\nexport FA_TILE_SELECT=cells FA_COMPRESS_STEPS=1 FA_SAVE_QUEUE=6\nexport EZC_RMAX=0 EZC_HTDIAG= SM_NO_CARRIER=1\nexport FF_NCCL_TIMEOUT_S=7200 FA_STALL_S=2400\nexport OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 MKL_NUM_THREADS=4 PYTHONUNBUFFERED=1\nexport TORCH_ALLOW_TF32_CUBLAS_OVERRIDE=0 NVIDIA_TF32_OVERRIDE=0\n",
+  "launch/e1.env": "export FA_CASE=e1 FA_DRIVER=zonec_multi.py\nexport FA_OBJECTIVE=e1_achromat FA_LAM_NM=420,450,470,510,540,570,600,635,670\nexport FF_TILE=19\nexport FA_NEUTRAL_CACHE=\"$PKG/neutral/d200_lookup.npz\"\nexport FA_OPT_OFFLOAD=0 FA_RHO_EVERY=10 FA_GRAD_EVERY=10 FA_TKEEP_EVERY=10\nexport FA_STATE_KEEP_EVERY=5\n"
+ },
+ "references": {
+  "e1_layout_d10_quad": "data/e1_live/step_0248.npz (keys d10_quad, d10_shape); same layout as designs/e1_freeform_step0248.npz"
+ }
+}

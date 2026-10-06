@@ -1,0 +1,570 @@
+source,key,value
+data/h200_unify/summary.json,[0].item,A3 tab:overlap
+data/h200_unify/summary.json,[0].quantity,"full time to gradient (s, median of 3)"
+data/h200_unify/summary.json,[0].new_h200,153.42659084917977
+data/h200_unify/summary.json,[0].unit,s
+data/h200_unify/summary.json,[1].item,A3 tab:overlap
+data/h200_unify/summary.json,[1].quantity,full peak allocation (GB)
+data/h200_unify/summary.json,[1].new_h200,5.84797696
+data/h200_unify/summary.json,[1].unit,GB
+data/h200_unify/summary.json,[2].item,A3 tab:overlap
+data/h200_unify/summary.json,[2].quantity,full directional FD rel error
+data/h200_unify/summary.json,[2].new_h200,5.428190339866061e-05
+data/h200_unify/summary.json,[2].unit,
+data/h200_unify/summary.json,[3].item,A3 tab:overlap
+data/h200_unify/summary.json,[3].quantity,"0.5 time to gradient (s, median of 3)"
+data/h200_unify/summary.json,[3].new_h200,164.59495269483887
+data/h200_unify/summary.json,[3].unit,s
+data/h200_unify/summary.json,[4].item,A3 tab:overlap
+data/h200_unify/summary.json,[4].quantity,0.5 peak allocation (GB)
+data/h200_unify/summary.json,[4].new_h200,2.901580288
+data/h200_unify/summary.json,[4].unit,GB
+data/h200_unify/summary.json,[5].item,A3 tab:overlap
+data/h200_unify/summary.json,[5].quantity,0.5 complex_field_relative_l2
+data/h200_unify/summary.json,[5].new_h200,0.12442802741171403
+data/h200_unify/summary.json,[5].unit,
+data/h200_unify/summary.json,[6].item,A3 tab:overlap
+data/h200_unify/summary.json,[6].quantity,0.5 focal_intensity_relative_l2
+data/h200_unify/summary.json,[6].new_h200,0.04603506362343724
+data/h200_unify/summary.json,[6].unit,
+data/h200_unify/summary.json,[7].item,A3 tab:overlap
+data/h200_unify/summary.json,[7].quantity,0.5 objective_relative_error
+data/h200_unify/summary.json,[7].new_h200,0.006017361599765181
+data/h200_unify/summary.json,[7].unit,
+data/h200_unify/summary.json,[8].item,A3 tab:overlap
+data/h200_unify/summary.json,[8].quantity,0.5 gradient_relative_l2
+data/h200_unify/summary.json,[8].new_h200,0.04038216015007029
+data/h200_unify/summary.json,[8].unit,
+data/h200_unify/summary.json,[9].item,A3 tab:overlap
+data/h200_unify/summary.json,[9].quantity,0.5 gradient_cosine
+data/h200_unify/summary.json,[9].new_h200,0.9992014765739441
+data/h200_unify/summary.json,[9].unit,
+data/h200_unify/summary.json,[10].item,A3 tab:overlap
+data/h200_unify/summary.json,[10].quantity,"1.0 time to gradient (s, median of 3)"
+data/h200_unify/summary.json,[10].new_h200,188.85874410090037
+data/h200_unify/summary.json,[10].unit,s
+data/h200_unify/summary.json,[11].item,A3 tab:overlap
+data/h200_unify/summary.json,[11].quantity,1.0 peak allocation (GB)
+data/h200_unify/summary.json,[11].new_h200,3.208816128
+data/h200_unify/summary.json,[11].unit,GB
+data/h200_unify/summary.json,[12].item,A3 tab:overlap
+data/h200_unify/summary.json,[12].quantity,1.0 complex_field_relative_l2
+data/h200_unify/summary.json,[12].new_h200,0.10268423801475221
+data/h200_unify/summary.json,[12].unit,
+data/h200_unify/summary.json,[13].item,A3 tab:overlap
+data/h200_unify/summary.json,[13].quantity,1.0 focal_intensity_relative_l2
+data/h200_unify/summary.json,[13].new_h200,0.03536113214464623
+data/h200_unify/summary.json,[13].unit,
+data/h200_unify/summary.json,[14].item,A3 tab:overlap
+data/h200_unify/summary.json,[14].quantity,1.0 objective_relative_error
+data/h200_unify/summary.json,[14].new_h200,0.003728597583097182
+data/h200_unify/summary.json,[14].unit,
+data/h200_unify/summary.json,[15].item,A3 tab:overlap
+data/h200_unify/summary.json,[15].quantity,1.0 gradient_relative_l2
+data/h200_unify/summary.json,[15].new_h200,0.03339129015674105
+data/h200_unify/summary.json,[15].unit,
+data/h200_unify/summary.json,[16].item,A3 tab:overlap
+data/h200_unify/summary.json,[16].quantity,1.0 gradient_cosine
+data/h200_unify/summary.json,[16].new_h200,0.9994586706161499
+data/h200_unify/summary.json,[16].unit,
+data/h200_unify/summary.json,[17].item,A3 tab:overlap
+data/h200_unify/summary.json,[17].quantity,"1.5 time to gradient (s, median of 3)"
+data/h200_unify/summary.json,[17].new_h200,211.7006970650982
+data/h200_unify/summary.json,[17].unit,s
+data/h200_unify/summary.json,[18].item,A3 tab:overlap
+data/h200_unify/summary.json,[18].quantity,1.5 peak allocation (GB)
+data/h200_unify/summary.json,[18].new_h200,3.528391168
+data/h200_unify/summary.json,[18].unit,GB
+data/h200_unify/summary.json,[19].item,A3 tab:overlap
+data/h200_unify/summary.json,[19].quantity,1.5 complex_field_relative_l2
+data/h200_unify/summary.json,[19].new_h200,0.08751395703672343
+data/h200_unify/summary.json,[19].unit,
+data/h200_unify/summary.json,[20].item,A3 tab:overlap
+data/h200_unify/summary.json,[20].quantity,1.5 focal_intensity_relative_l2
+data/h200_unify/summary.json,[20].new_h200,0.029696244880286472
+data/h200_unify/summary.json,[20].unit,
+data/h200_unify/summary.json,[21].item,A3 tab:overlap
+data/h200_unify/summary.json,[21].quantity,1.5 objective_relative_error
+data/h200_unify/summary.json,[21].new_h200,0.0023477355212265794
+data/h200_unify/summary.json,[21].unit,
+data/h200_unify/summary.json,[22].item,A3 tab:overlap
+data/h200_unify/summary.json,[22].quantity,1.5 gradient_relative_l2
+data/h200_unify/summary.json,[22].new_h200,0.02891435021124402
+data/h200_unify/summary.json,[22].unit,
+data/h200_unify/summary.json,[23].item,A3 tab:overlap
+data/h200_unify/summary.json,[23].quantity,1.5 gradient_cosine
+data/h200_unify/summary.json,[23].new_h200,0.9995996356010437
+data/h200_unify/summary.json,[23].unit,
+data/h200_unify/summary.json,[24].item,A3 tab:overlap
+data/h200_unify/summary.json,[24].quantity,1.5 directional FD rel error
+data/h200_unify/summary.json,[24].new_h200,5.512510051267273e-05
+data/h200_unify/summary.json,[24].unit,
+data/h200_unify/summary.json,[25].item,A3 tab:overlap
+data/h200_unify/summary.json,[25].quantity,"2.0 time to gradient (s, median of 3)"
+data/h200_unify/summary.json,[25].new_h200,233.71902890712954
+data/h200_unify/summary.json,[25].unit,s
+data/h200_unify/summary.json,[26].item,A3 tab:overlap
+data/h200_unify/summary.json,[26].quantity,2.0 peak allocation (GB)
+data/h200_unify/summary.json,[26].new_h200,3.874318336
+data/h200_unify/summary.json,[26].unit,GB
+data/h200_unify/summary.json,[27].item,A3 tab:overlap
+data/h200_unify/summary.json,[27].quantity,2.0 complex_field_relative_l2
+data/h200_unify/summary.json,[27].new_h200,0.07577873548563656
+data/h200_unify/summary.json,[27].unit,
+data/h200_unify/summary.json,[28].item,A3 tab:overlap
+data/h200_unify/summary.json,[28].quantity,2.0 focal_intensity_relative_l2
+data/h200_unify/summary.json,[28].new_h200,0.025333264380560064
+data/h200_unify/summary.json,[28].unit,
+data/h200_unify/summary.json,[29].item,A3 tab:overlap
+data/h200_unify/summary.json,[29].quantity,2.0 objective_relative_error
+data/h200_unify/summary.json,[29].new_h200,0.001888600235734783
+data/h200_unify/summary.json,[29].unit,
+data/h200_unify/summary.json,[30].item,A3 tab:overlap
+data/h200_unify/summary.json,[30].quantity,2.0 gradient_relative_l2
+data/h200_unify/summary.json,[30].new_h200,0.024886507098370012
+data/h200_unify/summary.json,[30].unit,
+data/h200_unify/summary.json,[31].item,A3 tab:overlap
+data/h200_unify/summary.json,[31].quantity,2.0 gradient_cosine
+data/h200_unify/summary.json,[31].new_h200,0.9997069239616394
+data/h200_unify/summary.json,[31].unit,
+data/h200_unify/raw/a3_record_rep1.json,stage,complete
+data/h200_unify/raw/a3_record_rep1.json,pilot,True
+data/h200_unify/raw/a3_record_rep1.json,production_equivalent,False
+data/h200_unify/raw/a3_record_rep1.json,scope,"FA pilot adapting TorchFDTD tiled_stitching to a saved freeform density.
+
+This CPML, 50-nm-mesh pilot is not validation of the production periodic tiles.
+All fields and gradients are saved before figure generation.
+"
+data/h200_unify/raw/a3_record_rep1.json,project.schema_version,1
+data/h200_unify/raw/a3_record_rep1.json,project.name,Untitled
+data/h200_unify/raw/a3_record_rep1.json,project.region.dimension,3d
+data/h200_unify/raw/a3_record_rep1.json,project.region.size[0],31.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.size[1],31.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.size[2],3.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.mesh,0.05
+data/h200_unify/raw/a3_record_rep1.json,project.region.mesh_steps,
+data/h200_unify/raw/a3_record_rep1.json,project.region.mesh_coordinates,
+data/h200_unify/raw/a3_record_rep1.json,project.region.material_sampling,cell
+data/h200_unify/raw/a3_record_rep1.json,project.region.interface_method,staircase
+data/h200_unify/raw/a3_record_rep1.json,project.region.subpixel_quadrature,8
+data/h200_unify/raw/a3_record_rep1.json,project.region.mesh_type,uniform
+data/h200_unify/raw/a3_record_rep1.json,project.region.mesh_max,0.15
+data/h200_unify/raw/a3_record_rep1.json,project.region.mesh_grading,1.25
+data/h200_unify/raw/a3_record_rep1.json,project.region.mesh_ppw,24.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.mesh_auto_refine,True
+data/h200_unify/raw/a3_record_rep1.json,project.region.courant_factor,0.99
+data/h200_unify/raw/a3_record_rep1.json,project.region.time_step_override,
+data/h200_unify/raw/a3_record_rep1.json,project.region.steps,600
+data/h200_unify/raw/a3_record_rep1.json,project.region.run_control.auto_shutoff,False
+data/h200_unify/raw/a3_record_rep1.json,project.region.run_control.decay_threshold,1e-06
+data/h200_unify/raw/a3_record_rep1.json,project.region.run_control.check_interval,50
+data/h200_unify/raw/a3_record_rep1.json,project.region.run_control.consecutive_checks,3
+data/h200_unify/raw/a3_record_rep1.json,project.region.run_control.min_steps,100
+data/h200_unify/raw/a3_record_rep1.json,project.region.run_control.source_tail_amplitude,1e-08
+data/h200_unify/raw/a3_record_rep1.json,project.region.run_control.after_source_s,0.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.run_control.divergence_check,True
+data/h200_unify/raw/a3_record_rep1.json,project.region.run_control.growth_limit,1000000.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.run_control.field_limit,
+data/h200_unify/raw/a3_record_rep1.json,project.region.pml_cells,10
+data/h200_unify/raw/a3_record_rep1.json,project.region.pml_dispersion,ade
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.x_min.kind,pml
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.x_min.layers,
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.x_min.sigma_scale,1.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.x_min.kappa,1.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.x_min.alpha,1e-08
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.x_min.polynomial,3.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.x_min.alpha_polynomial,0.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.x_max.kind,pml
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.x_max.layers,
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.x_max.sigma_scale,1.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.x_max.kappa,1.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.x_max.alpha,1e-08
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.x_max.polynomial,3.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.x_max.alpha_polynomial,0.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.y_min.kind,pml
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.y_min.layers,
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.y_min.sigma_scale,1.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.y_min.kappa,1.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.y_min.alpha,1e-08
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.y_min.polynomial,3.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.y_min.alpha_polynomial,0.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.y_max.kind,pml
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.y_max.layers,
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.y_max.sigma_scale,1.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.y_max.kappa,1.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.y_max.alpha,1e-08
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.y_max.polynomial,3.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.y_max.alpha_polynomial,0.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.z_min.kind,pml
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.z_min.layers,
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.z_min.sigma_scale,1.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.z_min.kappa,1.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.z_min.alpha,1e-08
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.z_min.polynomial,3.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.z_min.alpha_polynomial,0.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.z_max.kind,pml
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.z_max.layers,
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.z_max.sigma_scale,1.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.z_max.kappa,1.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.z_max.alpha,1e-08
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.z_max.polynomial,3.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.boundaries.z_max.alpha_polynomial,0.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.bloch_phase[0],0.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.bloch_phase[1],0.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.bloch_phase[2],0.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.background_index,1.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.backend,cuda
+data/h200_unify/raw/a3_record_rep1.json,project.region.memory_mode,resident
+data/h200_unify/raw/a3_record_rep1.json,project.region.execution_mode,auto
+data/h200_unify/raw/a3_record_rep1.json,project.region.tiling.size_um,20.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.tiling.overlap_um,2.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.tiling.max_angle_deg,45.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.tiling.propagation_um,
+data/h200_unify/raw/a3_record_rep1.json,project.region.tiling.allow_approximate,False
+data/h200_unify/raw/a3_record_rep1.json,project.region.cuda_kernel,fused
+data/h200_unify/raw/a3_record_rep1.json,project.region.cuda_monitor_kernel,torch
+data/h200_unify/raw/a3_record_rep1.json,project.region.precision,float32
+data/h200_unify/raw/a3_record_rep1.json,project.region.snapshot_interval,20
+data/h200_unify/raw/a3_record_rep1.json,project.region.field,Ez
+data/h200_unify/raw/a3_record_rep1.json,project.region.slice_axis,z
+data/h200_unify/raw/a3_record_rep1.json,project.region.slice_position,0.0
+data/h200_unify/raw/a3_record_rep1.json,project.region.complex_display,real
+data/h200_unify/raw/a3_record_rep1.json,project.materials[0].name,Air
+data/h200_unify/raw/a3_record_rep1.json,project.materials[0].index,1.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[0].color,#b7c5d7
+data/h200_unify/raw/a3_record_rep1.json,project.materials[0].model,dielectric
+data/h200_unify/raw/a3_record_rep1.json,project.materials[0].epsilon_tensor[0],2.25
+data/h200_unify/raw/a3_record_rep1.json,project.materials[0].epsilon_tensor[1],2.25
+data/h200_unify/raw/a3_record_rep1.json,project.materials[0].epsilon_tensor[2],2.25
+data/h200_unify/raw/a3_record_rep1.json,project.materials[0].epsilon_tensor[3],0.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[0].epsilon_tensor[4],0.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[0].epsilon_tensor[5],0.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[0].epsilon_inf,1.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[0].plasma_rad_s,2000000000000000.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[0].collision_rad_s,100000000000000.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[0].resonance_rad_s,2000000000000000.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[0].linewidth_rad_s,100000000000000.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[0].delta_epsilon,1.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[0].samples,
+data/h200_unify/raw/a3_record_rep1.json,project.materials[0].fit_band_um,
+data/h200_unify/raw/a3_record_rep1.json,project.materials[0].fit_dt_s,
+data/h200_unify/raw/a3_record_rep1.json,project.materials[0].provenance,
+data/h200_unify/raw/a3_record_rep1.json,project.materials[1].name,SiO2 (constant n)
+data/h200_unify/raw/a3_record_rep1.json,project.materials[1].index,1.444
+data/h200_unify/raw/a3_record_rep1.json,project.materials[1].color,#80c4d7
+data/h200_unify/raw/a3_record_rep1.json,project.materials[1].model,dielectric
+data/h200_unify/raw/a3_record_rep1.json,project.materials[1].epsilon_tensor[0],2.25
+data/h200_unify/raw/a3_record_rep1.json,project.materials[1].epsilon_tensor[1],2.25
+data/h200_unify/raw/a3_record_rep1.json,project.materials[1].epsilon_tensor[2],2.25
+data/h200_unify/raw/a3_record_rep1.json,project.materials[1].epsilon_tensor[3],0.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[1].epsilon_tensor[4],0.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[1].epsilon_tensor[5],0.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[1].epsilon_inf,1.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[1].plasma_rad_s,2000000000000000.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[1].collision_rad_s,100000000000000.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[1].resonance_rad_s,2000000000000000.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[1].linewidth_rad_s,100000000000000.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[1].delta_epsilon,1.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[1].samples,
+data/h200_unify/raw/a3_record_rep1.json,project.materials[1].fit_band_um,
+data/h200_unify/raw/a3_record_rep1.json,project.materials[1].fit_dt_s,
+data/h200_unify/raw/a3_record_rep1.json,project.materials[1].provenance,
+data/h200_unify/raw/a3_record_rep1.json,project.materials[2].name,SiN (constant n)
+data/h200_unify/raw/a3_record_rep1.json,project.materials[2].index,2.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[2].color,#69a1e8
+data/h200_unify/raw/a3_record_rep1.json,project.materials[2].model,dielectric
+data/h200_unify/raw/a3_record_rep1.json,project.materials[2].epsilon_tensor[0],2.25
+data/h200_unify/raw/a3_record_rep1.json,project.materials[2].epsilon_tensor[1],2.25
+data/h200_unify/raw/a3_record_rep1.json,project.materials[2].epsilon_tensor[2],2.25
+data/h200_unify/raw/a3_record_rep1.json,project.materials[2].epsilon_tensor[3],0.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[2].epsilon_tensor[4],0.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[2].epsilon_tensor[5],0.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[2].epsilon_inf,1.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[2].plasma_rad_s,2000000000000000.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[2].collision_rad_s,100000000000000.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[2].resonance_rad_s,2000000000000000.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[2].linewidth_rad_s,100000000000000.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[2].delta_epsilon,1.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[2].samples,
+data/h200_unify/raw/a3_record_rep1.json,project.materials[2].fit_band_um,
+data/h200_unify/raw/a3_record_rep1.json,project.materials[2].fit_dt_s,
+data/h200_unify/raw/a3_record_rep1.json,project.materials[2].provenance,
+data/h200_unify/raw/a3_record_rep1.json,project.materials[3].name,Si (constant n)
+data/h200_unify/raw/a3_record_rep1.json,project.materials[3].index,3.48
+data/h200_unify/raw/a3_record_rep1.json,project.materials[3].color,#cc8bdc
+data/h200_unify/raw/a3_record_rep1.json,project.materials[3].model,dielectric
+data/h200_unify/raw/a3_record_rep1.json,project.materials[3].epsilon_tensor[0],2.25
+data/h200_unify/raw/a3_record_rep1.json,project.materials[3].epsilon_tensor[1],2.25
+data/h200_unify/raw/a3_record_rep1.json,project.materials[3].epsilon_tensor[2],2.25
+data/h200_unify/raw/a3_record_rep1.json,project.materials[3].epsilon_tensor[3],0.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[3].epsilon_tensor[4],0.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[3].epsilon_tensor[5],0.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[3].epsilon_inf,1.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[3].plasma_rad_s,2000000000000000.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[3].collision_rad_s,100000000000000.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[3].resonance_rad_s,2000000000000000.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[3].linewidth_rad_s,100000000000000.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[3].delta_epsilon,1.0
+data/h200_unify/raw/a3_record_rep1.json,project.materials[3].samples,
+data/h200_unify/raw/a3_record_rep1.json,project.materials[3].fit_band_um,
+data/h200_unify/raw/a3_record_rep1.json,project.materials[3].fit_dt_s,
+data/h200_unify/raw/a3_record_rep1.json,project.materials[3].provenance,
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].wavelength,0.54
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].pulse,broadband
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].pulse_cycles,3.0
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].time_definition,wavelength
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].pulse_length,2e-14
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].pulse_offset,5e-14
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].signal,
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].wavelength_start,0.4
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].wavelength_stop,0.7
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].optimize_for_short_pulse,True
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].eliminate_discontinuities,False
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].chirp_bandwidth_hz,100000000000000.0
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].id,352a2ecee635
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].name,source
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].center[0],0.0
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].center[1],0.0
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].center[2],-0.85
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].enabled,True
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].kind,plane
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].injection,soft
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].normal,z
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].direction,+
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].incident_pml_cells,96
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].size[0],31.0
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].size[1],31.0
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].size[2],0.0
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].component,Ex
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].theta,
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].phi,0.0
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].amplitude,1.0
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].phase,0.0
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].use_global_source,False
+data/h200_unify/raw/a3_record_rep1.json,project.sources[0].extend_through_pml,True
+data/h200_unify/raw/a3_record_rep1.json,project.global_source.wavelength,1.55
+data/h200_unify/raw/a3_record_rep1.json,project.global_source.pulse,gaussian
+data/h200_unify/raw/a3_record_rep1.json,project.global_source.pulse_cycles,3.0
+data/h200_unify/raw/a3_record_rep1.json,project.global_source.time_definition,cycles
+data/h200_unify/raw/a3_record_rep1.json,project.global_source.pulse_length,2e-14
+data/h200_unify/raw/a3_record_rep1.json,project.global_source.pulse_offset,5e-14
+data/h200_unify/raw/a3_record_rep1.json,project.global_source.signal,
+data/h200_unify/raw/a3_record_rep1.json,project.global_source.wavelength_start,1.3
+data/h200_unify/raw/a3_record_rep1.json,project.global_source.wavelength_stop,1.8
+data/h200_unify/raw/a3_record_rep1.json,project.global_source.optimize_for_short_pulse,True
+data/h200_unify/raw/a3_record_rep1.json,project.global_source.eliminate_discontinuities,False
+data/h200_unify/raw/a3_record_rep1.json,project.global_source.chirp_bandwidth_hz,100000000000000.0
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].id,out
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].name,frequency monitor
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].center[0],0.0
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].center[1],0.0
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].center[2],0.5
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].enabled,True
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].kind,field
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].component,Ez
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].spectrum.sampling,custom
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].spectrum.chebyshev_wavelength,False
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].spectrum.chebyshev_nodes,roots
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].spectrum.use_source_limits,False
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].spectrum.custom_frequencies_hz[0],447451429850746.25
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].spectrum.custom_frequencies_hz[1],472114107086614.2
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].spectrum.custom_frequencies_hz[2],499654096666666.7
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].spectrum.custom_frequencies_hz[3],525951680701754.44
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].spectrum.custom_frequencies_hz[4],555171218518518.5
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].spectrum.custom_frequencies_hz[5],587828349019607.9
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].spectrum.custom_frequencies_hz[6],637856293617021.4
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].spectrum.custom_frequencies_hz[7],666205462222222.2
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].spectrum.custom_frequencies_hz[8],713791566666666.8
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].spectrum.wavelength_start,1.3
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].spectrum.wavelength_stop,1.8
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].spectrum.frequency_points,101
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].spectrum.apodization,none
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].spectrum.apodization_center,2e-14
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].spectrum.apodization_time_width,1e-14
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].use_global_monitor,False
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].inherit_apodization,True
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].time_downsample,1
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].normal,z
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].size[0],30.0
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].size[1],30.0
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].size[2],0.0
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].downsample,1
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].downsample_xyz,
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].record_fields[0],Ex
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].record_fields[1],Ey
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].record_fields[2],Ez
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].record_fields[3],Hx
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].record_fields[4],Hy
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].record_fields[5],Hz
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].record_poynting[0],x
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].record_poynting[1],y
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].record_poynting[2],z
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].record_flux,True
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].dft_precision,field
+data/h200_unify/raw/a3_record_rep1.json,project.monitors[0].spatial_interpolation,specified
+data/h200_unify/raw/a3_record_rep1.json,project.global_monitor.sampling,frequency
+data/h200_unify/raw/a3_record_rep1.json,project.global_monitor.chebyshev_wavelength,False
+data/h200_unify/raw/a3_record_rep1.json,project.global_monitor.chebyshev_nodes,roots
+data/h200_unify/raw/a3_record_rep1.json,project.global_monitor.use_source_limits,False
+data/h200_unify/raw/a3_record_rep1.json,project.global_monitor.wavelength_start,1.3
+data/h200_unify/raw/a3_record_rep1.json,project.global_monitor.wavelength_stop,1.8
+data/h200_unify/raw/a3_record_rep1.json,project.global_monitor.frequency_points,101
+data/h200_unify/raw/a3_record_rep1.json,project.global_monitor.apodization,none
+data/h200_unify/raw/a3_record_rep1.json,project.global_monitor.apodization_center,2e-14
+data/h200_unify/raw/a3_record_rep1.json,project.global_monitor.apodization_time_width,1e-14
+data/h200_unify/raw/a3_record_rep1.json,project.import_provenance,
+data/h200_unify/raw/a3_record_rep1.json,project.revision,0
+data/h200_unify/raw/a3_record_rep1.json,project.content_sha256,
+data/h200_unify/raw/a3_record_rep1.json,mesh_um,0.05
+data/h200_unify/raw/a3_record_rep1.json,footprint_um,30.0
+data/h200_unify/raw/a3_record_rep1.json,tile_um,10.0
+data/h200_unify/raw/a3_record_rep1.json,wavelength_um[0],0.67
+data/h200_unify/raw/a3_record_rep1.json,wavelength_um[1],0.635
+data/h200_unify/raw/a3_record_rep1.json,wavelength_um[2],0.6
+data/h200_unify/raw/a3_record_rep1.json,wavelength_um[3],0.57
+data/h200_unify/raw/a3_record_rep1.json,wavelength_um[4],0.54
+data/h200_unify/raw/a3_record_rep1.json,wavelength_um[5],0.51
+data/h200_unify/raw/a3_record_rep1.json,wavelength_um[6],0.47
+data/h200_unify/raw/a3_record_rep1.json,wavelength_um[7],0.45
+data/h200_unify/raw/a3_record_rep1.json,wavelength_um[8],0.42
+data/h200_unify/raw/a3_record_rep1.json,independent_variables,360000
+data/h200_unify/raw/a3_record_rep1.json,symmetry,none
+data/h200_unify/raw/a3_record_rep1.json,gpu,NVIDIA H200
+data/h200_unify/raw/a3_record_rep1.json,torch_version,2.8.0+cu128
+data/h200_unify/raw/a3_record_rep1.json,actual_execution,"DifferentiablePlaneSimulation resident fields, two host checkpoints per model"
+data/h200_unify/raw/a3_record_rep1.json,source_sha256,56b4e32bd414e44bf0fc6434843d2e1c0e97b0420f863e177c4808e770b4b37a
+data/h200_unify/raw/a3_record_rep1.json,results.full.objective,17.65958595275879
+data/h200_unify/raw/a3_record_rep1.json,results.full.forward_seconds,34.9812991048675
+data/h200_unify/raw/a3_record_rep1.json,results.full.backward_seconds,121.40492545603774
+data/h200_unify/raw/a3_record_rep1.json,results.full.time_to_gradient_seconds,156.38622456090525
+data/h200_unify/raw/a3_record_rep1.json,results.full.peak_torch_cuda_allocated_bytes,5847976960
+data/h200_unify/raw/a3_record_rep1.json,results.full.peak_torch_cuda_reserved_bytes,7247757312
+data/h200_unify/raw/a3_record_rep1.json,results.full.tile_count,1
+data/h200_unify/raw/a3_record_rep1.json,results.full.directional_fd.delta,0.005
+data/h200_unify/raw/a3_record_rep1.json,results.full.directional_fd.adjoint,82.08644104003906
+data/h200_unify/raw/a3_record_rep1.json,results.full.directional_fd.central_difference,82.08198547363281
+data/h200_unify/raw/a3_record_rep1.json,results.full.directional_fd.relative_error,5.428190339866061e-05
+data/h200_unify/raw/a3_record_rep1.json,results.0.5.objective,17.553321838378906
+data/h200_unify/raw/a3_record_rep1.json,results.0.5.forward_seconds,39.783756993943825
+data/h200_unify/raw/a3_record_rep1.json,results.0.5.backward_seconds,117.74876672099344
+data/h200_unify/raw/a3_record_rep1.json,results.0.5.time_to_gradient_seconds,157.53252371493727
+data/h200_unify/raw/a3_record_rep1.json,results.0.5.peak_torch_cuda_allocated_bytes,2901580288
+data/h200_unify/raw/a3_record_rep1.json,results.0.5.peak_torch_cuda_reserved_bytes,3235905536
+data/h200_unify/raw/a3_record_rep1.json,results.0.5.tile_count,9
+data/h200_unify/raw/a3_record_rep1.json,results.0.5.complex_field_relative_l2,0.12442802741171403
+data/h200_unify/raw/a3_record_rep1.json,results.0.5.focal_intensity_relative_l2,0.04603506362343724
+data/h200_unify/raw/a3_record_rep1.json,results.0.5.objective_relative_error,0.006017361599765181
+data/h200_unify/raw/a3_record_rep1.json,results.0.5.gradient_relative_l2,0.04038216015007029
+data/h200_unify/raw/a3_record_rep1.json,results.0.5.gradient_cosine,0.9992014765739441
+data/h200_unify/raw/a3_record_rep1.json,results.0.5.field_error_by_seam_distance[0].distance_um[0],0
+data/h200_unify/raw/a3_record_rep1.json,results.0.5.field_error_by_seam_distance[0].distance_um[1],0.25
+data/h200_unify/raw/a3_record_rep1.json,results.0.5.field_error_by_seam_distance[0].rms_relative_error,0.22233068943023682
+data/h200_unify/raw/a3_record_rep1.json,results.0.5.field_error_by_seam_distance[1].distance_um[0],0.25
+data/h200_unify/raw/a3_record_rep1.json,results.0.5.field_error_by_seam_distance[1].distance_um[1],0.5
+data/h200_unify/raw/a3_record_rep1.json,results.0.5.field_error_by_seam_distance[1].rms_relative_error,0.19257000088691711
+data/h200_unify/raw/a3_record_rep1.json,results.0.5.field_error_by_seam_distance[2].distance_um[0],0.5
+data/h200_unify/raw/a3_record_rep1.json,results.0.5.field_error_by_seam_distance[2].distance_um[1],1.0
+data/h200_unify/raw/a3_record_rep1.json,results.0.5.field_error_by_seam_distance[2].rms_relative_error,0.16404111683368683
+data/h200_unify/raw/a3_record_rep1.json,results.0.5.field_error_by_seam_distance[3].distance_um[0],1.0
+data/h200_unify/raw/a3_record_rep1.json,results.0.5.field_error_by_seam_distance[3].distance_um[1],1.5
+data/h200_unify/raw/a3_record_rep1.json,results.0.5.field_error_by_seam_distance[3].rms_relative_error,0.13792386651039124
+data/h200_unify/raw/a3_record_rep1.json,results.0.5.field_error_by_seam_distance[4].distance_um[0],1.5
+data/h200_unify/raw/a3_record_rep1.json,results.0.5.field_error_by_seam_distance[4].distance_um[1],2.0
+data/h200_unify/raw/a3_record_rep1.json,results.0.5.field_error_by_seam_distance[4].rms_relative_error,0.1201850101351738
+data/h200_unify/raw/a3_record_rep1.json,results.0.5.field_error_by_seam_distance[5].distance_um[0],2.0
+data/h200_unify/raw/a3_record_rep1.json,results.0.5.field_error_by_seam_distance[5].distance_um[1],3.0
+data/h200_unify/raw/a3_record_rep1.json,results.0.5.field_error_by_seam_distance[5].rms_relative_error,0.09950600564479828
+data/h200_unify/raw/a3_record_rep1.json,results.1.0.objective,17.593740463256836
+data/h200_unify/raw/a3_record_rep1.json,results.1.0.forward_seconds,44.98328942898661
+data/h200_unify/raw/a3_record_rep1.json,results.1.0.backward_seconds,141.12146872002631
+data/h200_unify/raw/a3_record_rep1.json,results.1.0.time_to_gradient_seconds,186.10475814901292
+data/h200_unify/raw/a3_record_rep1.json,results.1.0.peak_torch_cuda_allocated_bytes,3208816128
+data/h200_unify/raw/a3_record_rep1.json,results.1.0.peak_torch_cuda_reserved_bytes,3873439744
+data/h200_unify/raw/a3_record_rep1.json,results.1.0.tile_count,9
+data/h200_unify/raw/a3_record_rep1.json,results.1.0.complex_field_relative_l2,0.10268423801475221
+data/h200_unify/raw/a3_record_rep1.json,results.1.0.focal_intensity_relative_l2,0.03536113214464623
+data/h200_unify/raw/a3_record_rep1.json,results.1.0.objective_relative_error,0.003728597583097182
+data/h200_unify/raw/a3_record_rep1.json,results.1.0.gradient_relative_l2,0.03339129015674105
+data/h200_unify/raw/a3_record_rep1.json,results.1.0.gradient_cosine,0.9994586706161499
+data/h200_unify/raw/a3_record_rep1.json,results.1.0.field_error_by_seam_distance[0].distance_um[0],0
+data/h200_unify/raw/a3_record_rep1.json,results.1.0.field_error_by_seam_distance[0].distance_um[1],0.25
+data/h200_unify/raw/a3_record_rep1.json,results.1.0.field_error_by_seam_distance[0].rms_relative_error,0.16978269815444946
+data/h200_unify/raw/a3_record_rep1.json,results.1.0.field_error_by_seam_distance[1].distance_um[0],0.25
+data/h200_unify/raw/a3_record_rep1.json,results.1.0.field_error_by_seam_distance[1].distance_um[1],0.5
+data/h200_unify/raw/a3_record_rep1.json,results.1.0.field_error_by_seam_distance[1].rms_relative_error,0.15481553971767426
+data/h200_unify/raw/a3_record_rep1.json,results.1.0.field_error_by_seam_distance[2].distance_um[0],0.5
+data/h200_unify/raw/a3_record_rep1.json,results.1.0.field_error_by_seam_distance[2].distance_um[1],1.0
+data/h200_unify/raw/a3_record_rep1.json,results.1.0.field_error_by_seam_distance[2].rms_relative_error,0.1366964727640152
+data/h200_unify/raw/a3_record_rep1.json,results.1.0.field_error_by_seam_distance[3].distance_um[0],1.0
+data/h200_unify/raw/a3_record_rep1.json,results.1.0.field_error_by_seam_distance[3].distance_um[1],1.5
+data/h200_unify/raw/a3_record_rep1.json,results.1.0.field_error_by_seam_distance[3].rms_relative_error,0.1177193745970726
+data/h200_unify/raw/a3_record_rep1.json,results.1.0.field_error_by_seam_distance[4].distance_um[0],1.5
+data/h200_unify/raw/a3_record_rep1.json,results.1.0.field_error_by_seam_distance[4].distance_um[1],2.0
+data/h200_unify/raw/a3_record_rep1.json,results.1.0.field_error_by_seam_distance[4].rms_relative_error,0.10292943567037582
+data/h200_unify/raw/a3_record_rep1.json,results.1.0.field_error_by_seam_distance[5].distance_um[0],2.0
+data/h200_unify/raw/a3_record_rep1.json,results.1.0.field_error_by_seam_distance[5].distance_um[1],3.0
+data/h200_unify/raw/a3_record_rep1.json,results.1.0.field_error_by_seam_distance[5].rms_relative_error,0.08589879423379898
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.objective,17.618125915527344
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.forward_seconds,49.58460053708404
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.backward_seconds,159.2399871898815
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.time_to_gradient_seconds,208.82458772696555
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.peak_torch_cuda_allocated_bytes,3528391168
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.peak_torch_cuda_reserved_bytes,4282384384
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.tile_count,9
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.complex_field_relative_l2,0.08751395703672343
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.focal_intensity_relative_l2,0.029696244880286472
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.objective_relative_error,0.0023477355212265794
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.gradient_relative_l2,0.02891435021124402
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.gradient_cosine,0.9995996356010437
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.field_error_by_seam_distance[0].distance_um[0],0
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.field_error_by_seam_distance[0].distance_um[1],0.25
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.field_error_by_seam_distance[0].rms_relative_error,0.14025510847568512
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.field_error_by_seam_distance[1].distance_um[0],0.25
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.field_error_by_seam_distance[1].distance_um[1],0.5
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.field_error_by_seam_distance[1].rms_relative_error,0.12987995147705078
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.field_error_by_seam_distance[2].distance_um[0],0.5
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.field_error_by_seam_distance[2].distance_um[1],1.0
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.field_error_by_seam_distance[2].rms_relative_error,0.11672575026750565
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.field_error_by_seam_distance[3].distance_um[0],1.0
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.field_error_by_seam_distance[3].distance_um[1],1.5
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.field_error_by_seam_distance[3].rms_relative_error,0.1020844429731369
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.field_error_by_seam_distance[4].distance_um[0],1.5
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.field_error_by_seam_distance[4].distance_um[1],2.0
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.field_error_by_seam_distance[4].rms_relative_error,0.08940538763999939
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.field_error_by_seam_distance[5].distance_um[0],2.0
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.field_error_by_seam_distance[5].distance_um[1],3.0
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.field_error_by_seam_distance[5].rms_relative_error,0.07439211755990982
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.directional_fd.delta,0.005
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.directional_fd.adjoint,82.07659149169922
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.directional_fd.central_difference,82.07206726074219
+data/h200_unify/raw/a3_record_rep1.json,results.1.5.directional_fd.relative_error,5.512510051267273e-05
+data/h200_unify/raw/a3_record_rep1.json,results.2.0.objective,17.62623405456543
+data/h200_unify/raw/a3_record_rep1.json,results.2.0.forward_seconds,55.471440870082006
+data/h200_unify/raw/a3_record_rep1.json,results.2.0.backward_seconds,178.24758803704754
+data/h200_unify/raw/a3_record_rep1.json,results.2.0.time_to_gradient_seconds,233.71902890712954
+data/h200_unify/raw/a3_record_rep1.json,results.2.0.peak_torch_cuda_allocated_bytes,3874318336
+data/h200_unify/raw/a3_record_rep1.json,results.2.0.peak_torch_cuda_reserved_bytes,4571791360
+data/h200_unify/raw/a3_record_rep1.json,results.2.0.tile_count,9
+data/h200_unify/raw/a3_record_rep1.json,results.2.0.complex_field_relative_l2,0.07577873548563656
+data/h200_unify/raw/a3_record_rep1.json,results.2.0.focal_intensity_relative_l2,0.025333264380560064
+data/h200_unify/raw/a3_record_rep1.json,results.2.0.objective_relative_error,0.001888600235734783
+data/h200_unify/raw/a3_record_rep1.json,results.2.0.gradient_relative_l2,0.024886507098370012
+data/h200_unify/raw/a3_record_rep1.json,results.2.0.gradient_cosine,0.9997069239616394
+data/h200_unify/raw/a3_record_rep1.json,results.2.0.field_error_by_seam_distance[0].distance_um[0],0
+data/h200_unify/raw/a3_record_rep1.json,results.2.0.field_error_by_seam_distance[0].distance_um[1],0.25
+data/h200_unify/raw/a3_record_rep1.json,results.2.0.field_error_by_seam_distance[0].rms_relative_error,0.12031279504299164
+data/h200_unify/raw/a3_record_rep1.json,results.2.0.field_error_by_seam_distance[1].distance_um[0],0.25
+data/h200_unify/raw/a3_record_rep1.json,results.2.0.field_error_by_seam_distance[1].distance_um[1],0.5
+data/h200_unify/raw/a3_record_rep1.json,results.2.0.field_error_by_seam_distance[1].rms_relative_error,0.11224823445081711
+data/h200_unify/raw/a3_record_rep1.json,results.2.0.field_error_by_seam_distance[2].distance_um[0],0.5
+data/h200_unify/raw/a3_record_rep1.json,results.2.0.field_error_by_seam_distance[2].distance_um[1],1.0
+data/h200_unify/raw/a3_record_rep1.json,results.2.0.field_error_by_seam_distance[2].rms_relative_error,0.10159474611282349
+data/h200_unify/raw/a3_record_rep1.json,results.2.0.field_error_by_seam_distance[3].distance_um[0],1.0
+data/h200_unify/raw/a3_record_rep1.json,results.2.0.field_error_by_seam_distance[3].distance_um[1],1.5
+data/h200_unify/raw/a3_record_rep1.json,results.2.0.field_error_by_seam_distance[3].rms_relative_error,0.0888889878988266
+data/h200_unify/raw/a3_record_rep1.json,results.2.0.field_error_by_seam_distance[4].distance_um[0],1.5
+data/h200_unify/raw/a3_record_rep1.json,results.2.0.field_error_by_seam_distance[4].distance_um[1],2.0
+data/h200_unify/raw/a3_record_rep1.json,results.2.0.field_error_by_seam_distance[4].rms_relative_error,0.07768527418375015
+data/h200_unify/raw/a3_record_rep1.json,results.2.0.field_error_by_seam_distance[5].distance_um[0],2.0
+data/h200_unify/raw/a3_record_rep1.json,results.2.0.field_error_by_seam_distance[5].distance_um[1],3.0
+data/h200_unify/raw/a3_record_rep1.json,results.2.0.field_error_by_seam_distance[5].rms_relative_error,0.06435968726873398

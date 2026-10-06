@@ -1,0 +1,124 @@
+{
+ "torchfdtd": {
+  "version": "0.14.0.dev0",
+  "commit": "9d97df22384d2b788ee8ae9338f0d2c8456246ad",
+  "note": "the reference runs used a wheel built from a working tree whose torchfdtd/ equals this commit except three lines in reversible_cpml.py (one isfinite check per 2^28 elements instead of per 64 Ki; speed only)"
+ },
+ "environment_of_the_reference_runs": {
+  "e1": {
+   "python": "3.12.3",
+   "torch": "2.8.0+cu128",
+   "cuda": "12.8",
+   "numpy": "2.1.2",
+   "scipy": "1.18.1",
+   "cupy": "13.6.0",
+   "nccl": "2.27.3",
+   "gpu": "NVIDIA H200",
+   "device_count": 8,
+   "driver": "580.173.02",
+   "torchfdtd_version": "0.14.0.dev0"
+  },
+  "e2": {
+   "python": "3.12.3",
+   "torch": "2.8.0+cu128",
+   "cuda": "12.8",
+   "numpy": "2.1.2",
+   "scipy": "1.18.1",
+   "cupy": "13.6.0",
+   "nccl": "2.27.3",
+   "gpu": "NVIDIA H100 80GB HBM3",
+   "device_count": 8,
+   "driver": "580.126.09",
+   "torchfdtd_version": "0.14.0.dev0"
+  },
+  "e3": {
+   "python": "3.12.3",
+   "torch": "2.8.0+cu128",
+   "cuda": "12.8",
+   "numpy": "2.1.2",
+   "scipy": "1.18.1",
+   "cupy": "13.6.0",
+   "nccl": "2.27.3",
+   "gpu": "NVIDIA H200",
+   "device_count": 6,
+   "driver": "570.211.01",
+   "torchfdtd_version": "0.14.0.dev0"
+  }
+ },
+ "sources": {
+  "production_sha256": {
+   "b200_kernels.py": "4f553e72bd44939e40ae75485d4edcd9299ce86dff7eef2f727cb8290382c087",
+   "fast_spec_patch.py": "0fb6f9d7b21e3f3a2cff3d132e03121a0c405220446fe81536e4cc6d2e79ac4b",
+   "ff_opt.py": "33df2018e55a32a3955462df5a0f67fd7155c195d931342bc8cfa4ca5f7da0aa",
+   "jones_objectives.py": "891c9e9e3266c4fb1224f3fbb7d537808fddd028076fd7d229dd2a948f13d3d0",
+   "lens_cfg.py": "2cd632082fa77ac72cd15840ae42f1a0a6da52cade7d8ac64ef4ec7650b0d949",
+   "loop_block.py": "7b219eba3fdea75e4981786f070c7f3ca4d3a3af1050f59a80e7ba6c432f8887",
+   "loop_levelset10.py": "91c15a13b51e2304c5b2a9b797379bed8e919ec6e7d5ca90a3de9b9d061b0c42",
+   "loop_spacemap.py": "82a60683eaf52d0ffcbb31532a85eb319506da9dd78ad67e1d83a682d7c457ab",
+   "loop_zone.py": "f0733034d6d49e045da80ee93b599f05c8b874a479c9973895465dd76340d7c6",
+   "loop_zonec.py": "f80985402ccfd810d786fcf5333a887362f9fd4b6ae463d10b770f456fd14fbf",
+   "fa_dist.py": "90c75caad9df63261f14064d8f8abf7e082f8fe97a374a5f334123d7c1a849b1",
+   "fa_keep_trace.py": "7057a76c1ba436578c2218303d14271c86ab8237a288046a1e6342436234a5dc",
+   "fa_objective_loader.py": "e22740e924910f0796ea58af5a71251eb3843b1c0e3dd90618b42be7a446ca7e",
+   "fa_objectives.py": "fd6c4af676c08314ec8d51553ee5b76ed723dc088e6c4d5997664650d427768a",
+   "fa_runtime.py": "a623f71b8e7e8a3b63b5639a70124f4cc4303f1c7a5825b65741b1070f93e705",
+   "ns_run.py": "4cd66e3e52194446aee0df838445176b3aafdada74a257e1ce0d0fa81b1ac28e",
+   "zonec_multi.py": "40e18983613f6de6f0f24f5db8fd1de8a58e1d5cd1ccd280c415b20bb6798726"
+  },
+  "published_sha256": {
+   "b200_kernels.py": "78b6d1391fa2c8a648649aae61c7b297fed1f5f5e99418726867954c179f7ec4",
+   "fast_spec_patch.py": "60f6502e68b5778d72f0071d6e421e0bd329d3293aa40e77e39d0bfc10b6127f",
+   "ff_opt.py": "8968cc64c90fd47ccf02062beb6b31785d921e4c664a9d42f7b670956226c260",
+   "jones_objectives.py": "061b4e41efb9db42d9fd78c3432e6aae3a4d86c20bb69eb9f5ece2f2a8709c86",
+   "lens_cfg.py": "2f9ed42db00765740e9a0cddac81fd2ac9a9cb78434d251f9ea21a2ce7ed6710",
+   "loop_block.py": "7b219eba3fdea75e4981786f070c7f3ca4d3a3af1050f59a80e7ba6c432f8887",
+   "loop_levelset10.py": "be9f51d6956f02617ef87b76bc180f59afd91a2937c8688128674ca02af7857a",
+   "loop_spacemap.py": "28602398fdad72db076b954282ca516dc42eeabba8b75587eee5d3b5e54e0740",
+   "loop_zone.py": "56a5b5dd21784e2ec9c64c5c73473c816a21834a23b843ac9b416c1a9159f380",
+   "loop_zonec.py": "e4897f01727eb416933306e6eb1063929127179d2421a58ffe03ce12c0b4c505",
+   "fa_dist.py": "5d8d3447570e424b65b2798dd43dad41e52974d9e6f97dead40c3bbd8dffa6d6",
+   "fa_keep_trace.py": "db692c663f08127a81f4d8e10b3df3f2a03fccb3da32357d20ba9f8fd01b8d13",
+   "fa_objective_loader.py": "3ff8efe67b20475a4efff9445259a4962405925c5d3f9072f3cb4ac495c6ed22",
+   "fa_objectives.py": "755d5b13e3b37c792d5f9b9d442fe4406054db9fad5eea5fad083d94fdd3bca3",
+   "fa_runtime.py": "b1d81a2ac0fd472749a44f95855a65292873772087f924b81975f732c9e9c509",
+   "ns_run.py": "a24c7dc4b5f340d80323747119880b6eaa03cc2ef4ace1b1ddaa3c32c3174ea3",
+   "zonec_multi.py": "70b3290990cd0ac002f1f6bc3bc87a26084db3e1d08421e2ea87f033f00b69c5"
+  },
+  "differences": [
+   "comments and docstrings only (the AST of every file without docstrings equals the production file), except:",
+   "ff_opt.py: two lines removed that put a local directory, unused by these examples, on sys.path",
+   "loop_zonec.py: EZC_BETA_TABLE (recorded beta of every step) added; without it the code is the production code",
+   "fa_runtime.py: run_manifest.json no longer records the cloud instance id, hourly price or budget fields (bookkeeping only)",
+   "line endings normalized to LF"
+  ],
+  "production_sha256_source": "run_manifest.json of the last E2 launch (8 x H100, steps 128-158). E1 and E3 ran earlier revisions of loop_zonec.py, ns_run.py, fa_keep_trace.py and fa_objectives.py; the later revisions add the schedule and stop rules (inactive with EZC_BETA_TABLE) and a GPU-memory fix of the kept traces. The E1 objective of the published module reproduces the recorded binary objective of E1 step 248 from its stored pupil maps (0.120495552806772)."
+ },
+ "results": {
+  "e1": {
+   "steps": 250,
+   "best_binary_step": 248,
+   "binary_objective_run": 0.12049555280677204,
+   "score_over_3p6": 0.11961452284830515,
+   "score_settings": "ns_run.py --eval-only, core 15 um, FF_OVER 3.6 um, 165 tiles x 2 polarizations, 8 x H100 80GB, 353 s"
+  },
+  "e2": {
+   "steps": 159,
+   "best_binary_step": 158,
+   "binary_objective_run": 0.6761390270598296,
+   "score_over_3p6": 0.6729735633963294,
+   "score_settings": "core 15 um, FF_OVER 3.6 um, 100 tiles, 8 x H100 80GB, 132 s",
+   "rescore_at_run_settings": {
+    "objective": 0.6761390271003574,
+    "relative_to_run": 5.99e-11,
+    "settings": "core 19 um, FF_OVER 0.9 um, 64 tiles"
+   }
+  },
+  "e3": {
+   "steps": 190,
+   "best_binary_step": 189,
+   "binary_objective_run": 0.8479491083499667,
+   "score_over_3p6": 0.8439241581726773,
+   "score_settings": "core 15 um, FF_OVER 3.6 um, 49 tiles x 2 polarizations, 8 x H100 80GB, 113 s"
+  }
+ }
+}
