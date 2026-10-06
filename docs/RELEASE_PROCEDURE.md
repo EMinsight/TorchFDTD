@@ -1,5 +1,31 @@
 # Release-candidate procedure (G9-06)
 
+## Version changes and publication checks
+
+These checks apply to every version change, including a patch release that
+uses an approved changed-code validation scope.
+
+1. Commit the version change, then run `scripts/clean_install_check.py`
+   from that clean tree as described in step 3 below. The newest successful
+   record must describe the current packaging inputs and the wheel for the
+   new version. Keep older records as history. Do not rename an older wheel
+   or edit an older record to claim that it tested the new version.
+2. Commit the successful record, then run
+   `python scripts/build_validation_report.py` followed by
+   `python scripts/build_validation_report.py --check`. Both commands must
+   exit 0 and report zero consistency mismatches. Include the rendered
+   report and scope changes in the final repair commit, and check that
+   final tree with `tests/test_clean_install.py`,
+   `tests/test_validation_report.py` and `scripts/run_suite.py cpu-pr`.
+3. Obtain the owner's publication approval before pushing when the task
+   requires it. After the push, require a successful Verify run on main
+   whose `head_sha` equals the exact final commit. Create the release tag
+   at that commit only after this check passes. A green run from before
+   the version change does not satisfy this requirement.
+4. If the version already has a public tag or Release, ask the owner to
+   choose between explicitly replacing it and issuing a new version.
+   Never move a published tag as part of routine record repair.
+
 For v1.1.3, patch validation covers fixed observation-table reuse and its
 related regressions. The [1.1.3 validation scope](RELEASE113_VALIDATION.md)
 records completed checks and omitted full-suite work. It does not claim
