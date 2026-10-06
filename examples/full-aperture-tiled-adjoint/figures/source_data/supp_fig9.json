@@ -1,0 +1,678 @@
+{
+ "arrays_from": [],
+ "records": {
+  "data/landscape/prior_works_landscape.json": {
+   "scope": "Transcription of internal notes (audit dated 2026-09-30) for the Supplementary Fig. 9a landscape. Only numbers stated in the audit are used. Aperture is the width (2D) or diameter/side (3D) in vacuum wavelengths as stated by each work, or derived from a stated size and wavelength. Entries without a stated wavelength are kept with aperture_lambda null and are not placed on the axis. Grid points, matrix sizes, repeated mask pixels and independent design variables are not mixed. Addendum 2026-09-30: the Skarda wavelengths were taken from the published paper itself at the orchestrator request, with the quoted sentences in each source field.",
+   "audit": "internal notes",
+   "rows": [
+    {
+     "row": "ours",
+     "label": "This work",
+     "sub": "full-layer density, 3D FDTD tiles",
+     "em": "3D"
+    },
+    {
+     "row": "zda",
+     "label": "Zoned axisymmetry",
+     "sub": "zone densities, 3D FDTD",
+     "em": "3D",
+     "cite": "fa_zda2025"
+    },
+    {
+     "row": "tmatrix",
+     "label": "Distributed T-matrix",
+     "sub": "post positions and radii, 3D",
+     "em": "3D",
+     "cite": "fa_skarda2022"
+    },
+    {
+     "row": "whole",
+     "label": "Whole-structure FDTD",
+     "sub": "post widths, 3D",
+     "em": "3D",
+     "cite": "fa_mansouree2021"
+    },
+    {
+     "row": "lpa",
+     "label": "Locally periodic",
+     "sub": "cell densities, 3D RCWA per cell",
+     "em": "3D",
+     "cite": "fa_lpa2019"
+    },
+    {
+     "row": "oda",
+     "label": "Overlapping domains",
+     "sub": "layer densities, 2D",
+     "em": "2D",
+     "cite": "cpc_lin2019"
+    },
+    {
+     "row": "apf",
+     "label": "Partial factorization",
+     "sub": "ridge widths and positions, 2D",
+     "em": "2D",
+     "cite": "fa_apf2022, fa_apfinverse2024"
+    }
+   ],
+   "points": [
+    {
+     "id": "zda_lwir",
+     "row": "zda",
+     "status": "optimized",
+     "aperture_lambda": 800,
+     "label": "8 mm, LWIR",
+     "source": "Sun et al. 2025 ZDA row: '8mm LWIR 800λ' completed, 'Binarization+conic filter'"
+    },
+    {
+     "id": "zda_visible",
+     "row": "zda",
+     "status": "optimized",
+     "aperture_lambda": 3008,
+     "label": "1.96 mm, 6 λ",
+     "source": "Sun et al. 2025 ZDA row: '1.96mm visible 3008λ 6 wavelengths'"
+    },
+    {
+     "id": "zda_rgb",
+     "row": "zda",
+     "status": "optimized",
+     "aperture_lambda": null,
+     "label": "1 mm RGB",
+     "source": "Sun et al. 2025 ZDA row: '1mmRGB'. Wavelength not stated in the audit, not placed."
+    },
+    {
+     "id": "skarda_opt",
+     "row": "tmatrix",
+     "status": "optimized",
+     "aperture_lambda": 22.39,
+     "size_um": 30,
+     "label": "30 µm, 1340 nm",
+     "source": "Skarda et al., npj Comput. Mater. 8, 78 (2022), author PDF https://web.stanford.edu/group/nqp/jv_files/papers/jinhie_distrib.pdf, p.4: \"a 30 μm × 30 μm metalens with focal-length 20 μm designed from the low aspect-ratio scatterer library used in Fig. 3b\", \"In 35 optimization iterations, the metalens efficiency is almost doubled.\" p.3, Fig. 3b caption: \"silicon cylinders with height 220 nm ... background refractive index 1.66; source wavelength of 1340 nm\"",
+     "wavelength_nm": 1340,
+     "derived": "30 µm / 1.34 µm. The optimized lens uses the Fig. 3b library, whose caption gives the source wavelength."
+    },
+    {
+     "id": "skarda_fwd",
+     "row": "tmatrix",
+     "status": "forward",
+     "aperture_lambda": 645,
+     "size_um": 1000,
+     "label": "1 mm, 1550 nm",
+     "source": "Skarda et al., npj Comput. Mater. 8, 78 (2022), author PDF https://web.stanford.edu/group/nqp/jv_files/papers/jinhie_distrib.pdf, p.1: \"We demonstrate numerically accurate simulations of metasurfaces of size 1 mm × 1 mm at a wavelength of 1.55 μm (about 645λ × 645λ) on a cluster of 48 GPU nodes.\"",
+     "wavelength_nm": 1550,
+     "derived": "the paper states about 645 λ × 645 λ"
+    },
+    {
+     "id": "mansouree",
+     "row": "whole",
+     "status": "optimized",
+     "aperture_lambda": 58.82,
+     "size_um": 50,
+     "wavelength_nm": 850,
+     "label": "50 µm, 850 nm",
+     "derived": "50 µm / 0.85 µm",
+     "source": "Mansouree et al. 2021 row: 'Fabricated 50µm lenses, λ850nm, NA .78/.95'"
+    },
+    {
+     "id": "lpa3d",
+     "row": "lpa",
+     "status": "optimized",
+     "aperture_lambda": 80,
+     "label": "6400 cells of λ²",
+     "derived": "square-equivalent width sqrt(6400) = 80 λ. The audit does not assert a circular diameter.",
+     "source": "Lin et al. 2019 LPA row: 'Full 3D case 6400 cells, independent density DOF 6.4×10⁵', 'Full3D NA.37 lens, 6400 λ×λ cells', 'Heaviside projection binary'"
+    },
+    {
+     "id": "oda",
+     "row": "oda",
+     "status": "optimized",
+     "aperture_lambda": 200,
+     "size_um": 140,
+     "wavelength_nm": 700,
+     "label": "140 µm, 480 to 700 nm",
+     "source": "Lin & Johnson 2019 ODA row: 'Width 200λ at λ 700nm = 140µm. Broadband 480–700nm', 'Binarized designs', 'Demonstrated 2D EM'"
+    },
+    {
+     "id": "apf_forward",
+     "row": "apf",
+     "status": "forward",
+     "aperture_lambda": 1879.7,
+     "size_um": 1000,
+     "wavelength_nm": 532,
+     "label": "1 mm, 532 nm",
+     "derived": "1000 µm / 0.532 µm",
+     "source": "APF Lin et al. 2022 row: '~1mm-wide 532nm metalens transmission characterization', 'phase-prescribed forward characterization'"
+    },
+    {
+     "id": "apf_splitter",
+     "row": "apf",
+     "status": "optimized",
+     "aperture_lambda": 25.53,
+     "size_um": 24,
+     "wavelength_nm": 940,
+     "label": "24 µm splitter",
+     "derived": "24 µm / 0.94 µm",
+     "source": "APF inverse Li et al. 2024 row: 'Completed period 24µm, 80 ridges, λ940nm ±30° splitter'"
+    },
+    {
+     "id": "apf_benchmark",
+     "row": "apf",
+     "status": "forward",
+     "aperture_lambda": null,
+     "size_um": 1000,
+     "label": "1 mm gradient benchmark",
+     "source": "APF inverse Li et al. 2024 row: '1200-edge 1mm benchmark'. Wavelength not stated in the audit, not placed."
+    }
+   ],
+   "ours": [
+    {
+     "id": "e1_e3",
+     "row": "ours",
+     "status": "pending",
+     "label": "E1 to E3, 150 to 200 µm",
+     "examples": [
+      {
+       "name": "E1",
+       "aperture_um": 200,
+       "wavelengths_nm": [
+        420,
+        670
+       ]
+      },
+      {
+       "name": "E2",
+       "aperture_um": 150,
+       "wavelengths_nm": [
+        450,
+        635
+       ]
+      },
+      {
+       "name": "E3",
+       "aperture_um": 200,
+       "wavelengths_nm": [
+        940,
+        940
+       ]
+      }
+     ],
+     "source": "launch/e1.env, e2.env (150 um square), e3.env (D200 physical at 940 nm, scaled model); the bar spans the smallest to largest aperture in vacuum wavelengths over the design wavelengths"
+    },
+    {
+     "id": "mm",
+     "row": "ours",
+     "status": "pending",
+     "label": "1 mm gradient step",
+     "examples": [
+      {
+       "name": "1 mm",
+       "aperture_um": 1000,
+       "wavelengths_nm": [
+        420,
+        670
+       ]
+      }
+     ],
+     "source": "internal notes section 3.4, 1 mm gradient step, one or two measured steps"
+    }
+   ],
+   "excluded": [
+    {
+     "id": "dba2025",
+     "reason": "Zhang & Xia 2025 DBA is a 3D continuum evolution solver, not electromagnetic inverse design (audit row 8)."
+    },
+    {
+     "id": "hughes2021",
+     "reason": "Forward simulation only, primary text access limited in the audit, and not cited in the current manuscript."
+    }
+   ]
+  },
+  "data/h200_unify/a5/fit.json": {
+   "rows": [
+    {
+     "name": "H08_s1200_l3",
+     "host_trace": true,
+     "nx": 400,
+     "nz": 125,
+     "nxy": 160000,
+     "cells": 20000000,
+     "steps": 1200,
+     "nlam": 3,
+     "nograd": 1976314880.0,
+     "recfwd": 1990179328.0,
+     "adj": 3418893312.0,
+     "total": 3418893312.0,
+     "total_reserved": 3600809984.0,
+     "host_hwm": 6449025024.0,
+     "trace_bytes": 3072000000,
+     "reservation": 4191502446,
+     "host_reservation": 3422421640
+    },
+    {
+     "name": "H16_s1200_l3",
+     "host_trace": true,
+     "nx": 800,
+     "nz": 125,
+     "nxy": 640000,
+     "cells": 80000000,
+     "steps": 1200,
+     "nlam": 3,
+     "nograd": 7830850560.0,
+     "recfwd": 7352471552.0,
+     "adj": 13609152512.0,
+     "total": 13609152512.0,
+     "total_reserved": 13805551616.0,
+     "host_hwm": 16627683328.0,
+     "trace_bytes": 12288000000,
+     "reservation": 16635609198,
+     "host_reservation": 13912187528
+    },
+    {
+     "name": "H24_s1200_l3",
+     "host_trace": true,
+     "nx": 1200,
+     "nz": 125,
+     "nxy": 1440000,
+     "cells": 180000000,
+     "steps": 1200,
+     "nlam": 3,
+     "nograd": 15957604352.0,
+     "recfwd": 16510905856.0,
+     "adj": 30586735616.0,
+     "total": 30586735616.0,
+     "total_reserved": 30981226496.0,
+     "host_hwm": 33325588480.0,
+     "trace_bytes": 27648000000,
+     "reservation": 37422751854,
+     "host_reservation": 31484166792
+    },
+    {
+     "name": "H32_s1200_l3",
+     "host_trace": true,
+     "nx": 1600,
+     "nz": 125,
+     "nxy": 2560000,
+     "cells": 320000000,
+     "steps": 1200,
+     "nlam": 3,
+     "nograd": 28369575936.0,
+     "recfwd": 29345159680.0,
+     "adj": 54377027584.0,
+     "total": 54377027584.0,
+     "total_reserved": 55159291904.0,
+     "host_hwm": 57420021760.0,
+     "trace_bytes": 49152000000,
+     "reservation": 66552930414,
+     "host_reservation": 56138359432
+    },
+    {
+     "name": "L04_s1200_l3",
+     "host_trace": false,
+     "nx": 200,
+     "nz": 125,
+     "nxy": 40000,
+     "cells": 5000000,
+     "steps": 1200,
+     "nlam": 3,
+     "nograd": 522237440.0,
+     "recfwd": 2531714048.0,
+     "adj": 1628226560.0,
+     "total": 2531714048.0,
+     "total_reserved": 2699034624.0,
+     "host_hwm": 1380515840.0,
+     "trace_bytes": 768000000,
+     "reservation": 1861479534,
+     "host_reservation": 24343176
+    },
+    {
+     "name": "L06_s1200_l3",
+     "host_trace": false,
+     "nx": 300,
+     "nz": 125,
+     "nxy": 90000,
+     "cells": 11250000,
+     "steps": 1200,
+     "nlam": 3,
+     "nograd": 1124739072.0,
+     "recfwd": 4495962112.0,
+     "adj": 3571509248.0,
+     "total": 4495962112.0,
+     "total_reserved": 4836032512.0,
+     "host_hwm": 1400279040.0,
+     "trace_bytes": 1728000000,
+     "reservation": 4101707118,
+     "host_reservation": 86350472
+    },
+    {
+     "name": "L08_s0600_l3",
+     "host_trace": false,
+     "nx": 400,
+     "nz": 125,
+     "nxy": 160000,
+     "cells": 20000000,
+     "steps": 600,
+     "nlam": 3,
+     "nograd": 1976312320.0,
+     "recfwd": 4972462592.0,
+     "adj": 4789936128.0,
+     "total": 4972462592.0,
+     "total_reserved": 5570035712.0,
+     "host_hwm": 1407967232.0,
+     "trace_bytes": 1536000000,
+     "reservation": 5632267926,
+     "host_reservation": 186420104
+    },
+    {
+     "name": "L08_s1200_l3",
+     "host_trace": false,
+     "nx": 400,
+     "nz": 125,
+     "nxy": 160000,
+     "cells": 20000000,
+     "steps": 1200,
+     "nlam": 3,
+     "nograd": 1976314880.0,
+     "recfwd": 6508792832.0,
+     "adj": 6326266368.0,
+     "total": 6508792832.0,
+     "total_reserved": 7105150976.0,
+     "host_hwm": 1442836480.0,
+     "trace_bytes": 3072000000,
+     "reservation": 7245070446,
+     "host_reservation": 186516104
+    },
+    {
+     "name": "L08_s1200_l9",
+     "host_trace": false,
+     "nx": 400,
+     "nz": 125,
+     "nxy": 160000,
+     "cells": 20000000,
+     "steps": 1200,
+     "nlam": 9,
+     "nograd": 1982892032.0,
+     "recfwd": 6514552832.0,
+     "adj": 6333078528.0,
+     "total": 6514552832.0,
+     "total_reserved": 7165968384.0,
+     "host_hwm": 1401090048.0,
+     "trace_bytes": 3072000000,
+     "reservation": 7289432174,
+     "host_reservation": 186516104
+    },
+    {
+     "name": "L12_s1200_l3",
+     "host_trace": false,
+     "nx": 600,
+     "nz": 125,
+     "nxy": 360000,
+     "cells": 45000000,
+     "steps": 1200,
+     "nlam": 3,
+     "nograd": 4412995584.0,
+     "recfwd": 12263476736.0,
+     "adj": 14203521024.0,
+     "total": 14203521024.0,
+     "total_reserved": 15051259904.0,
+     "host_hwm": 1554313216.0,
+     "trace_bytes": 6912000000,
+     "reservation": 16241204334,
+     "host_reservation": 501322376
+    },
+    {
+     "name": "L16_s0600_l3",
+     "host_trace": false,
+     "nx": 800,
+     "nz": 125,
+     "nxy": 640000,
+     "cells": 80000000,
+     "steps": 600,
+     "nlam": 3,
+     "nograd": 7830848000.0,
+     "recfwd": 14183213056.0,
+     "adj": 19100161536.0,
+     "total": 19100161536.0,
+     "total_reserved": 19316867072.0,
+     "host_hwm": 1695662080.0,
+     "trace_bytes": 6144000000,
+     "reservation": 22398678678,
+     "host_reservation": 968665992
+    },
+    {
+     "name": "L16_s1200_l3",
+     "host_trace": false,
+     "nx": 800,
+     "nz": 125,
+     "nxy": 640000,
+     "cells": 80000000,
+     "steps": 1200,
+     "nlam": 3,
+     "nograd": 7830850560.0,
+     "recfwd": 20326560256.0,
+     "adj": 25243508736.0,
+     "total": 25243508736.0,
+     "total_reserved": 25461522432.0,
+     "host_hwm": 1729495040.0,
+     "trace_bytes": 12288000000,
+     "reservation": 28849881198,
+     "host_reservation": 968761992
+    },
+    {
+     "name": "L16_s1200_l9",
+     "host_trace": false,
+     "nx": 800,
+     "nz": 125,
+     "nxy": 640000,
+     "cells": 80000000,
+     "steps": 1200,
+     "nlam": 9,
+     "nograd": 7860793344.0,
+     "recfwd": 20355493888.0,
+     "adj": 25275220992.0,
+     "total": 25275220992.0,
+     "total_reserved": 25459425280.0,
+     "host_hwm": 1729347584.0,
+     "trace_bytes": 12288000000,
+     "reservation": 29080450362,
+     "host_reservation": 968761992
+    },
+    {
+     "name": "L20p8_s1200_l3",
+     "host_trace": false,
+     "nx": 1040,
+     "nz": 125,
+     "nxy": 1081600,
+     "cells": 135200000,
+     "steps": 1200,
+     "nlam": 3,
+     "nograd": 12257988096.0,
+     "recfwd": 33037687296.0,
+     "adj": 42652384256.0,
+     "total": 42652384256.0,
+     "total_reserved": 42964353024.0,
+     "host_hwm": 1999179776.0,
+     "trace_bytes": 20766720000,
+     "reservation": 48744063534,
+     "host_reservation": 1722091016
+    },
+    {
+     "name": "L24_s1200_l3",
+     "host_trace": false,
+     "nx": 1200,
+     "nz": 125,
+     "nxy": 1440000,
+     "cells": 180000000,
+     "steps": 1200,
+     "nlam": 3,
+     "nograd": 15957604352.0,
+     "recfwd": 43354646528.0,
+     "adj": 56761457664.0,
+     "total": 56761457664.0,
+     "total_reserved": 57191432192.0,
+     "host_hwm": 2272886784.0,
+     "trace_bytes": 27648000000,
+     "reservation": 64904863854,
+     "host_reservation": 2361541256
+    }
+   ],
+   "fits": {
+    "total": {
+     "c_bytes": 184895324.53012222,
+     "a_bytes_per_cell": 159.3025404715635,
+     "t_bytes_per_xy_step": 16.13309353065881,
+     "w_bytes_per_xy_lambda": -5.323564830583765,
+     "max_rel_residual": 0.01112020235265386,
+     "n": 9
+    },
+    "recfwd": {
+     "c_bytes": 1901867349.725105,
+     "a_bytes_per_cell": 76.55384056425967,
+     "t_bytes_per_xy_step": 15.995178298438788,
+     "w_bytes_per_xy_lambda": 7.786923097301286,
+     "max_rel_residual": 0.00015927909053303093,
+     "n": 9
+    },
+    "nograd": {
+     "c_bytes": 297158844.0431005,
+     "a_bytes_per_cell": 95.99219452371602,
+     "t_bytes_per_xy_step": -1.086539929263509,
+     "w_bytes_per_xy_lambda": 116.3967066518408,
+     "max_rel_residual": 0.09738618672177803,
+     "n": 9
+    },
+    "total_reserved": {
+     "c_bytes": 892189929.4913157,
+     "a_bytes_per_cell": 151.4360287326881,
+     "t_bytes_per_xy_step": 16.9181640091044,
+     "w_bytes_per_xy_lambda": -88.4974362045558,
+     "max_rel_residual": 0.01733285601967818,
+     "n": 9
+    },
+    "total_hosttrace_device": {
+     "c_bytes": 19464025.302322492,
+     "a_bytes_per_cell_incl_area_terms": 169.85658820465122,
+     "n": 4
+    }
+   },
+   "extrapolation": {
+    "d200_D4_quarter_5113sq": {
+     "nxy": 26142769,
+     "cells": 3267846125,
+     "nlam1": {
+      "fwd_adj_TB": 1.0267383970944515,
+      "fwd_adj_TiB": 0.9338131322642326,
+      "nograd_forward_TB": 0.2829416171069599,
+      "trace_TB": 0.5019411648,
+      "B_per_cell": 314.19423002802847
+     },
+     "nlam3": {
+      "fwd_adj_TB": 1.0264600516432065,
+      "fwd_adj_TiB": 0.9335599785510627,
+      "nograd_forward_TB": 0.2890274815356796,
+      "trace_TB": 0.5019411648,
+      "B_per_cell": 314.10905299073914
+     },
+     "nlam9": {
+      "fwd_adj_TB": 1.0256250152894717,
+      "fwd_adj_TiB": 0.932800517411553,
+      "nograd_forward_TB": 0.3072850748218386,
+      "trace_TB": 0.5019411648,
+      "B_per_cell": 313.8535218788711
+     }
+    },
+    "d200_full_10090sq_(0.9um_margin)": {
+     "nxy": 101808100,
+     "cells": 12726012500,
+     "nlam1": {
+      "fwd_adj_TB": 3.9979045540011735,
+      "fwd_adj_TiB": 3.636073010057929,
+      "nograd_forward_TB": 1.1010028748788234,
+      "trace_TB": 1.95471552,
+      "B_per_cell": 314.1521787756513
+     },
+     "nlam3": {
+      "fwd_adj_TB": 3.996820589959916,
+      "fwd_adj_TiB": 3.635087150505493,
+      "nograd_forward_TB": 1.1247031299797858,
+      "trace_TB": 1.95471552,
+      "B_per_cell": 314.06700173836197
+     },
+     "nlam9": {
+      "fwd_adj_TB": 3.9935686978361447,
+      "fwd_adj_TiB": 3.6321295718481856,
+      "nograd_forward_TB": 1.1958038952826735,
+      "trace_TB": 1.95471552,
+      "B_per_cell": 313.81147062649393
+     }
+    },
+    "s150_full_7590sq": {
+     "nxy": 57608100,
+     "cells": 7201012500,
+     "nlam1": {
+      "fwd_adj_TB": 2.2622940385951527,
+      "fwd_adj_TiB": 2.057544441954772,
+      "nograd_forward_TB": 0.6231313435494175,
+      "trace_TB": 1.10607552,
+      "B_per_cell": 314.1633261426991
+     },
+     "nlam3": {
+      "fwd_adj_TB": 2.2616806776849194,
+      "fwd_adj_TiB": 2.05698659345664,
+      "nograd_forward_TB": 0.6365421297823575,
+      "trace_TB": 1.10607552,
+      "B_per_cell": 314.07814910540975
+     },
+     "nlam9": {
+      "fwd_adj_TB": 2.259840594954219,
+      "fwd_adj_TiB": 2.055313047962244,
+      "nograd_forward_TB": 0.6767744884811767,
+      "trace_TB": 1.10607552,
+      "B_per_cell": 313.8226179935417
+     }
+    },
+    "s100_full_5090sq": {
+     "nxy": 25908100,
+     "cells": 3238512500,
+     "nlam1": {
+      "fwd_adj_TB": 1.017523601075451,
+      "fwd_adj_TiB": 0.9254323241070332,
+      "nograd_forward_TB": 0.28040447605751323,
+      "trace_TB": 0.49743552,
+      "B_per_cell": 314.1947425169583
+     },
+     "nlam3": {
+      "fwd_adj_TB": 1.0172477541754765,
+      "fwd_adj_TiB": 0.925181442813006,
+      "nograd_forward_TB": 0.28643571108872634,
+      "trace_TB": 0.49743552,
+      "B_per_cell": 314.10956547966896
+     },
+     "nlam9": {
+      "fwd_adj_TB": 1.016420213475553,
+      "fwd_adj_TiB": 0.9244287989309241,
+      "nograd_forward_TB": 0.3045294161823657,
+      "trace_TB": 0.49743552,
+      "B_per_cell": 313.854034367801
+     }
+    }
+   },
+   "marginal_bytes_per_cell_two_largest": 314.93467428571427,
+   "largest": {
+    "name": "L24_s1200_l3",
+    "cells": 180000000,
+    "fwd_adj_B_per_cell": 315.3414314666667,
+    "nograd_B_per_cell": 88.65335751111111,
+    "recfwd_B_per_cell": 240.8591473777778
+   },
+   "compare": {
+    "H200x8_TB": 1.128,
+    "H100x4_TB": 0.32
+   },
+   "model": "peak = c + a*Nx*Ny*Nz + t*Nx*Ny*steps + w*Nx*Ny*Nlam (Nz=125), fit on L>=8 um device-trace runs"
+  },
+  "launch/common.env": "export FF_LENS=d200 FF_APERTURE_UM=200 FF_FOCAL_UM=333.3333333333 FF_OVER=0.9 FF_ALGO=zonec FF_INIT_DESIGN=w240\nexport FF_L9_DUALPOL=1 FF_L9_ANISO=1 FF_OWNGRAD=0\nexport FF_TRACE=device FF_GPU_GIB=72 FF_HOST_GIB=110\nexport FF_FAST_DIAG=1 FF_FAST_SYNC=1 FF_FAST_NOGRAD=1 FF_FAST_SPEC=1\nexport FF_B200_KERNELS=1 FF_B200_INTERVAL=pil FF_B200_FUSE_EG=1 FF_B200_HYGIENE=1 FF_B200_AUTOTUNE=1 FF_B200_FUSED_EH=0 FF_B200_FUSED_ADJ=0\nexport FA_TILE_SELECT=cells FA_COMPRESS_STEPS=1 FA_SAVE_QUEUE=6\nexport EZC_RMAX=0 EZC_HTDIAG= SM_NO_CARRIER=1\nexport FF_NCCL_TIMEOUT_S=7200 FA_STALL_S=2400\nexport OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 MKL_NUM_THREADS=4 PYTHONUNBUFFERED=1\nexport TORCH_ALLOW_TF32_CUBLAS_OVERRIDE=0 NVIDIA_TF32_OVERRIDE=0\n",
+  "launch/e1.env": "export FA_CASE=e1 FA_DRIVER=zonec_multi.py\nexport FA_OBJECTIVE=e1_achromat FA_LAM_NM=420,450,470,510,540,570,600,635,670\nexport FF_TILE=19\nexport FA_NEUTRAL_CACHE=\"$PKG/neutral/d200_lookup.npz\"\nexport FA_OPT_OFFLOAD=0 FA_RHO_EVERY=10 FA_GRAD_EVERY=10 FA_TKEEP_EVERY=10\nexport FA_STATE_KEEP_EVERY=5\n",
+  "launch/e2.env": "export FA_CASE=e2 FA_DRIVER=ns_run.py\nexport FA_OBJECTIVE=e2_rgb_holo FA_LAM_NM=450,540,635 FA_POLS=x\nexport FF_LENS=s150 FF_APERTURE_UM=150 FF_TILE=19 FA_TILE_GRID=edge\nexport FA_OBJ_CFG='{\"aperture\": \"square\", \"radius_um\": 75.0, \"z_um\": 300.0, \"window_um\": 120.0}'\nexport FA_OPT_OFFLOAD=1 FA_RHO_EVERY=0 FA_GRAD_EVERY=0 FA_TKEEP_EVERY=10\nexport FA_KEEP_TRACE=1 FA_KEEP_MAX_UNITS=auto FF_FAST_OBS=1\nexport FA_STATE_KEEP_EVERY=10\n",
+  "launch/e3.env": "export FA_CASE=e3 FA_DRIVER=ns_run.py\nexport FA_OBJECTIVE=e3_pol_holo FA_LAM_NM=540 FA_POLS=xy\nexport FF_LENS=s100 FF_APERTURE_UM=100 FF_TILE=25 FA_TILE_GRID=edge\nexport FA_OBJ_CFG='{\"aperture\": \"square\", \"radius_um\": 50.0, \"z_um\": 200.0, \"window_um\": 80.0}'\nexport FA_OPT_OFFLOAD=1 FA_RHO_EVERY=0 FA_GRAD_EVERY=0 FA_TKEEP_EVERY=10 FA_STATE_KEEP_EVERY=10\nexport FA_KEEP_TRACE=1 FA_KEEP_MAX_UNITS=auto FF_FAST_OBS=1\nexport EZC_SMIN0=50 EZC_SMOOTH=9 EZC_SMOOTH_TO=40 EZC_BFAC=1.3\n"
+ },
+ "references": {}
+}

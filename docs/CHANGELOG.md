@@ -9,6 +9,12 @@ Commits that only record validation evidence or documentation ("Record ...",
 
 ## Unreleased
 
+## 1.1.5 (2026-10-06)
+
+### Added
+
+- Example `examples/full-aperture-tiled-adjoint/`: full-aperture tiled-adjoint optimization of three freeform metasurfaces (a broadband lens and two holograms), with drivers, settings, final layouts, optimization histories, an evaluation script and the source data of the figures and tables of the accompanying preprint (2fae7bd).
+
 ## 1.1.4 (2026-10-02)
 
 ### Added

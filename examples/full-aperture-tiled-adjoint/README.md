@@ -107,8 +107,13 @@ name the record files of the original runs; those files themselves are not part 
 |---|---|
 | Figs. 1-6 | `fig1.npz/.json` ... `fig6.json` (Fig. 6 includes the per-step histories of the three runs) |
 | Extended Data Table 1 | `extended_data_table1.csv` |
-| Supplementary Figs. 1-8 | `supp_fig1.json` ... `supp_fig8.json`, with `supp_fig2.npz`, `supp_fig6.npz`, `supp_fig7.npz` |
-| Supplementary Figs. 9-12 | the layouts in `designs/` (`supp_fig9_12.json`) |
-| Supplementary Tables 1-12 | `supp_table<k>_*.csv` |
+| Supplementary Figs. 1-9 | `supp_fig1.json` ... `supp_fig9.json`, with `supp_fig2.npz`, `supp_fig6.npz`, `supp_fig7.npz`, `supp_fig8.npz` |
+| Supplementary Figs. 10-13 | the layouts in `designs/` (`supp_fig10_13.json`) |
+| Supplementary Tables 1-13 | `supp_table<k>_*.csv` |
 
-Full three-dimensional fields are not stored; they can be regenerated with `evaluate.sh` and the layouts above.
+Supplementary Fig. 8 and Supplementary Table 12 (layer thickness and edge bias) give, for the three freeform layouts, the
+objective and its components at layer heights of 620, 640 and 700 nm and at edge biases of -20, -10, 0, +10 and +20 nm
+(`supp_fig8.json`, `supp_fig8.npz`, `supp_table12_robustness.csv`).
+
+Full three-dimensional fields are not stored. The transmitted exit-plane fields (`pupil_jones.npz`) and all scores can be
+regenerated from the layouts above with `evaluate.sh`.
