@@ -296,11 +296,25 @@ def run_mode_network(config, project, options, *, grad):
 
 
 def run_reversible(config, project):
+    def input_map():
+        if config['material'] == 'dispersive_ade':
+            _, _, ownership = voxelize(project,with_ownership=True)
+            index = [m.name for m in project.materials].index('block')
+            mask = ownership==index
+            # Reversible density is scalar per cell. The scene rasterizer
+            # reports separate Yee-component owners, so take their union.
+            if mask.ndim == 4:
+                mask = mask.any(axis=-1)
+            return track(torch.as_tensor(mask,dtype=dtype_of(config),
+                device=device_of(config)).contiguous().requires_grad_(True))
+        return scalar_epsilon(project,config,grad=True)
+    def fixed_map(epsilon):
+        return track(torch.ones_like(epsilon) if config['material']=='dispersive_ade' else epsilon.detach().clone())
     active_pml = any(kind == 'pml' for name, kind in C.face_kinds(config).items()
                      if 'xyz'.index(name[0]) in C.active_axes(config))
     if config['monitor'] == 'point' and not active_pml:
         model = ReversibleSimulation(project, ReversibleOptions())
-        epsilon = track(scalar_epsilon(project, config, grad=True)[..., 0].contiguous().detach().requires_grad_(True))
+        epsilon = input_map() if config['material']=='dispersive_ade' else track(scalar_epsilon(project, config, grad=True)[..., 0].contiguous().detach().requires_grad_(True))
         result = model(epsilon)
         finite_signals(result)
         backward_finite(result.signals.abs().square().sum(), epsilon)
@@ -308,14 +322,14 @@ def run_reversible(config, project):
     options = ReversibleCPMLOptions()
     if config['monitor'] == 'point':
         model = ReversibleCPMLSimulation(project, options)
-        epsilon = scalar_epsilon(project, config, grad=True)
-        result = model(epsilon, fixed_epsilon=track(epsilon.detach().clone()))
+        epsilon = input_map()
+        result = model(epsilon, fixed_epsilon=fixed_map(epsilon))
         finite_signals(result)
         backward_finite(result.signals.abs().square().sum(), epsilon)
         return dict(result.report)
     model = ReversibleCPMLPlaneSimulation(project, options)
-    epsilon = scalar_epsilon(project, config, grad=True)
-    planes = model(epsilon, FREQUENCY_HZ, fixed_epsilon=track(epsilon.detach().clone()))
+    epsilon = input_map()
+    planes = model(epsilon, FREQUENCY_HZ, fixed_epsilon=fixed_map(epsilon))
     return finish_planes(config, project, planes, (epsilon,), True)
 
 

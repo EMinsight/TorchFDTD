@@ -1,13 +1,13 @@
 """Experimental lossless periodic FDTD with terminal-state reconstruction.
 
-This is an explicit alternative to checkpointed differentiation. It does not
-invert absorbing or dispersive states. Floating-point reconstruction is
+This is an explicit alternative to checkpointed differentiation. It supports
+confined isotropic Lorentz density mixtures and does not invert absorbing states. Floating-point reconstruction is
 approximate, and its drift diagnostic is not a gradient-error bound.
 """
 from __future__ import annotations
 
 import copy
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import math
 import threading
 import time
@@ -26,8 +26,11 @@ class ReversibleOptions:
     host_budget_bytes: int | None = None
     resident_budget_bytes: int | None = None
     reconstruction_tolerance: float = 1e-3
+    offload_terminal: bool = field(default=False, kw_only=True)
 
     def __post_init__(self):
+        if type(self.offload_terminal) is not bool:
+            raise ValueError('offload_terminal must be a boolean.')
         for name in ('gpu_budget_bytes', 'host_budget_bytes', 'resident_budget_bytes'):
             value = getattr(self, name)
             if value is not None and (isinstance(value, bool) or not isinstance(value, int) or value <= 0):
@@ -195,23 +198,35 @@ class ReversibleSimulation(torch.nn.Module):
     All material cells receive their actual derivative. Constrain design cells
     explicitly with torch.where when a source or exterior must remain fixed.
     Field storage is O(cells). Point/source histories remain O(steps).
+    Selecting ``material`` changes the input to scalar density rho in [0,1],
+    with a fixed scalar/per-z background supplied as ``fixed_epsilon``.
     """
 
-    def __init__(self, project: Project, options: ReversibleOptions | None = None):
+    def __init__(self, project: Project, options: ReversibleOptions | None = None, *, material=None):
         super().__init__()
         self.project = Project.model_validate(project.model_dump())
         self.options = options or ReversibleOptions()
+        from .reversible_lorentz import resolve_material, proxy_project
         if not isinstance(self.options, ReversibleOptions):
             raise ValueError('ReversibleSimulation requires ReversibleOptions.')
         from .boundaries import reject_pmc_faces
         reject_pmc_faces(self.project.region, 'ReversibleSimulation')
-        _validate_project(self.project)
+        _validate_project(proxy_project(self.project) if any(m.oscillators for m in self.project.materials) else self.project)
+        self.material = resolve_material(self.project, material)
+        if self.material is None and self.options.offload_terminal:
+            raise ValueError('Terminal offload is currently available for reversible Lorentz density mixtures only.')
         from .adjoint_memory import _resident_contract
         _resident_contract(self.project.region, self.options)
 
-    def plan(self, *, device='cpu'):
+    def plan(self, *, device='cpu', density_layers=None):
         """Metadata-only admission, repeated before each execution."""
         project = self._snapshot()
+        if self.material is not None:
+            from .reversible_lorentz import resolve_material, reservation
+            material = resolve_material(project, self.material)
+            shape = (*project.region.shape[:2], project.region.shape[2] if density_layers is None else density_layers)
+            return reservation(project, self.options, torch.device(device), (0, project.region.shape[2]-1),
+                               material, density_shape=shape, periodic=True)[0]
         from .reversible_memory import _reversible_reservation
         return _reversible_reservation(project, self.options, torch.device(device))
 
@@ -221,11 +236,21 @@ class ReversibleSimulation(torch.nn.Module):
         # Pydantic objects are mutable. Revalidate numeric/CFL settings as well
         # as categorical scope, then use this same snapshot throughout a call.
         project = Project.model_validate(self.project.model_dump())
-        _validate_project(project)
+        from .reversible_lorentz import resolve_material, proxy_project
+        _validate_project(proxy_project(project) if any(m.oscillators for m in project.materials) else project)
+        material = resolve_material(project, self.material)
         return project
 
-    def forward(self, epsilon):
+    def forward(self, epsilon, *, fixed_epsilon=None):
         project = self._snapshot()
+        if self.material is not None:
+            from .reversible_lorentz import resolve_material, execute_density
+            material = resolve_material(project, self.material)
+            background = epsilon.new_tensor(1.) if fixed_epsilon is None and isinstance(epsilon, torch.Tensor) else fixed_epsilon
+            return execute_density(epsilon, background, project, self.options,
+                (0, project.region.shape[2]-1), material, periodic=True)
+        if fixed_epsilon is not None:
+            raise ValueError('fixed_epsilon is used only for the explicit Lorentz density mixture.')
         if (not isinstance(epsilon, torch.Tensor) or epsilon.dtype != torch.float32
                 or epsilon.device.type not in ('cpu', 'cuda') or epsilon.layout != torch.strided
                 or not epsilon.is_contiguous() or epsilon.is_conj() or epsilon.is_neg()

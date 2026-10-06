@@ -560,7 +560,7 @@ rule('reversible_mesh', dict(CLOSED, boundary=['periodic', 'bloch', 'pec', 'anti
      'ReversibleSimulation requires uniform 3D FP32 Yee staircase sampling and fixed resident steps.', executions=REV)
 rule('reversible_faces', dict(CLOSED, boundary=['bloch', 'pec', 'antisymmetric']), 'entry', 'torchfdtd/reversible.py::_validate_project',
      'ReversibleSimulation requires all six boundaries to be periodic, without Bloch phase.', executions=REV)
-rule('reversible_materials', dict(CLOSED, boundary=['periodic'], material=['dispersive_ade', 'anisotropic_tensor']), 'entry',
+rule('reversible_materials', dict(CLOSED, boundary=['periodic'], material=['anisotropic_tensor']), 'entry',
      'torchfdtd/reversible.py::_validate_project',
      'ReversibleSimulation supports only nondispersive dielectric material declarations.', executions=REV)
 OPEN = dict(boundary=['cpml', 'periodic', 'bloch', 'pec', 'antisymmetric'])
@@ -579,12 +579,12 @@ rule('reversible_cpml_mesh', dict(OPEN, mesh=['graded', 'explicit']), 'entry', '
      'ReversibleCPMLSimulation requires uniform 3D FP32 Yee staircase sampling and fixed resident steps.', executions=REV)
 rule('reversible_cpml_faces', dict(boundary=['cpml', 'pec', 'antisymmetric']), 'entry', 'torchfdtd/reversible_cpml.py::_validate_project',
      'ReversibleCPMLSimulation requires periodic or Bloch x/y and CPML on both z faces.', executions=REV)
-rule('reversible_cpml_materials', dict(boundary=['periodic', 'bloch'], material=['dispersive_ade', 'anisotropic_tensor']), 'entry',
-     'torchfdtd/reversible_cpml.py::_validate_project',
-     'ReversibleCPMLSimulation supports only nondispersive dielectric declarations.', executions=REV)
 rule('reversible_cpml_sources', dict(boundary=['periodic', 'bloch'], source=['plane_oneway', 'tfsf']), 'entry',
      'torchfdtd/reversible_cpml.py::_validate_project',
      'ReversibleCPMLSimulation supports fixed soft electric point or z-normal plane sources only.', executions=REV)
+rule('reversible_lorentz_bloch', dict(boundary=['bloch'], material=['dispersive_ade']), 'entry',
+     'torchfdtd/reversible_lorentz.py::resolve_material',
+     'Reversible Lorentz density mixtures currently require real fields;', executions=REV)
 
 # Tensor batch (run_tensor_batch)
 TB = ('tensor_batch',)

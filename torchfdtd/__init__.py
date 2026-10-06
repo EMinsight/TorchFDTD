@@ -184,6 +184,9 @@ __all__ += ["MaterialProvenance", "MaterialImportResult", "MaterialBandWarning",
             "discretization_report", "fit_band_extrapolation"]
 from .source_preview import preview_source, effective_bandwidth
 __all__ += ["preview_source", "effective_bandwidth"]
+
+from .material_fit import fit_discrete_lorentz
+__all__ += ["fit_discrete_lorentz"]
 from .results import (ResultRecord, guarded_ratio, reflection_transmission, s_parameters, mode_decomposition,
                       diffraction_record, farfield_record, nearzone_record)
 __all__ += ["ResultRecord", "guarded_ratio", "reflection_transmission", "s_parameters", "mode_decomposition",

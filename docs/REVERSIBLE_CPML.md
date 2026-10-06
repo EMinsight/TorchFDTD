@@ -10,7 +10,112 @@ The admitted problem has uniform 3D Yee sampling, staircase interfaces, real FP3
 
 Sources are fixed soft electric point increments or z-normal plane increments. Each resolved polarization component must lie wholly inside or wholly outside the reconstruction interval. Sources outside the interval contribute through the recorded boundary planes and are not undone in the interior. The point API observes E/H after each complete native step. `ReversibleCPMLPlaneSimulation` instead returns online spectra on fixed collocated field planes. Project validation requires sources and monitors inside the non-PML physical region. Both may lie outside the reconstructed interval.
 
-Off-diagonal tensor coupling, ADE dispersion, nonuniform meshes, subpixel interfaces, spatial streaming, adaptive stopping, H sources, and one-way/TFSF injection are outside this API. The derivative contract is first order. The API does not differentiate source settings or the boundary configuration.
+Off-diagonal tensor coupling, nonuniform meshes, subpixel interfaces, spatial streaming, adaptive stopping, H sources, and one-way/TFSF injection are outside this API. Isotropic ADE density mixtures have the additional contract below. The derivative contract is first order. The API does not differentiate source settings or the boundary configuration.
+
+## Isotropic Lorentz density mixtures
+
+Select a scalar oscillator `Material` with the `material=` constructor keyword
+in `ReversibleSimulation`, `ReversibleCPMLSimulation` or
+`ReversibleCPMLPlaneSimulation`. A sole oscillator declaration in the project
+is selected automatically. Multiple declarations require an explicit material
+or its declared name. The input then represents density `rho`, rather than
+permittivity. The original nondispersive numerical kernels are unchanged.
+
+The density must be contiguous real FP32 on CPU or CUDA, lie in `[0,1]`, and
+have shape `(Nx,Ny,Nz)` or `(Nx,Ny,M)`, where `M` evenly divides the inclusive
+reconstruction depth. A layer map is replicated along z. Its VJP sums all
+replicated cell contributions. For a full map, the exterior density gradient
+is zero. The fixed background is a non-gradient FP32 scalar, `(Nz,)` table or
+laterally uniform scalar volume. It may vary inside a density layer.
+
+The constitutive mixture is linear in density:
+
+```
+epsilon_inf(z,rho) = background(z) + rho * (material.epsilon_inf - background(z))
+pole_strength_j(rho) = rho * material.pole_strength_j
+```
+
+The density VJP includes both terms. Source increments remain fixed. Oscillator
+rates, damping, background, frequencies and source parameters are not design
+variables. This path requires real fields, isotropic materials and split E/H
+and split field-adjoint kernels. Bloch fields and tensor dispersion raise an
+explicit error. The existing dielectric Bloch/diagonal paths retain their
+contract. Small nonnegative damping is accepted only within the reversible
+conditioning horizon. Use checkpointed `DispersiveSimulation` for a longer
+lossy run or other supported dispersion paths.
+
+### Discrete fitting and stability
+
+`fit_discrete_lorentz(material, dt_s=..., wavelength_range_um=(low,high))`
+fits an existing Lorentz/Drude declaration to the trapezoidal ADE response.
+Alternatively pass `sellmeier_coefficients=[(B,C), ...]`, with wavelength in
+micrometres and `C` in micrometres squared. The continuous target is
+`epsilon_inf + sum(B * wavelength**2 / (wavelength**2-C))`.
+The result retains the target samples and its timestep/band provenance.
+Call `require_tolerance()` before using the fitted material. The report gives
+the maximum n error for transparent fits and the existing complex fitter's
+residuals for lossy inputs. A declared fitted timestep must match the solver.
+
+For transparent passive inputs, deterministic Gauss–Newton refinement fits
+the discrete frequency `(2/dt)*tan(omega*dt/2)` and reports rounded FP32 pole
+coefficients. Lossy targets use the existing constrained ADE fitter. Positive
+pole strengths, nonnegative damping, instantaneous permittivity at least one,
+background permittivity at least one and the region's Yee CFL bound are
+required. The fit band must lie below temporal Nyquist and avoid singularities.
+These checks do not validate an extrapolated band or spatial convergence.
+
+Optional `grid_spacing_m` fits the normal-incidence one-dimensional Yee phase
+on its first Nyquist branch. It is an effective-medium compensation for that
+direction and spacing. It does not correct every angle in a lens.
+
+For each pole, inversion uses
+`d_minus = 1 - damping*dt/2 + (resonance*dt)**2/4` and forward uses `d_plus`
+with the positive damping term. Nonpositive `d_minus` is rejected. The run also
+rejects `steps*log(d_plus/d_minus) > log(1000)`, and backward checks the actual
+initial E/H/P/Q reconstruction residual against the chosen tolerance.
+This is a fail-closed roundoff diagnostic, not a bound on gradient error.
+
+### Packed poles, transfers and memory
+
+CUDA stores each pair of poles as `(P0,Q0,P1,Q1)` in a `float4` per interior
+cell and electric component. One pole is padded to two. For `N` interior cells
+and `p` poles, each packed bank uses `24*N*(2*ceil(p/2))` bytes. Recorded solves
+admit the primal pole bank, immutable terminal bank and pole cotangents, along
+with density maps, gradients, diagnostics and tuning scratch. Every execution
+repeats complete host/GPU admission. `plan(..., density_layers=M)` reports the
+actual input shape and padded pole bytes. Its conservative recorded reservation
+also bounds forward-only calls.
+
+`offload_terminal=True` keeps terminal E/H and the complete P/Q bank in pinned
+host memory on CUDA and releases working field/pole volumes between forward
+and backward. Copies are ordered on the compute stream. Sequential retained
+VJPs restore a fresh working bank and preserve the terminal snapshot. CPU
+already retains these states on the host and reports that offload was unused.
+
+The boundary history contains the original four tangential E/H rows per step.
+Nonzero poles are confined inside the reconstruction interval. The two halo
+planes therefore have implicit zero P/Q, and need no extra polarization
+history. Device, synchronous host and asynchronous host histories preserve
+this exact trace format. Terminal P/Q is never discarded or reconstructed
+from E/H alone. No half-precision pole or trace approximation is used.
+
+### Small voxel example
+
+Run `python -m examples.reversible_lorentz_voxel` for a 1 µm periodic tile,
+256 steps, z-dependent substrate background, three online spectral samples
+and a density VJP. `--device cuda` uses packed kernels and terminal offload.
+The example uses the campaign's two-term approximation to Siefke ALD TiO2
+tabulated data. Those coefficients are not a Sellmeier formula published in
+the [source paper](https://doi.org/10.1002/adom.201600250). The coarse grid is an
+API demonstration and does not establish a converged lens performance.
+
+The pinned research v2 reference was compared on an RTX 3060 with real FP32,
+a 20×20×40 grid, 256 steps, two poles, two density layers, 1 µm tile and nine
+frequencies. Every forward/reverse E/H/P/Q state, halo frame, pole transpose,
+density gradient and online plane spectrum matched with `torch.equal` at each
+step. This is correctness evidence for that fixture. It is not a measurement
+of the full d50 aperture or a throughput speedup. The supplied H200 prototype
+timings remain attributed to that prototype. Multiple GPUs remain unvalidated.
 
 ## Optional CUDA launch and fusion settings
 
@@ -50,7 +155,7 @@ the existing split path. `report['forward_kernel_used']`,
 `report['forward_kernel_variant']` (when fused), `report['adjoint_kernel_used']`,
 and `report['fallback_reason']` identify the actual path and any fallback.
 The adjoint-used field is updated when backward executes. Unsupported physics
-such as dispersion, PMC, subpixel interfaces, and nonuniform meshes retain the
+such as tensor dispersion, PMC, subpixel interfaces, and nonuniform meshes retain the
 API's existing validation errors. The options do not expand the physics contract.
 CUDA runtime and allocation failures propagate.
 

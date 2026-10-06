@@ -496,17 +496,26 @@ class ReversibleCPMLSimulation(torch.nn.Module):
     lie outside the reconstructed interval. Bloch fields use complex64. The full resident
     CPML forward and adjoint are retained, while only four boundary planes
     per timestep and one interior terminal state replace checkpoint replay.
+    With an isotropic oscillator ``material``, the input is FP32 density rho
+    in [0,1]. The fixed background is scalar, per-z or laterally uniform.
+    Packed pole states participate in terminal reconstruction and its VJP.
     """
 
-    def __init__(self, project: Project, options: ReversibleCPMLOptions | None = None):
+    _explicit_dispersive_parameters = True
+
+    def __init__(self, project: Project, options: ReversibleCPMLOptions | None = None, *, material=None):
         super().__init__()
         self.project = Project.model_validate(project.model_dump())
         self.options = options or ReversibleCPMLOptions()
+        from .reversible_lorentz import resolve_material, proxy_project
         if not isinstance(self.options, ReversibleCPMLOptions):
             raise ValueError('ReversibleCPMLSimulation requires ReversibleCPMLOptions.')
         from .boundaries import reject_pmc_faces
         reject_pmc_faces(self.project.region, 'ReversibleCPMLSimulation')
-        _validate_project(self.project, self.options)
+        _validate_project(proxy_project(self.project) if any(m.oscillators for m in self.project.materials) else self.project, self.options)
+        self.material = resolve_material(self.project, material)
+        if self.material is None and self.options.offload_terminal:
+            raise ValueError('Terminal offload is currently available for reversible Lorentz density mixtures only.')
         from .adjoint_memory import _resident_contract
         _resident_contract(self.project.region, self.options)
 
@@ -514,14 +523,25 @@ class ReversibleCPMLSimulation(torch.nn.Module):
         if not isinstance(self.options, ReversibleCPMLOptions):
             raise ValueError('ReversibleCPMLSimulation requires ReversibleCPMLOptions.')
         project = Project.model_validate(self.project.model_dump())
-        return project, _validate_project(project, self.options)
+        from .reversible_lorentz import resolve_material, proxy_project
+        interval = _validate_project(proxy_project(project) if any(m.oscillators for m in project.materials) else project, self.options)
+        material = resolve_material(project, self.material)
+        return project, interval
 
     @property
     def interior_z(self):
         return self._snapshot()[1]
 
-    def plan(self, *, device='cpu', material_components=1):
+    def plan(self, *, device='cpu', material_components=1, density_layers=None):
         project, interval = self._snapshot()
+        if self.material is not None:
+            if material_components != 1:
+                raise ValueError('Lorentz density mixtures require scalar isotropic material input.')
+            from .reversible_lorentz import resolve_material, reservation
+            material = resolve_material(project, self.material)
+            shape = (*project.region.shape[:2], project.region.shape[2] if density_layers is None else density_layers)
+            return reservation(project, self.options, torch.device(device), interval,
+                               material, density_shape=shape)[0]
         from .reversible_cpml_memory import _cpml_reversible_reservation
         return _cpml_reversible_reservation(project, self.options, torch.device(device), interval,
                                            material_components=material_components)
@@ -531,6 +551,10 @@ class ReversibleCPMLSimulation(torch.nn.Module):
 
     def _run(self, epsilon, spectral, *, fixed_epsilon):
         project, interval = self._snapshot()
+        if self.material is not None:
+            from .reversible_lorentz import resolve_material, execute_density
+            material = resolve_material(project, self.material)
+            return execute_density(epsilon, fixed_epsilon, project, self.options, interval, material, spectral)
         for name, value in (('epsilon', epsilon), ('fixed_epsilon', fixed_epsilon)):
             if (not isinstance(value, torch.Tensor) or value.dtype != torch.float32
                     or value.device.type not in ('cpu', 'cuda') or value.layout != torch.strided

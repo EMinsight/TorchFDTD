@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from datetime import date
 import hashlib
 import json
+import math
 from pathlib import Path
 import time
 from typing import Literal
@@ -370,3 +371,164 @@ def import_material_table(path=None,*,text=None,kind: Literal['nk','epsilon']='n
         if message:
             messages.append(message);warnings.warn(message,MaterialBandWarning,stacklevel=2)
     return MaterialImportResult(fit.material,fit.report,provenance,discretization,messages)
+
+
+def fit_discrete_lorentz(material=None, *, sellmeier_coefficients=None,
+                         epsilon_inf=1.0, dt_s, wavelength_range_um,
+                         sample_count=1001, tolerance=1e-3, grid_spacing_m=None,
+                         name='Discrete Lorentz material'):
+    """Fit a passive material to the implemented trapezoidal time update.
+
+    Supply either a scalar ``Material`` or Sellmeier pairs ``(B, C)`` in
+    ``epsilon = epsilon_inf + sum(B*lambda_um**2/(lambda_um**2-C))``.
+    ``C`` is in um squared. The returned ``MaterialFitResult`` retains the
+    continuous target samples and reports the error after FP32 coefficient
+    rounding. A timestep-specific fit must be rebuilt if its timestep changes.
+
+    Transparent lossless inputs use deterministic Gauss--Newton refinement
+    of the supplied pole strengths/rates, rounded to nine decimal multiplier
+    digits. Lossy inputs use the existing constrained complex ADE fitter.
+    ``grid_spacing_m`` optionally fits the normal-incidence 1D Yee phase;
+    this is an effective-medium compensation, not an all-angle correction.
+    """
+    from .models import LorentzPole
+
+    if (material is None) == (sellmeier_coefficients is None):
+        raise ValueError('Supply exactly one Material or Sellmeier coefficient sequence.')
+    if (isinstance(dt_s, bool) or not np.isfinite(dt_s) or dt_s <= 0
+            or type(sample_count) is not int or not 3 <= sample_count <= 8192
+            or isinstance(tolerance, bool) or not np.isfinite(tolerance) or not 0 < tolerance <= 1):
+        raise ValueError('Use a positive timestep, 3..8192 samples and a finite tolerance in (0,1].')
+    try:
+        low, high = (float(v) for v in wavelength_range_um)
+    except (TypeError, ValueError):
+        raise ValueError('wavelength_range_um must contain two positive increasing wavelengths.') from None
+    if not np.isfinite((low, high)).all() or not 0 < low < high:
+        raise ValueError('wavelength_range_um must be finite, positive and increasing.')
+    c0 = 299792458.0
+    wavelengths = np.linspace(low, high, sample_count)
+    frequency = c0 / (wavelengths * 1e-6)
+    if np.max(frequency) * dt_s >= .5:
+        raise ValueError('The entire fitting band must lie below timestep Nyquist.')
+    if sellmeier_coefficients is not None:
+        terms = np.asarray(sellmeier_coefficients, dtype=np.float64)
+        if (terms.ndim != 2 or terms.shape[1] != 2 or not 1 <= terms.shape[0] <= 16
+                or not np.isfinite(terms).all() or np.any(terms <= 0)
+                or isinstance(epsilon_inf, bool) or not np.isfinite(epsilon_inf) or not 1 <= epsilon_inf <= 400):
+            raise ValueError('Sellmeier input needs 1..16 positive finite (B,C) pairs and epsilon_inf in [1,400].')
+        rates = [2 * np.pi * c0 / (np.asarray(math.sqrt(c), dtype=np.float64) * 1e-6)
+                 for _, c in terms]
+        original = Material(name=name, model='multipole', epsilon_inf=epsilon_inf,
+            poles=[LorentzPole(resonance_rad_s=float(w), strength_rad_s_squared=float(b*w**2), damping_rad_s=0)
+                   for (b, _), w in zip(terms, rates)])
+        # Preserve the input formula's arithmetic for the transparent target.
+        square = wavelengths**2
+        with np.errstate(divide='ignore', invalid='ignore'):
+            expected = epsilon_inf + sum(b * square / (square - c) for b, c in terms)
+        expected = np.asarray(expected, dtype=np.complex128)
+    else:
+        if not isinstance(material, Material):
+            raise ValueError('material must be a validated scalar Material.')
+        original = Material.model_validate(material.model_dump())
+        if original.model == 'tensor' or not original.oscillators:
+            raise ValueError('Discrete Lorentz fitting requires an isotropic oscillator material.')
+        expected = permittivity(original, frequency)
+    if not np.isfinite(expected).all():
+        raise ValueError('A material resonance is singular in the fitting band.')
+    data = OpticalData(wavelength_um=wavelengths.tolist(), epsilon_real=expected.real.tolist(),
+        epsilon_imag=expected.imag.tolist(), reference='Continuous target of the supplied material declaration')
+    poles = original.oscillators
+    lossless = (all(gamma == 0 and rate > 0 for rate, _, gamma in poles)
+                and bool(np.all(expected.real > 0)))
+    if grid_spacing_m is not None:
+        if (isinstance(grid_spacing_m, bool) or not np.isfinite(grid_spacing_m) or grid_spacing_m <= 0
+                or not lossless):
+            raise ValueError('Yee phase compensation requires a positive spacing and a transparent lossless target.')
+    if not lossless:
+        result = fit_material(data, name=name, options=FitOptions(max_poles=len(poles),
+            include_drude=any(w == 0 for w, _, _ in poles), target='ade', dt_s=dt_s,
+            tolerance=tolerance, starts=2), provenance=original.provenance)
+        result.report['input_kind'] = 'Lorentz declaration'
+        result.report['stability_contract'] = 'passive strengths/damping, epsilon_inf >= 1 and Yee CFL bound'
+        return result
+    continuous_n = np.sqrt(expected.real)
+    target_n = continuous_n.copy()
+    angular = 2 * np.pi * c0 / (wavelengths * 1e-6)
+    if grid_spacing_m is not None:
+        phase = continuous_n * angular * grid_spacing_m / (2 * c0)
+        if np.any(phase >= np.pi / 2):
+            raise ValueError('The compensated band crosses the first spatial Yee Nyquist branch.')
+        target_n = c0 * dt_s * np.sin(phase) / (grid_spacing_m * np.sin(angular * dt_s / 2))
+    discrete_angular = 2 / dt_s * np.tan(angular * dt_s / 2)
+    count = len(poles)
+
+    def residual(values, free):
+        constant = values[-1] if free else 1.0
+        # Keep the scalar expression order fixed. Refitting ill-conditioned
+        # transparent poles is sensitive to double-precision rounding.
+        epsilon = constant + sum(values[2*i] * strength /
+            ((values[2*i+1] * rate)*(values[2*i+1] * rate) - discrete_angular*discrete_angular)
+            for i, (rate, strength, _) in enumerate(poles))
+        if not np.isfinite(epsilon).all() or np.any(epsilon <= 0):
+            raise ValueError('Refinement left the transparent passive fitting branch.')
+        return np.sqrt(epsilon) - target_n
+
+    def refine(free):
+        values = np.ones(2*count + int(free))
+        if free:
+            values[-1] = original.epsilon_inf
+        for iteration in range(80):
+            current = residual(values, free)
+            jacobian = np.empty((sample_count, values.size))
+            for i in range(values.size):
+                delta = np.zeros_like(values)
+                delta[i] = 1e-7
+                jacobian[:, i] = (residual(values + delta, free) - residual(values - delta, free)) / 2e-7
+            step = np.linalg.lstsq(jacobian, -current, rcond=None)[0]
+            values = values + step
+            if np.max(np.abs(step)) < 1e-13:
+                break
+        return values, iteration + 1
+
+    try:
+        values, iterations = refine(True)
+        if values[-1] < 1:
+            values, iterations = refine(False)
+            values = np.r_[values, 1.0]
+        values = np.array([float(f'{v:.9f}') for v in values])
+        if not np.isfinite(values).all() or np.any(values[:-1] <= 0) or not 1 <= values[-1] <= 400:
+            raise ValueError('The refined oscillator declaration is not passive.')
+        fitted = Material(name=name, model='multipole', epsilon_inf=float(values[-1]),
+            poles=[LorentzPole(resonance_rad_s=float(values[2*i+1]*w),
+                strength_rad_s_squared=float(values[2*i]*s), damping_rad_s=0)
+                for i, (w, s, _) in enumerate(poles)],
+            samples=data, fit_band_um=(low, high), fit_dt_s=dt_s, provenance=original.provenance)
+    except (ValueError, np.linalg.LinAlgError) as error:
+        if grid_spacing_m is not None:
+            raise ValueError('The compensated lossless fit did not converge on a passive branch.') from error
+        fitted_result = fit_material(data, name=name, options=FitOptions(max_poles=count,
+            include_drude=False, target='ade', dt_s=dt_s, tolerance=tolerance), provenance=original.provenance)
+        fitted_result.report['lossless_refinement_fallback'] = str(error)
+        return fitted_result
+
+    coefficients = []
+    epsilon32 = np.full(wavelengths.shape, float(np.float32(fitted.epsilon_inf)))
+    for rate, strength, gamma in fitted.oscillators:
+        square = (rate * dt_s)**2
+        d = 1 + .5*gamma*dt_s + .25*square
+        a32, d32, k32 = (float(np.float32(v)) for v in (.5*square, d, strength*dt_s*dt_s/(4*d)))
+        coefficients.append(dict(a=a32, inverse_d=float(np.float32(1/d)), k=k32))
+        epsilon32 += (4*d32*k32/dt_s**2)/(2*a32/dt_s**2-discrete_angular**2)
+    if not np.isfinite(epsilon32).all() or np.any(epsilon32 <= 0):
+        raise ValueError('Rounded ADE coefficients are singular or opaque in the fitting band.')
+    index32 = np.sqrt(epsilon32)
+    error = float(np.max(np.abs(index32 - target_n)))
+    report = dict(converged=error <= tolerance, target='ade', lossless=True,
+        dt_s=dt_s, wavelength_range_um=[low, high], sample_count=sample_count,
+        max_abs_n_error=error, max_abs_continuous_n_error=float(np.max(np.abs(index32-continuous_n))),
+        tolerance=tolerance, iterations=iterations, parameter_multipliers=values.tolist(),
+        fp32_coefficients=coefficients, data_sha256=data.fingerprint,
+        input_kind='Sellmeier coefficients' if sellmeier_coefficients is not None else 'Lorentz declaration',
+        grid_spacing_m=grid_spacing_m, spatial_compensation='normal-incidence 1D Yee phase' if grid_spacing_m else None,
+        stability_contract='nonnegative strengths/damping, epsilon_inf >= 1, below temporal/spatial Nyquist and Yee CFL bound')
+    return MaterialFitResult(fitted, report)

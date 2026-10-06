@@ -133,8 +133,8 @@
  "recipe": "* Region 2.4 x 2.4 um transverse and 2.4 um along the propagation axis d\n  (z in 3D, y in 2D), mesh 0.1 um, 3 PML cells, 12 steps, Yee material\n  sampling, staircase interfaces. ``graded`` refines the mesh around the\n  structure (mesh_max 0.2 um, 6 points per wavelength); ``explicit`` freezes\n  those graded nodes as fixed coordinates.\n* The material sits in one block of 0.45 x 0.45 x 0.45 um at the centre; mode\n  scenes (mode source or mode-port monitor) stretch it into a straight guide\n  along d instead.\n  ``dielectric`` is a constant index 2; ``dispersive_ade`` a two-pole\n  Drude/Lorentz multipole material; ``anisotropic_tensor`` a symmetric tensor\n  material; ``tensor_ade`` the same tensor material whose Lorentz pole is\n  passed to the tensor-ADE API as explicit pole tensors; ``pec`` an ideal\n  conductor material, which the schema does not offer.\n* The boundary kind applies to every active face. Directional scenes (sheet,\n  one-way, TFSF, mode and tiled-sheet sources, plane, mode-port and\n  radiation-box monitors, tiled execution) carry CPML on the two d faces and\n  the boundary kind on the transverse faces. CPML faces use alpha = 0 so that the PMC\n  endpoint profile contract can accept them. Bloch faces carry a phase of\n  0.3 rad on their axis.\n* Sources are Gaussian, 1 um carrier, two cycles. ``point`` is an Ez point\n  source; ``sheet`` a soft plane through the interior; ``plane_oneway`` a\n  one-way plane over the whole transverse cell; ``tfsf`` a 0.8 um box;\n  ``mode`` the soft plane template of a fixed-eigenmode launch;\n  ``tiled_sheet`` a soft plane extended through the lateral PML.\n* Monitors: ``point`` one Ez probe; ``plane_dft`` one d-normal frequency plane\n  over the transverse interior (one cell short of PEC/PMC walls);\n  ``mode_port`` two opposing fixed mode ports (no project monitors);\n  ``radiation_box`` six frequency planes on a closed 0.8 um box, projected\n  to the far field after the run.\n* ``precision`` is Region.precision; ``cpu`` is backend cpu, ``cuda_torch`` is\n  backend cuda with the Torch kernels, ``cuda_fused`` backend cuda with the\n  fused CuPy kernels.",
  "summary": {
   "total": 211680,
-  "admitted": 11879,
-  "rejected": 199801,
+  "admitted": 11906,
+  "rejected": 199774,
   "rules": 86,
   "lanes": 25,
   "unused": []
@@ -1662,8 +1662,7 @@
      "periodic"
     ],
     "material": [
-     "anisotropic_tensor",
-     "dispersive_ade"
+     "anisotropic_tensor"
     ]
    },
    "stage": "entry",
@@ -1816,28 +1815,6 @@
    "note": ""
   },
   {
-   "name": "reversible_cpml_materials",
-   "when": {
-    "boundary": [
-     "bloch",
-     "periodic"
-    ],
-    "material": [
-     "anisotropic_tensor",
-     "dispersive_ade"
-    ]
-   },
-   "stage": "entry",
-   "code_path": "torchfdtd/reversible_cpml.py::_validate_project",
-   "message": "ReversibleCPMLSimulation supports only nondispersive dielectric declarations.",
-   "format": {},
-   "exception": "ValueError",
-   "executions": [
-    "reversible_adjoint"
-   ],
-   "note": ""
-  },
-  {
    "name": "reversible_cpml_sources",
    "when": {
     "boundary": [
@@ -1852,6 +1829,26 @@
    "stage": "entry",
    "code_path": "torchfdtd/reversible_cpml.py::_validate_project",
    "message": "ReversibleCPMLSimulation supports fixed soft electric point or z-normal plane sources only.",
+   "format": {},
+   "exception": "ValueError",
+   "executions": [
+    "reversible_adjoint"
+   ],
+   "note": ""
+  },
+  {
+   "name": "reversible_lorentz_bloch",
+   "when": {
+    "boundary": [
+     "bloch"
+    ],
+    "material": [
+     "dispersive_ade"
+    ]
+   },
+   "stage": "entry",
+   "code_path": "torchfdtd/reversible_lorentz.py::resolve_material",
+   "message": "Reversible Lorentz density mixtures currently require real fields;",
    "format": {},
    "exception": "ValueError",
    "executions": [
@@ -2610,7 +2607,7 @@
    },
    "3d|uniform": {
     "status": "admitted",
-    "admitted": 2397,
+    "admitted": 2424,
     "total": 35280,
     "reason": null,
     "lanes": {
@@ -2757,7 +2754,7 @@
    },
    "3d|dispersive_ade": {
     "status": "admitted",
-    "admitted": 3154,
+    "admitted": 3181,
     "total": 21168,
     "reason": null,
     "lanes": {
@@ -2956,7 +2953,7 @@
    },
    "3d|periodic": {
     "status": "admitted",
-    "admitted": 1741,
+    "admitted": 1768,
     "total": 15120,
     "reason": null,
     "lanes": {
@@ -3167,7 +3164,7 @@
    },
    "3d|point": {
     "status": "admitted",
-    "admitted": 2483,
+    "admitted": 2492,
     "total": 17640,
     "reason": null,
     "lanes": {
@@ -3185,7 +3182,7 @@
    },
    "3d|sheet": {
     "status": "admitted",
-    "admitted": 2424,
+    "admitted": 2433,
     "total": 17640,
     "reason": null,
     "lanes": {
@@ -3255,7 +3252,7 @@
    },
    "3d|tiled_sheet": {
     "status": "admitted",
-    "admitted": 1308,
+    "admitted": 1317,
     "total": 17640,
     "reason": null,
     "lanes": {
@@ -3337,7 +3334,7 @@
    },
    "3d|point": {
     "status": "admitted",
-    "admitted": 2805,
+    "admitted": 2814,
     "total": 26460,
     "reason": null,
     "lanes": {
@@ -3355,7 +3352,7 @@
    },
    "3d|plane_dft": {
     "status": "admitted",
-    "admitted": 2316,
+    "admitted": 2325,
     "total": 26460,
     "reason": null,
     "lanes": {
@@ -3389,7 +3386,7 @@
    },
    "3d|radiation_box": {
     "status": "admitted",
-    "admitted": 1520,
+    "admitted": 1529,
     "total": 26460,
     "reason": null,
     "lanes": {
@@ -3557,13 +3554,13 @@
    },
    "3d|reversible_adjoint": {
     "status": "admitted",
-    "admitted": 51,
+    "admitted": 78,
     "total": 15120,
     "reason": null,
     "lanes": {
-     "reversible.cpml_planes": 36,
-     "reversible.cpml": 12,
-     "reversible.periodic": 3
+     "reversible.cpml_planes": 54,
+     "reversible.cpml": 18,
+     "reversible.periodic": 6
     },
     "rules": {
      "mode_port_unavailable": 3150,
@@ -3678,7 +3675,7 @@
    },
    "3d|float32": {
     "status": "admitted",
-    "admitted": 3418,
+    "admitted": 3445,
     "total": 52920,
     "reason": null,
     "lanes": {
@@ -3770,7 +3767,7 @@
    },
    "3d|cpu": {
     "status": "admitted",
-    "admitted": 2047,
+    "admitted": 2056,
     "total": 35280,
     "reason": null,
     "lanes": {
@@ -3788,7 +3785,7 @@
    },
    "3d|cuda_torch": {
     "status": "admitted",
-    "admitted": 2387,
+    "admitted": 2396,
     "total": 35280,
     "reason": null,
     "lanes": {
@@ -3806,7 +3803,7 @@
    },
    "3d|cuda_fused": {
     "status": "admitted",
-    "admitted": 2261,
+    "admitted": 2270,
     "total": 35280,
     "reason": null,
     "lanes": {
@@ -3844,7 +3841,7 @@
    },
    "uniform|dispersive_ade": {
     "status": "admitted",
-    "admitted": 1912,
+    "admitted": 1939,
     "total": 14112,
     "reason": null,
     "lanes": {
@@ -4075,7 +4072,7 @@
    },
    "uniform|periodic": {
     "status": "admitted",
-    "admitted": 1077,
+    "admitted": 1104,
     "total": 10080,
     "reason": null,
     "lanes": {
@@ -4437,7 +4434,7 @@
   "mesh|source": {
    "uniform|point": {
     "status": "admitted",
-    "admitted": 1421,
+    "admitted": 1430,
     "total": 11760,
     "reason": null,
     "lanes": {
@@ -4455,7 +4452,7 @@
    },
    "uniform|sheet": {
     "status": "admitted",
-    "admitted": 1368,
+    "admitted": 1377,
     "total": 11760,
     "reason": null,
     "lanes": {
@@ -4525,7 +4522,7 @@
    },
    "uniform|tiled_sheet": {
     "status": "admitted",
-    "admitted": 1016,
+    "admitted": 1025,
     "total": 11760,
     "reason": null,
     "lanes": {
@@ -4747,7 +4744,7 @@
   "mesh|monitor": {
    "uniform|point": {
     "status": "admitted",
-    "admitted": 1841,
+    "admitted": 1850,
     "total": 17640,
     "reason": null,
     "lanes": {
@@ -4765,7 +4762,7 @@
    },
    "uniform|plane_dft": {
     "status": "admitted",
-    "admitted": 1690,
+    "admitted": 1699,
     "total": 17640,
     "reason": null,
     "lanes": {
@@ -4799,7 +4796,7 @@
    },
    "uniform|radiation_box": {
     "status": "admitted",
-    "admitted": 548,
+    "admitted": 557,
     "total": 17640,
     "reason": null,
     "lanes": {
@@ -4989,13 +4986,13 @@
    },
    "uniform|reversible_adjoint": {
     "status": "admitted",
-    "admitted": 51,
+    "admitted": 78,
     "total": 10080,
     "reason": null,
     "lanes": {
-     "reversible.cpml_planes": 36,
-     "reversible.cpml": 12,
-     "reversible.periodic": 3
+     "reversible.cpml_planes": 54,
+     "reversible.cpml": 18,
+     "reversible.periodic": 6
     },
     "rules": {
      "mode_port_unavailable": 2100,
@@ -5295,7 +5292,7 @@
   "mesh|precision": {
    "uniform|float32": {
     "status": "admitted",
-    "admitted": 2134,
+    "admitted": 2161,
     "total": 35280,
     "reason": null,
     "lanes": {
@@ -5405,7 +5402,7 @@
   "mesh|backend": {
    "uniform|cpu": {
     "status": "admitted",
-    "admitted": 1249,
+    "admitted": 1258,
     "total": 23520,
     "reason": null,
     "lanes": {
@@ -5423,7 +5420,7 @@
    },
    "uniform|cuda_torch": {
     "status": "admitted",
-    "admitted": 1477,
+    "admitted": 1486,
     "total": 23520,
     "reason": null,
     "lanes": {
@@ -5441,7 +5438,7 @@
    },
    "uniform|cuda_fused": {
     "status": "admitted",
-    "admitted": 1407,
+    "admitted": 1416,
     "total": 23520,
     "reason": null,
     "lanes": {
@@ -5713,7 +5710,7 @@
    },
    "dispersive_ade|periodic": {
     "status": "admitted",
-    "admitted": 1290,
+    "admitted": 1317,
     "total": 6048,
     "reason": null,
     "lanes": {
@@ -6214,7 +6211,7 @@
    },
    "dispersive_ade|point": {
     "status": "admitted",
-    "admitted": 2008,
+    "admitted": 2017,
     "total": 7056,
     "reason": null,
     "lanes": {
@@ -6232,7 +6229,7 @@
    },
    "dispersive_ade|sheet": {
     "status": "admitted",
-    "admitted": 1998,
+    "admitted": 2007,
     "total": 7056,
     "reason": null,
     "lanes": {
@@ -6295,7 +6292,7 @@
    },
    "dispersive_ade|tiled_sheet": {
     "status": "admitted",
-    "admitted": 1446,
+    "admitted": 1455,
     "total": 7056,
     "reason": null,
     "lanes": {
@@ -6614,7 +6611,7 @@
    },
    "dispersive_ade|point": {
     "status": "admitted",
-    "admitted": 2604,
+    "admitted": 2613,
     "total": 10584,
     "reason": null,
     "lanes": {
@@ -6632,7 +6629,7 @@
    },
    "dispersive_ade|plane_dft": {
     "status": "admitted",
-    "admitted": 2376,
+    "admitted": 2385,
     "total": 10584,
     "reason": null,
     "lanes": {
@@ -6663,14 +6660,14 @@
    },
    "dispersive_ade|radiation_box": {
     "status": "admitted",
-    "admitted": 712,
+    "admitted": 721,
     "total": 10584,
     "reason": null,
     "lanes": {
      "streamed.dispersive_planes": 468,
      "checkpointed.dispersive_planes": 234,
-     "forward.grid": 6,
-     "tensor_batch": 4
+     "reversible.cpml_planes": 9,
+     "forward.grid": 6
     },
     "rules": {
      "radiation_box_2d_schema": 2502,
@@ -6986,11 +6983,15 @@
     }
    },
    "dispersive_ade|reversible_adjoint": {
-    "status": "rejected",
-    "admitted": 0,
+    "status": "admitted",
+    "admitted": 27,
     "total": 6048,
-    "reason": "reversible_cpml_materials",
-    "lanes": {},
+    "reason": null,
+    "lanes": {
+     "reversible.cpml_planes": 18,
+     "reversible.cpml": 6,
+     "reversible.periodic": 3
+    },
     "rules": {
      "mode_port_unavailable": 1260,
      "mode_source_unavailable": 1008,
@@ -7361,7 +7362,7 @@
    },
    "dispersive_ade|float32": {
     "status": "admitted",
-    "admitted": 2846,
+    "admitted": 2873,
     "total": 21168,
     "reason": null,
     "lanes": {
@@ -7536,7 +7537,7 @@
    },
    "dispersive_ade|cpu": {
     "status": "admitted",
-    "admitted": 1704,
+    "admitted": 1713,
     "total": 14112,
     "reason": null,
     "lanes": {
@@ -7554,7 +7555,7 @@
    },
    "dispersive_ade|cuda_torch": {
     "status": "admitted",
-    "admitted": 2042,
+    "admitted": 2051,
     "total": 14112,
     "reason": null,
     "lanes": {
@@ -7572,7 +7573,7 @@
    },
    "dispersive_ade|cuda_fused": {
     "status": "admitted",
-    "admitted": 1946,
+    "admitted": 1955,
     "total": 14112,
     "reason": null,
     "lanes": {
@@ -7825,7 +7826,7 @@
    },
    "periodic|point": {
     "status": "admitted",
-    "admitted": 805,
+    "admitted": 814,
     "total": 5040,
     "reason": null,
     "lanes": {
@@ -7843,7 +7844,7 @@
    },
    "periodic|sheet": {
     "status": "admitted",
-    "admitted": 801,
+    "admitted": 810,
     "total": 5040,
     "reason": null,
     "lanes": {
@@ -7910,7 +7911,7 @@
    },
    "periodic|tiled_sheet": {
     "status": "admitted",
-    "admitted": 801,
+    "admitted": 810,
     "total": 5040,
     "reason": null,
     "lanes": {
@@ -8455,7 +8456,7 @@
    },
    "periodic|point": {
     "status": "admitted",
-    "admitted": 1261,
+    "admitted": 1270,
     "total": 7560,
     "reason": null,
     "lanes": {
@@ -8473,7 +8474,7 @@
    },
    "periodic|plane_dft": {
     "status": "admitted",
-    "admitted": 1269,
+    "admitted": 1278,
     "total": 7560,
     "reason": null,
     "lanes": {
@@ -8507,7 +8508,7 @@
    },
    "periodic|radiation_box": {
     "status": "admitted",
-    "admitted": 411,
+    "admitted": 420,
     "total": 7560,
     "reason": null,
     "lanes": {
@@ -8993,13 +8994,13 @@
    },
    "periodic|reversible_adjoint": {
     "status": "admitted",
-    "admitted": 27,
+    "admitted": 54,
     "total": 4320,
     "reason": null,
     "lanes": {
-     "reversible.cpml_planes": 18,
-     "reversible.cpml": 6,
-     "reversible.periodic": 3
+     "reversible.cpml_planes": 36,
+     "reversible.cpml": 12,
+     "reversible.periodic": 6
     },
     "rules": {
      "mode_port_unavailable": 900,
@@ -9653,7 +9654,7 @@
    },
    "periodic|float32": {
     "status": "admitted",
-    "admitted": 1510,
+    "admitted": 1537,
     "total": 15120,
     "reason": null,
     "lanes": {
@@ -9925,7 +9926,7 @@
    },
    "periodic|cpu": {
     "status": "admitted",
-    "admitted": 865,
+    "admitted": 874,
     "total": 10080,
     "reason": null,
     "lanes": {
@@ -9943,7 +9944,7 @@
    },
    "periodic|cuda_torch": {
     "status": "admitted",
-    "admitted": 1057,
+    "admitted": 1066,
     "total": 10080,
     "reason": null,
     "lanes": {
@@ -9961,7 +9962,7 @@
    },
    "periodic|cuda_fused": {
     "status": "admitted",
-    "admitted": 1055,
+    "admitted": 1064,
     "total": 10080,
     "reason": null,
     "lanes": {
@@ -10251,7 +10252,7 @@
   "source|monitor": {
    "point|point": {
     "status": "admitted",
-    "admitted": 1911,
+    "admitted": 1914,
     "total": 8820,
     "reason": null,
     "lanes": {
@@ -10269,7 +10270,7 @@
    },
    "point|plane_dft": {
     "status": "admitted",
-    "admitted": 1614,
+    "admitted": 1617,
     "total": 8820,
     "reason": null,
     "lanes": {
@@ -10300,7 +10301,7 @@
    },
    "point|radiation_box": {
     "status": "admitted",
-    "admitted": 566,
+    "admitted": 569,
     "total": 8820,
     "reason": null,
     "lanes": {
@@ -10318,7 +10319,7 @@
    },
    "sheet|point": {
     "status": "admitted",
-    "admitted": 1854,
+    "admitted": 1857,
     "total": 8820,
     "reason": null,
     "lanes": {
@@ -10336,7 +10337,7 @@
    },
    "sheet|plane_dft": {
     "status": "admitted",
-    "admitted": 1614,
+    "admitted": 1617,
     "total": 8820,
     "reason": null,
     "lanes": {
@@ -10370,7 +10371,7 @@
    },
    "sheet|radiation_box": {
     "status": "admitted",
-    "admitted": 546,
+    "admitted": 549,
     "total": 8820,
     "reason": null,
     "lanes": {
@@ -10574,7 +10575,7 @@
    },
    "tiled_sheet|point": {
     "status": "admitted",
-    "admitted": 1278,
+    "admitted": 1281,
     "total": 8820,
     "reason": null,
     "lanes": {
@@ -10592,7 +10593,7 @@
    },
    "tiled_sheet|plane_dft": {
     "status": "admitted",
-    "admitted": 1302,
+    "admitted": 1305,
     "total": 8820,
     "reason": null,
     "lanes": {
@@ -10626,7 +10627,7 @@
    },
    "tiled_sheet|radiation_box": {
     "status": "admitted",
-    "admitted": 330,
+    "admitted": 333,
     "total": 8820,
     "reason": null,
     "lanes": {
@@ -10682,12 +10683,12 @@
    },
    "point|reversible_adjoint": {
     "status": "admitted",
-    "admitted": 15,
+    "admitted": 24,
     "total": 5040,
     "reason": null,
     "lanes": {
-     "reversible.cpml_planes": 12,
-     "reversible.periodic": 3
+     "reversible.cpml_planes": 18,
+     "reversible.periodic": 6
     },
     "rules": {
      "mode_port_unavailable": 1260,
@@ -10796,12 +10797,12 @@
    },
    "sheet|reversible_adjoint": {
     "status": "admitted",
-    "admitted": 18,
+    "admitted": 27,
     "total": 5040,
     "reason": null,
     "lanes": {
-     "reversible.cpml_planes": 12,
-     "reversible.cpml": 6
+     "reversible.cpml_planes": 18,
+     "reversible.cpml": 9
     },
     "rules": {
      "mode_port_unavailable": 1260,
@@ -11201,12 +11202,12 @@
    },
    "tiled_sheet|reversible_adjoint": {
     "status": "admitted",
-    "admitted": 18,
+    "admitted": 27,
     "total": 5040,
     "reason": null,
     "lanes": {
-     "reversible.cpml_planes": 12,
-     "reversible.cpml": 6
+     "reversible.cpml_planes": 18,
+     "reversible.cpml": 9
     },
     "rules": {
      "mode_port_unavailable": 1260,
@@ -11285,7 +11286,7 @@
   "source|precision": {
    "point|float32": {
     "status": "admitted",
-    "admitted": 2083,
+    "admitted": 2092,
     "total": 17640,
     "reason": null,
     "lanes": {
@@ -11321,7 +11322,7 @@
    },
    "sheet|float32": {
     "status": "admitted",
-    "admitted": 2028,
+    "admitted": 2037,
     "total": 17640,
     "reason": null,
     "lanes": {
@@ -11461,7 +11462,7 @@
    },
    "tiled_sheet|float32": {
     "status": "admitted",
-    "admitted": 1476,
+    "admitted": 1485,
     "total": 17640,
     "reason": null,
     "lanes": {
@@ -11499,7 +11500,7 @@
   "source|backend": {
    "point|cpu": {
     "status": "admitted",
-    "admitted": 1243,
+    "admitted": 1246,
     "total": 11760,
     "reason": null,
     "lanes": {
@@ -11517,7 +11518,7 @@
    },
    "point|cuda_torch": {
     "status": "admitted",
-    "admitted": 1463,
+    "admitted": 1466,
     "total": 11760,
     "reason": null,
     "lanes": {
@@ -11535,7 +11536,7 @@
    },
    "point|cuda_fused": {
     "status": "admitted",
-    "admitted": 1385,
+    "admitted": 1388,
     "total": 11760,
     "reason": null,
     "lanes": {
@@ -11553,7 +11554,7 @@
    },
    "sheet|cpu": {
     "status": "admitted",
-    "admitted": 1224,
+    "admitted": 1227,
     "total": 11760,
     "reason": null,
     "lanes": {
@@ -11571,7 +11572,7 @@
    },
    "sheet|cuda_torch": {
     "status": "admitted",
-    "admitted": 1440,
+    "admitted": 1443,
     "total": 11760,
     "reason": null,
     "lanes": {
@@ -11589,7 +11590,7 @@
    },
    "sheet|cuda_fused": {
     "status": "admitted",
-    "admitted": 1368,
+    "admitted": 1371,
     "total": 11760,
     "reason": null,
     "lanes": {
@@ -11762,7 +11763,7 @@
    },
    "tiled_sheet|cpu": {
     "status": "admitted",
-    "admitted": 896,
+    "admitted": 899,
     "total": 11760,
     "reason": null,
     "lanes": {
@@ -11780,7 +11781,7 @@
    },
    "tiled_sheet|cuda_torch": {
     "status": "admitted",
-    "admitted": 1040,
+    "admitted": 1043,
     "total": 11760,
     "reason": null,
     "lanes": {
@@ -11798,7 +11799,7 @@
    },
    "tiled_sheet|cuda_fused": {
     "status": "admitted",
-    "admitted": 992,
+    "admitted": 995,
     "total": 11760,
     "reason": null,
     "lanes": {
@@ -11854,12 +11855,12 @@
    },
    "point|reversible_adjoint": {
     "status": "admitted",
-    "admitted": 15,
+    "admitted": 24,
     "total": 7560,
     "reason": null,
     "lanes": {
-     "reversible.cpml": 12,
-     "reversible.periodic": 3
+     "reversible.cpml": 18,
+     "reversible.periodic": 6
     },
     "rules": {
      "mode_source_unavailable": 1260,
@@ -11965,11 +11966,11 @@
    },
    "plane_dft|reversible_adjoint": {
     "status": "admitted",
-    "admitted": 18,
+    "admitted": 27,
     "total": 7560,
     "reason": null,
     "lanes": {
-     "reversible.cpml_planes": 18
+     "reversible.cpml_planes": 27
     },
     "rules": {
      "mode_source_unavailable": 1260,
@@ -12166,11 +12167,11 @@
    },
    "radiation_box|reversible_adjoint": {
     "status": "admitted",
-    "admitted": 18,
+    "admitted": 27,
     "total": 7560,
     "reason": null,
     "lanes": {
-     "reversible.cpml_planes": 18
+     "reversible.cpml_planes": 27
     },
     "rules": {
      "mode_source_unavailable": 1260,
@@ -12245,7 +12246,7 @@
   "monitor|precision": {
    "point|float32": {
     "status": "admitted",
-    "admitted": 2733,
+    "admitted": 2742,
     "total": 26460,
     "reason": null,
     "lanes": {
@@ -12281,7 +12282,7 @@
    },
    "plane_dft|float32": {
     "status": "admitted",
-    "admitted": 2472,
+    "admitted": 2481,
     "total": 26460,
     "reason": null,
     "lanes": {
@@ -12349,7 +12350,7 @@
    },
    "radiation_box|float32": {
     "status": "admitted",
-    "admitted": 769,
+    "admitted": 778,
     "total": 26460,
     "reason": null,
     "lanes": {
@@ -12387,7 +12388,7 @@
   "monitor|backend": {
    "point|cpu": {
     "status": "admitted",
-    "admitted": 1599,
+    "admitted": 1602,
     "total": 17640,
     "reason": null,
     "lanes": {
@@ -12405,7 +12406,7 @@
    },
    "point|cuda_torch": {
     "status": "admitted",
-    "admitted": 1959,
+    "admitted": 1962,
     "total": 17640,
     "reason": null,
     "lanes": {
@@ -12423,7 +12424,7 @@
    },
    "point|cuda_fused": {
     "status": "admitted",
-    "admitted": 1833,
+    "admitted": 1836,
     "total": 17640,
     "reason": null,
     "lanes": {
@@ -12441,7 +12442,7 @@
    },
    "plane_dft|cpu": {
     "status": "admitted",
-    "admitted": 1454,
+    "admitted": 1457,
     "total": 17640,
     "reason": null,
     "lanes": {
@@ -12459,7 +12460,7 @@
    },
    "plane_dft|cuda_torch": {
     "status": "admitted",
-    "admitted": 1766,
+    "admitted": 1769,
     "total": 17640,
     "reason": null,
     "lanes": {
@@ -12477,7 +12478,7 @@
    },
    "plane_dft|cuda_fused": {
     "status": "admitted",
-    "admitted": 1694,
+    "admitted": 1697,
     "total": 17640,
     "reason": null,
     "lanes": {
@@ -12543,7 +12544,7 @@
    },
    "radiation_box|cpu": {
     "status": "admitted",
-    "admitted": 504,
+    "admitted": 507,
     "total": 17640,
     "reason": null,
     "lanes": {
@@ -12561,7 +12562,7 @@
    },
    "radiation_box|cuda_torch": {
     "status": "admitted",
-    "admitted": 508,
+    "admitted": 511,
     "total": 17640,
     "reason": null,
     "lanes": {
@@ -12579,7 +12580,7 @@
    },
    "radiation_box|cuda_fused": {
     "status": "admitted",
-    "admitted": 508,
+    "admitted": 511,
     "total": 17640,
     "reason": null,
     "lanes": {
@@ -12670,13 +12671,13 @@
    },
    "reversible_adjoint|float32": {
     "status": "admitted",
-    "admitted": 51,
+    "admitted": 78,
     "total": 15120,
     "reason": null,
     "lanes": {
-     "reversible.cpml_planes": 36,
-     "reversible.cpml": 12,
-     "reversible.periodic": 3
+     "reversible.cpml_planes": 54,
+     "reversible.cpml": 18,
+     "reversible.periodic": 6
     },
     "rules": {
      "mode_port_unavailable": 3150,
@@ -12942,13 +12943,13 @@
    },
    "reversible_adjoint|cpu": {
     "status": "admitted",
-    "admitted": 17,
+    "admitted": 26,
     "total": 10080,
     "reason": null,
     "lanes": {
-     "reversible.cpml_planes": 12,
-     "reversible.cpml": 4,
-     "reversible.periodic": 1
+     "reversible.cpml_planes": 18,
+     "reversible.cpml": 6,
+     "reversible.periodic": 2
     },
     "rules": {
      "mode_port_unavailable": 2100,
@@ -12959,13 +12960,13 @@
    },
    "reversible_adjoint|cuda_torch": {
     "status": "admitted",
-    "admitted": 17,
+    "admitted": 26,
     "total": 10080,
     "reason": null,
     "lanes": {
-     "reversible.cpml_planes": 12,
-     "reversible.cpml": 4,
-     "reversible.periodic": 1
+     "reversible.cpml_planes": 18,
+     "reversible.cpml": 6,
+     "reversible.periodic": 2
     },
     "rules": {
      "mode_port_unavailable": 2100,
@@ -12976,13 +12977,13 @@
    },
    "reversible_adjoint|cuda_fused": {
     "status": "admitted",
-    "admitted": 17,
+    "admitted": 26,
     "total": 10080,
     "reason": null,
     "lanes": {
-     "reversible.cpml_planes": 12,
-     "reversible.cpml": 4,
-     "reversible.periodic": 1
+     "reversible.cpml_planes": 18,
+     "reversible.cpml": 6,
+     "reversible.periodic": 2
     },
     "rules": {
      "mode_port_unavailable": 2100,
@@ -13191,7 +13192,7 @@
   "precision|backend": {
    "float32|cpu": {
     "status": "admitted",
-    "admitted": 1812,
+    "admitted": 1821,
     "total": 35280,
     "reason": null,
     "lanes": {
@@ -13209,7 +13210,7 @@
    },
    "float32|cuda_torch": {
     "status": "admitted",
-    "admitted": 2150,
+    "admitted": 2159,
     "total": 35280,
     "reason": null,
     "lanes": {
@@ -13227,7 +13228,7 @@
    },
    "float32|cuda_fused": {
     "status": "admitted",
-    "admitted": 2048,
+    "admitted": 2057,
     "total": 35280,
     "reason": null,
     "lanes": {
