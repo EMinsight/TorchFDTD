@@ -13,8 +13,8 @@ authors:
 doi: 10.5281/zenodo.22928834
 repository-code: "https://github.com/hyoseokp/TorchFDTD"
 license: MIT
-version: 1.1.6
-date-released: "2026-10-06"
+version: 1.1.7
+date-released: "2026-10-07"
 preferred-citation:
   type: article
   title: "TorchFDTD: GPU-accelerated finite-difference time-domain simulation with discrete adjoints and host-streamed execution for photonic inverse design"
