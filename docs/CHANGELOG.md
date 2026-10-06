@@ -9,6 +9,16 @@ Commits that only record validation evidence or documentation ("Record ...",
 
 ## Unreleased
 
+## 1.1.6 (2026-10-06)
+
+### Added
+
+- Example `examples/full-aperture-tiled-adjoint/`: the meta-atom libraries of the baseline designs (`libraries/`).
+
+### Fixed
+
+- Example `examples/full-aperture-tiled-adjoint/`: the source data of Supplementary Fig. 9 list the apertures and wavelengths of the three plotted designs (E3, 100 um at 540 nm), and the README names the examples as in the paper.
+
 ## 1.1.5 (2026-10-06)
 
 ### Added

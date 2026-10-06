@@ -8,7 +8,7 @@ Licence texts of the bundled frontend libraries and of the grid dependency are i
 This inventory records what is known; it is not a legal opinion, and every item whose
 right to distribute is unsettled is listed under open items rather than left out.
 
-Project: torchfdtd 1.1.5, licence MIT; inventoried with Python 3.10.2 on win32 (Windows-10-10.0.26200-SP0).
+Project: torchfdtd 1.1.6, licence MIT; inventoried with Python 3.10.2 on win32 (Windows-10-10.0.26200-SP0).
 
 ## Python dependencies
 

@@ -5,11 +5,11 @@ Code, settings, final layouts and source data of the three freeform designs E1-E
 all tiles of the aperture forward and adjoint with TorchFDTD (3D FDTD, 20 nm Yee lattice), assembles the exit-plane Jones maps,
 propagates them with a vector angular spectrum to the objective, and updates a filtered, tanh-projected density with Adam.
 
-| | E1 achromatic lens | E2 RGB hologram | E3 polarization-switched hologram |
+| | E1 nine-wavelength lens | E2 color hologram | E3 polarization-switched hologram |
 |---|---|---|---|
-| aperture | 200 um disc, D4 symmetric | 150 x 150 um square | 100 x 100 um square |
+| aperture | 200 um disk, D4 symmetric | 150 x 150 um square | 100 x 100 um square |
 | wavelengths, input polarization | 420-670 nm (9), x and y | 450, 540, 635 nm, x | 540 nm, x and y |
-| target | common focus at f = 333.3 um | colour image at z = 300 um | x: "CNU", y: "PHY" at z = 200 um |
+| target | common focus at f = 333.3 um | color image at z = 300 um | x: "CNU", y: "PHY" at z = 200 um |
 | driver | `src/zonec_multi.py` (polar octant) | `src/ns_run.py` (10 nm Cartesian) | `src/ns_run.py` (10 nm Cartesian) |
 | tile core, solves per step | 19 um, 16 octant tiles x 2 pol | 19 um, 64 tiles | 25 um, 16 tiles x 2 pol |
 | hardware of the reported run | 8 x H200 | 6 x H200 (steps 0-9), 8 x H100 80GB | 6 x H200 |
@@ -27,6 +27,7 @@ lateral faces, 1200 time steps, float32 fields, complex128 propagation. Objectiv
 |---|---|
 | `designs/e{1,2,3}_freeform_step*.npz` | final binary layouts of E1-E3 on the 10 nm grid (`np.packbits`, x-major; E1 is the D4 quadrant x, y >= 0) |
 | `designs/e{1,2,3}_metaatom.npz` | meta-atom baseline layouts, same encoding |
+| `libraries/` | meta-atom libraries of the baselines (TORCWA, double precision): square posts with 13 and 11 Fourier orders (`library_o13.npz`, `library_o11.npz`), posts, holes and crosses (`library_disp_o13.npz`, `library_disp_o11.npz`) and the rectangular posts of E3 at 540 nm (`library_rect540_o13.npz`) |
 | `reference/e{1,2,3}_history.csv` | optimization history of each run: beta, learning rate, gray and binary objective, gray fraction, fill, time per step |
 | `reference/provenance.json` | TorchFDTD commit, software versions, source hashes and final scores |
 | `src/` | drivers, tile solver set-up, objectives, filter/projection/Adam loop, solver speed patches |

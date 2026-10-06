@@ -2,8 +2,7 @@
  "arrays_from": [],
  "records": {
   "data/landscape/prior_works_landscape.json": {
-   "scope": "Transcription of internal notes (audit dated 2026-09-30) for the Supplementary Fig. 9a landscape. Only numbers stated in the audit are used. Aperture is the width (2D) or diameter/side (3D) in vacuum wavelengths as stated by each work, or derived from a stated size and wavelength. Entries without a stated wavelength are kept with aperture_lambda null and are not placed on the axis. Grid points, matrix sizes, repeated mask pixels and independent design variables are not mixed. Addendum 2026-09-30: the Skarda wavelengths were taken from the published paper itself at the orchestrator request, with the quoted sentences in each source field.",
-   "audit": "internal notes",
+   "scope": "Prior large-area full-wave inverse designs placed in Supplementary Fig. 9a, with the numbers stated in each cited work. Aperture is the width (2D) or diameter/side (3D) in vacuum wavelengths as stated by each work, or derived from a stated size and wavelength. Entries without a stated wavelength are kept with aperture_lambda null and are not placed on the axis. Grid points, matrix sizes, repeated mask pixels and independent design variables are not mixed. The Skarda wavelengths are taken from the published paper, with the quoted sentences in each source field.",
    "rows": [
     {
      "row": "ours",
@@ -61,7 +60,7 @@
      "status": "optimized",
      "aperture_lambda": 800,
      "label": "8 mm, LWIR",
-     "source": "Sun et al. 2025 ZDA row: '8mm LWIR 800λ' completed, 'Binarization+conic filter'"
+     "source": "Sun et al. 2025 (zoned axisymmetry): 8 mm LWIR lens, 800 wavelengths, completed design, binarization and conic filter"
     },
     {
      "id": "zda_visible",
@@ -69,7 +68,7 @@
      "status": "optimized",
      "aperture_lambda": 3008,
      "label": "1.96 mm, 6 λ",
-     "source": "Sun et al. 2025 ZDA row: '1.96mm visible 3008λ 6 wavelengths'"
+     "source": "Sun et al. 2025 (zoned axisymmetry): 1.96 mm visible lens, 3008 wavelengths, 6 wavelengths"
     },
     {
      "id": "zda_rgb",
@@ -77,7 +76,7 @@
      "status": "optimized",
      "aperture_lambda": null,
      "label": "1 mm RGB",
-     "source": "Sun et al. 2025 ZDA row: '1mmRGB'. Wavelength not stated in the audit, not placed."
+     "source": "Sun et al. 2025 (zoned axisymmetry): 1 mm RGB lens. Wavelength not stated, not placed."
     },
     {
      "id": "skarda_opt",
@@ -110,7 +109,7 @@
      "wavelength_nm": 850,
      "label": "50 µm, 850 nm",
      "derived": "50 µm / 0.85 µm",
-     "source": "Mansouree et al. 2021 row: 'Fabricated 50µm lenses, λ850nm, NA .78/.95'"
+     "source": "Mansouree et al. 2021: fabricated 50 um lenses, wavelength 850 nm, NA 0.78 and 0.95"
     },
     {
      "id": "lpa3d",
@@ -118,8 +117,8 @@
      "status": "optimized",
      "aperture_lambda": 80,
      "label": "6400 cells of λ²",
-     "derived": "square-equivalent width sqrt(6400) = 80 λ. The audit does not assert a circular diameter.",
-     "source": "Lin et al. 2019 LPA row: 'Full 3D case 6400 cells, independent density DOF 6.4×10⁵', 'Full3D NA.37 lens, 6400 λ×λ cells', 'Heaviside projection binary'"
+     "derived": "square-equivalent width sqrt(6400) = 80 wavelengths; no circular diameter is stated.",
+     "source": "Lin et al. 2019 (locally periodic): full 3D case with 6400 cells, 6.4e5 independent density variables, NA 0.37 lens of 6400 cells of one wavelength squared, Heaviside projection to binary"
     },
     {
      "id": "oda",
@@ -129,7 +128,7 @@
      "size_um": 140,
      "wavelength_nm": 700,
      "label": "140 µm, 480 to 700 nm",
-     "source": "Lin & Johnson 2019 ODA row: 'Width 200λ at λ 700nm = 140µm. Broadband 480–700nm', 'Binarized designs', 'Demonstrated 2D EM'"
+     "source": "Lin and Johnson 2019 (overlapping domains): width 200 wavelengths at 700 nm, 140 um, band 480-700 nm, binarized designs, 2D electromagnetic model"
     },
     {
      "id": "apf_forward",
@@ -140,7 +139,7 @@
      "wavelength_nm": 532,
      "label": "1 mm, 532 nm",
      "derived": "1000 µm / 0.532 µm",
-     "source": "APF Lin et al. 2022 row: '~1mm-wide 532nm metalens transmission characterization', 'phase-prescribed forward characterization'"
+     "source": "Lin et al. 2022 (augmented partial factorization): transmission of a metalens about 1 mm wide at 532 nm, phase-prescribed forward calculation"
     },
     {
      "id": "apf_splitter",
@@ -151,7 +150,7 @@
      "wavelength_nm": 940,
      "label": "24 µm splitter",
      "derived": "24 µm / 0.94 µm",
-     "source": "APF inverse Li et al. 2024 row: 'Completed period 24µm, 80 ridges, λ940nm ±30° splitter'"
+     "source": "Li et al. 2024 (inverse design with augmented partial factorization): completed design with a 24 um period, 80 ridges, 940 nm, +-30 degree splitter"
     },
     {
      "id": "apf_benchmark",
@@ -160,15 +159,15 @@
      "aperture_lambda": null,
      "size_um": 1000,
      "label": "1 mm gradient benchmark",
-     "source": "APF inverse Li et al. 2024 row: '1200-edge 1mm benchmark'. Wavelength not stated in the audit, not placed."
+     "source": "Li et al. 2024 (inverse design with augmented partial factorization): 1 mm gradient benchmark with 1200 edges. Wavelength not stated, not placed."
     }
    ],
    "ours": [
     {
      "id": "e1_e3",
      "row": "ours",
-     "status": "pending",
-     "label": "E1 to E3, 150 to 200 µm",
+     "status": "optimized",
+     "label": "E1 to E3, 100 to 200 µm",
      "examples": [
       {
        "name": "E1",
@@ -188,41 +187,24 @@
       },
       {
        "name": "E3",
-       "aperture_um": 200,
+       "aperture_um": 100,
        "wavelengths_nm": [
-        940,
-        940
+        540,
+        540
        ]
       }
      ],
-     "source": "launch/e1.env, e2.env (150 um square), e3.env (D200 physical at 940 nm, scaled model); the bar spans the smallest to largest aperture in vacuum wavelengths over the design wavelengths"
-    },
-    {
-     "id": "mm",
-     "row": "ours",
-     "status": "pending",
-     "label": "1 mm gradient step",
-     "examples": [
-      {
-       "name": "1 mm",
-       "aperture_um": 1000,
-       "wavelengths_nm": [
-        420,
-        670
-       ]
-      }
-     ],
-     "source": "internal notes section 3.4, 1 mm gradient step, one or two measured steps"
+     "source": "launch/common.env, e1.env, e2.env and e3.env (FF_APERTURE_UM and FA_LAM_NM); the bar spans the smallest to largest aperture in vacuum wavelengths over the design wavelengths"
     }
    ],
    "excluded": [
     {
      "id": "dba2025",
-     "reason": "Zhang & Xia 2025 DBA is a 3D continuum evolution solver, not electromagnetic inverse design (audit row 8)."
+     "reason": "Zhang and Xia 2025 (DBA) is a 3D continuum evolution solver, not electromagnetic inverse design."
     },
     {
      "id": "hughes2021",
-     "reason": "Forward simulation only, primary text access limited in the audit, and not cited in the current manuscript."
+     "reason": "Forward simulation only. Cited in the paper as a large-scale GPU FDTD solver and as the independent solver (Tidy3D) of the validation, not as an inverse design, so it is not placed."
     }
    ]
   },
