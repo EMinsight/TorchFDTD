@@ -119,7 +119,7 @@
     "torchfdtd/reversible_cpml.py": "3739d44df4613740fea7b3283b859c73cc82bd5afe42ab1d9942b58caacb6069",
     "torchfdtd/reversible_cpml_memory.py": "30ae9ee036541640e6a350873487efc09ec56eea1809de34a6b1406735f93c4b",
     "tests/test_automatic_trace_storage.py": "bec827d39b5343736a939698f768fb1f720d397546771d9eaf114f56412ca985",
-    "benchmarks/automatic_trace_storage.py": "df50e4ee4a1c08b6af2731b4380f136ca8d93e6d1f51074e6cb36aa10d47b4f1"
+    "benchmarks/automatic_trace_storage.py": "41b1568c815dc4a0d740ecdc1d971478266fa2ceca0470ce05f2dc727a64ff4b"
   },
   "benchmark": "docs/validation/automatic_trace_storage.json",
   "benchmark_sha256": "722734cc6bc9c8e1384476c29ccbaaf1f3f7677fc5a33848d417bcd76a7c4336",
@@ -131,7 +131,7 @@
   "not_run": [
     "new installed wheel, release RC and exact-commit GitHub CI",
     "HPC/multi-GPU and other hardware",
-    "NCS kept-unit graph keeper and full H200 workload"
+    "External full-aperture kept-unit graph keeper and full H200 workload"
   ],
   "documentation_cases": [
     "tests.test_compatibility_policy::test_changelog_cites_real_commits_and_carries_the_result_impact_section",

@@ -534,7 +534,7 @@ Every call makes a fresh decision. An admitted graph keeps its selected archive 
 
 This option applies to the existing resident recorded CPML point and plane APIs, with the same physics and derivative restrictions. The periodic browser configuration continues to expose explicit CPU/device storage. Automatic placement does not retain a batch of tile graphs or change the sequential batch replay algorithm.
 
-An external NCS H200 run measured **193 to 123 seconds** with observation caching and kept-unit graph/trace placement combined, a 36.3% reduction. That workflow retains unit graphs to avoid a second recorded forward. Automatic archive placement in TorchFDTD is measured separately with `python -m benchmarks.automatic_trace_storage --output comparison.json`.
+An external full-aperture H200 run measured **193 to 123 seconds** with observation caching and kept-unit graph/trace placement combined, a 36.3% reduction. That workflow retains unit graphs to avoid a second recorded forward. Automatic archive placement in TorchFDTD is measured separately with `python -m benchmarks.automatic_trace_storage --output comparison.json`.
 
 The [automatic placement measurements](validation/automatic_trace_storage.json) use an RTX 3060, a 64 × 64 × 32 grid, 256 steps, diagonal material, two planes with 8 × 8 quadrature, three frequencies and five warmed repeats per path in rotating order. Forward-plus-backward wall time includes admission and is synchronized. Model construction is excluded. All spectra and material VJPs are bitwise equal, with maximum absolute difference zero.
 

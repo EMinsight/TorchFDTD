@@ -4,7 +4,7 @@ Run under an exclusive GPU lock on an otherwise idle device. Compare automatic
 selection with each identical explicit storage path, including admission in the
 synchronized wall time. The constrained case admits the CPU archive while the
 complete device reservation is refused. This does not benchmark a graph keeper
-or infer the separate NCS workload's H200 speedup.
+or infer the separate external full-aperture workload's H200 speedup.
 """
 import argparse
 from dataclasses import replace
