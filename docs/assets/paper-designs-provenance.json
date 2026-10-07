@@ -1,0 +1,28 @@
+{
+  "paper": "https://arxiv.org/abs/2609.30039v3",
+  "figures": [
+    {
+      "file": "docs/assets/paper-e1-lens.png",
+      "source_url": "https://arxiv.org/html/2609.30039v3/e1_final_step0248.png",
+      "label": "arXiv v3 Figure 3: E1",
+      "bytes": 341201,
+      "sha256": "2d686adf9efd650df07a43223b9b9e4e8775d6168d060f18b444903eed45195c",
+      "transformation": "None; original public arXiv PNG copied byte-for-byte."
+    },
+    {
+      "file": "docs/assets/paper-e2-e3-holograms.png",
+      "source_url": "https://arxiv.org/html/2609.30039v3/holograms_combined.png",
+      "label": "arXiv v3 Figure 4: E2/E3",
+      "bytes": 329651,
+      "sha256": "e2d850db5f461809fdcc1836e7f70a69a8ace441cb3b03e5ed85859f058fa392",
+      "transformation": "None; original public arXiv PNG copied byte-for-byte."
+    }
+  ],
+  "usage": "README showcase of the authors' already public arXiv v3 figures; no full-scale calculation rerun.",
+  "reference_workflow": "examples/full-aperture-tiled-adjoint/README.md",
+  "scores_3p6um_overlap": {
+    "E1": 0.1196,
+    "E2": 0.673,
+    "E3": 0.8439
+  }
+}

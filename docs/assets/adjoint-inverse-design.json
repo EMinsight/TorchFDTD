@@ -1,0 +1,51 @@
+{
+  "torchfdtd_version": "1.1.7",
+  "torch_version": "2.14.0+cpu",
+  "backend": "cpu",
+  "precision": "float64",
+  "shape": [
+    48,
+    40,
+    1
+  ],
+  "steps": 160,
+  "checkpoints": 4,
+  "density_parameters": 256,
+  "seed": 7,
+  "iterations": 12,
+  "objective": "Mean squared Ez at one point, without power normalization",
+  "history": [
+    0.00021436913158136536,
+    0.00026115418011064855,
+    0.00028983760318055806,
+    0.0003111086275450732,
+    0.0003299392684692327,
+    0.00034815750753155723,
+    0.0003660846820569527,
+    0.0003834307192406271,
+    0.00039964451889183585,
+    0.00041405428778119505,
+    0.0004261811469855736,
+    0.0004360654023557923,
+    0.0004442126673386489
+  ],
+  "initial_objective": 0.00021436913158136536,
+  "final_objective": 0.0004442126673386489,
+  "objective_ratio": 2.0721857856201873,
+  "gradient_check": {
+    "parameter_flat_index": 240,
+    "step": 0.0001,
+    "adjoint": -0.012796437945109637,
+    "finite_difference": -0.012796437927065085,
+    "relative_error": 1.4101230390167552e-09
+  },
+  "example_driver": "examples/adjoint_inverse_design/optimize.py",
+  "example_driver_sha256": "f9f35c9eabbe57f285f6bf6aae8b31473cf2022c7abe9e65eb566001e4c73dc1",
+  "numerical_functions_sha256": "c3f2af4f26de4a331fc3850f067e54d3afb17005ac90d48fb808c450663c8d4d",
+  "numpy_version": "2.2.6",
+  "reference_data": "examples/adjoint_inverse_design/reference.npz",
+  "reference_data_sha256": "2592bbf28c043c8bbc76930adc8ef230e3f19f94a4ff99337f1347025965634f",
+  "figure": "docs/assets/adjoint-inverse-design.png",
+  "figure_sha256": "fd5668fce4260ba9cb6434c6a05c0c0905356f1beab743d7f31f6148ca6d27e8",
+  "scope": "Small CPU tutorial. Reported point-field objective is not power-normalized efficiency or a speed benchmark."
+}

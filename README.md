@@ -12,7 +12,7 @@ Open-source GPU FDTD for photonics, with PyTorch gradients and a browser workben
 
 Build a device in Python or in the browser, simulate its electromagnetic fields, and use discrete adjoints with PyTorch autograd for inverse design.
 
-[Quick start](#quick-start) · [Examples](#examples) · [Validation](docs/MEEP_COMPARISON.md) · [Documentation](#documentation) · [Paper](https://arxiv.org/abs/2609.30039)
+[Quick start](#quick-start) · [Adjoint inverse design](#adjoint-inverse-design) · [Paper designs](#paper-designs-e1-e2-e3) · [Examples](#examples) · [Validation](docs/MEEP_COMPARISON.md) · [Documentation](#documentation) · [Paper](https://arxiv.org/abs/2609.30039)
 
 [![An optical pulse couples into a microring and circulates, computed with 2D TorchFDTD](docs/assets/microring-pulse.gif)](https://github.com/hyoseokp/TorchFDTD/raw/refs/heads/main/docs/assets/microring-pulse.mp4)
 
@@ -26,16 +26,19 @@ Build a device in Python or in the browser, simulate its electromagnetic fields,
 
 ### Install and open the workbench
 
-Use Python 3.10 or 3.12. Install from [PyPI](https://pypi.org/project/torchfdtd/) and start the workbench:
+Install from [PyPI](https://pypi.org/project/torchfdtd/) with Python 3.10 or 3.12 and start the workbench:
 
 ```sh
 pip install torchfdtd
 torchfdtd serve
 ```
 
-The package includes the browser workbench, so you do not need Node.js or a source checkout. For an NVIDIA GPU, select a CUDA-enabled PyTorch build and install the `cuda-kernels` extra as below. Versioned wheels are also available from [GitHub Releases](https://github.com/hyoseokp/TorchFDTD/releases/latest).
+The package includes the browser workbench, so you do not need Node.js or a source checkout. Open **http://127.0.0.1:8765** after starting the server.
 
-**Windows / PowerShell, NVIDIA GPU:**
+<details>
+<summary>NVIDIA GPU installation on Windows / PowerShell</summary>
+
+Select a CUDA-enabled PyTorch build and install the `cuda-kernels` extra:
 
 ```powershell
 python -m venv torchfdtd-env
@@ -45,9 +48,11 @@ torchfdtd-env/Scripts/torchfdtd doctor
 torchfdtd-env/Scripts/torchfdtd serve
 ```
 
-Open **http://127.0.0.1:8765** in your browser. `torchfdtd doctor` checks the installation, CUDA device and fused-kernel launch before you start.
+`torchfdtd doctor` checks the installation, CUDA device and fused-kernel launch before you start.
 
 For a CPU-only installation, use the PyTorch index `https://download.pytorch.org/whl/cpu` and omit `[cuda-kernels]` from the installation command. The `cuda-kernels` extra installs CuPy for the fused CUDA path. See [installation and tested versions](docs/INSTALL.md) for requirements and troubleshooting.
+
+</details>
 
 The server listens on loopback only. Use SSH forwarding for a remote GPU. The default workbench limit is 8 million resident cells. For larger local projects, see [memory admission and server limits](docs/SECURITY.md#memory-admission).
 
@@ -110,6 +115,60 @@ npm.cmd run build
 This route reuses packages available in the base Python environment. Install a suitable [PyTorch build](https://pytorch.org/get-started/locally/) first. The [installation guide](docs/INSTALL.md) also covers wheel builds and clean-install checks.
 
 </details>
+
+## Adjoint inverse design
+
+Start with a [small CPU example](examples/adjoint_inverse_design/) that optimizes a dielectric region between a source and a target point. TorchFDTD computes the discrete Yee/CPML adjoint, and PyTorch carries its material gradient through a density filter to an Adam optimizer.
+
+[![Initial and optimized dielectric, measured objective history and target signals of the CPU adjoint example](docs/assets/adjoint-inverse-design.png)](examples/adjoint_inverse_design/)
+
+*Actual installed-package run with TorchFDTD 1.1.7: 256 design variables, a 48 × 40 grid, 160 timesteps, FP64 on CPU and four checkpoints. Twelve Adam updates increase the mean squared target field by **2.07×**. This objective is measured over a fixed time window in arbitrary units. It is not power-normalized transmission or efficiency. [Conditions and numerical record](docs/assets/adjoint-inverse-design.json).*
+
+Download [optimize.py](examples/adjoint_inverse_design/optimize.py), then run it with the PyPI package:
+
+```sh
+pip install torchfdtd
+python optimize.py --iterations 12 --check-gradient --output results/adjoint
+```
+
+The core update is below. The linked script supplies the complete project, density parameterization, plotting and result export:
+
+<!-- readme-example: skip: core update excerpt; the complete standalone script is linked above -->
+```python
+optimizer.zero_grad(set_to_none=True)
+epsilon, density = material(theta, project.region.shape)
+result = model(epsilon)                  # DifferentiableSimulation
+objective = result.signals[:, 0].square().mean()
+loss = -torch.log(objective)
+loss.backward()                         # Discrete adjoint and density/filter gradient
+optimizer.step()
+```
+
+The script can check one adjoint derivative against a central finite difference. It saves the initial/final design arrays, point signals, objective history and a summary figure. See [differentiable FDTD](docs/DIFFERENTIABLE_FDTD.md) for the supported API and [reversible CPML adjoints](docs/REVERSIBLE_CPML.md) for larger designs.
+
+## Paper designs: E1, E2, E3
+
+The [paper](https://arxiv.org/abs/2609.30039v3) applies tiled 3D full-wave adjoints and differentiable angular-spectrum propagation to three freeform metasurfaces. The repository includes their [drivers, configurations, targets, optimized layouts and figure source data](examples/full-aperture-tiled-adjoint/).
+
+| Study | Device and target | Re-evaluated objective | Hardware of the reported optimization |
+|---|---|---|---|
+| [E1](examples/full-aperture-tiled-adjoint/configs/e1.env) | 200 µm lens, nine wavelengths from 420 to 670 nm, common focus at 333.3 µm | J1 = **0.1196** | 8 × H200 |
+| [E2](examples/full-aperture-tiled-adjoint/configs/e2.env) | 150 × 150 µm color hologram, 450/540/635 nm, image plane at 300 µm | J2 = **0.6730** | 6 × H200, then 8 × H100 |
+| [E3](examples/full-aperture-tiled-adjoint/configs/e3.env) | 100 × 100 µm polarization-switched hologram, CNU/PHY under x/y input at 540 nm, image plane at 200 µm | J3 = **0.8439** | 6 × H200 |
+
+The table reports the saved binary layouts re-evaluated with 3.6 µm tile overlaps. Each study has its own objective definition. The published full-scale runs used the historical solver commit recorded in the [reproduction guide](examples/full-aperture-tiled-adjoint/#requirements).
+
+### E1: a nine-wavelength freeform lens
+
+[![Paper Figure 3: E1 optimization, freeform and meta-atom layouts, nine-wavelength focal fields and optical performance](docs/assets/paper-e1-lens.png)](https://arxiv.org/html/2609.30039v3#Sx1.F3)
+
+*Figure 3 from the authors' public arXiv v3: optimization history, final dielectric pattern and full-wave focal fields of E1. The convergence history uses the 0.9 µm overlaps of the optimization. The optical comparison is re-evaluated with 3.6 µm overlaps.*
+
+### E2 and E3: color and polarization-switched holograms
+
+[![Paper Figure 4: E2 color parrot hologram and E3 polarization-switched CNU and PHY images, with targets, optimized layouts and comparisons](docs/assets/paper-e2-e3-holograms.png)](https://arxiv.org/html/2609.30039v3#Sx1.F4)
+
+*Figure 4 from the authors' public arXiv v3: E2 in the upper panels and E3 in the lower panels. These are the reported full-scale results. [Figure provenance](docs/assets/paper-designs-provenance.json) · [Reproduce or evaluate the saved layouts](examples/full-aperture-tiled-adjoint/).*
 
 ## Examples
 
@@ -229,7 +288,7 @@ python -m pytest -q
 npm run test:ui
 ```
 
-Validation uses analytical solutions, independently authored CPU/CUDA references, and the open-source solver comparisons linked above. No commercial solver results are used.
+The solver benchmark tables use analytical solutions, independently authored CPU/CUDA references, and the open-source solver comparisons linked above. The paper design studies have their own validation and reproduction records in [the full-aperture example](examples/full-aperture-tiled-adjoint/).
 
 ## Citing TorchFDTD
 
