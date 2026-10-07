@@ -4,7 +4,7 @@ TorchFDTD ships as one pure-Python wheel that carries the built browser
 workbench under `torchfdtd/web`. An end user needs Python and a PyTorch build
 for the machine; Node.js and a source checkout are only needed to change the
 frontend. This page lists the versions that were actually installed and run,
-the two install routes, `torchfdtd doctor`, and the maintainer steps that keep
+the installation routes, `torchfdtd doctor`, and the maintainer steps that keep
 the packaged assets current.
 
 ## Versions that were installed and run
@@ -26,6 +26,7 @@ the clean-install rows are the newest record under
 | 3.10.2 | 2.14.0+cpu | 2.2.6 | none | full clean install, README blocks | passed (clean-install record) |
 | 3.10.2 | 2.10.0+cu126 | 2.2.6 | cupy-cuda12x 13.6.0, CUDA runtime 12.6, driver 591.86, RTX 3060 | full clean install with `[cuda-kernels]`, fused launch, README CUDA block | passed (clean-install record) |
 | 3.12.7 (Anaconda base) | 2.14.0+cpu | 2.5.3 | none | probe, CPU subset | passed; 31 passed, 5 CUDA skips |
+| 3.12.15 (Ubuntu 24.04) | 2.14.1+cpu | 2.5.3 | none | v1.1.7 from PyPI, CLI, packaged UI, 80-step CPU run and NPZ round trip | passed ([publication workflow](https://github.com/hyoseokp/TorchFDTD/actions/runs/37599084025)) |
 | 3.9 | any | any | none | none | not tried: the host has no 3.9 interpreter; the wheel metadata carries `Requires-Python >=3.10` |
 
 The probe imports `torchfdtd` from the environment's own `site-packages`
@@ -49,17 +50,38 @@ Bounds in `pyproject.toml` that follow from the table:
 - `requires-python >=3.10`: 3.10.2 carries every record; 3.12.7 passed the
   probe and the subset; 3.11 and 3.13 were not tried.
 
-Not tried: Linux and macOS installs (the CI job in `.github/workflows/test.yml`
-installs a CPU torch on Ubuntu with Python 3.11 from a checkout, not from the
-wheel), torch builds between 2.4.1 and 2.10.0 or between 2.10.0 and 2.14.0,
-CUDA runtimes other than 12.6, drivers other than 591.86.
+The v1.1.7 PyPI publication additionally verified an installed wheel on Ubuntu
+24.04 with Python 3.12.15 and torch 2.14.1+cpu. PyPI's file digest and a fresh
+download both matched the GitHub release wheel. The
+[publication workflow](https://github.com/hyoseokp/TorchFDTD/actions/runs/37599084025)
+records the actual installed `site-packages` path and CPU result.
 
-## Install the wheel
+Not tried: macOS installs, Linux CUDA installs, torch builds between 2.4.1 and
+2.10.0 or between 2.10.0 and 2.14.0, CUDA runtimes other than 12.6, drivers
+other than 591.86.
+
+## Install from PyPI
+
+With Python 3.10 or newer, install TorchFDTD and its Python dependencies:
+
+```sh
+pip install torchfdtd
+torchfdtd doctor
+torchfdtd serve
+```
+
+The package includes the browser workbench at `http://127.0.0.1:8765`. No
+Node.js installation or source checkout is needed. Use a virtual environment
+to keep this installation separate from other Python projects.
+
+For NVIDIA GPU execution, install the PyTorch CUDA build appropriate for the
+machine first, then install the `cuda-kernels` extra. The following is the
+CUDA 12.6 installation route used by this project:
 
 ```powershell
 python -m venv torchfdtd-env
 torchfdtd-env/Scripts/python.exe -m pip install torch --index-url https://download.pytorch.org/whl/cu126
-torchfdtd-env/Scripts/python.exe -m pip install "torchfdtd-1.1.3-py3-none-any.whl[cuda-kernels]"
+torchfdtd-env/Scripts/python.exe -m pip install "torchfdtd[cuda-kernels]"
 torchfdtd-env/Scripts/torchfdtd doctor
 torchfdtd-env/Scripts/torchfdtd serve
 ```
@@ -67,7 +89,10 @@ torchfdtd-env/Scripts/torchfdtd serve
 Use `https://download.pytorch.org/whl/cpu` and drop `[cuda-kernels]` on a
 machine without an NVIDIA GPU; every simulation then runs on the CPU. The
 pip bundled with Python 3.10 (21.2.4) installs the wheel; upgrading pip is not
-required. The wheel is built from a checkout (below) or taken from a release;
+required. Versioned wheels can also be taken from a
+[GitHub release](https://github.com/hyoseokp/TorchFDTD/releases/latest) or built
+from a checkout (below). To install a downloaded wheel, use
+`python -m pip install "torchfdtd-1.1.7-py3-none-any.whl[cuda-kernels]"`.
 `torchfdtd serve` listens on `http://127.0.0.1:8765` only.
 
 Optional extras: `gds` (gdstk for GDS import and export), `dev` (pytest,

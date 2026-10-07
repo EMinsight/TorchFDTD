@@ -2,6 +2,7 @@
 
 [![arXiv](https://img.shields.io/badge/arXiv-2609.30039-b31b1b.svg)](https://arxiv.org/abs/2609.30039)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22928834.svg)](https://doi.org/10.5281/zenodo.22928834)
+[![PyPI](https://img.shields.io/pypi/v/torchfdtd.svg)](https://pypi.org/project/torchfdtd/)
 
 https://github.com/user-attachments/assets/021d317c-bd63-4019-8391-9211d9be4166
 
@@ -25,21 +26,28 @@ Build a device in Python or in the browser, simulate its electromagnetic fields,
 
 ### Install and open the workbench
 
-Use Python 3.10 or 3.12. The [release wheel](https://github.com/hyoseokp/TorchFDTD/releases/latest) includes the browser workbench, so you do not need Node.js or a source checkout.
+Use Python 3.10 or 3.12. Install from [PyPI](https://pypi.org/project/torchfdtd/) and start the workbench:
+
+```sh
+pip install torchfdtd
+torchfdtd serve
+```
+
+The package includes the browser workbench, so you do not need Node.js or a source checkout. For an NVIDIA GPU, select a CUDA-enabled PyTorch build and install the `cuda-kernels` extra as below. Versioned wheels are also available from [GitHub Releases](https://github.com/hyoseokp/TorchFDTD/releases/latest).
 
 **Windows / PowerShell, NVIDIA GPU:**
 
 ```powershell
 python -m venv torchfdtd-env
 torchfdtd-env/Scripts/python.exe -m pip install torch --index-url https://download.pytorch.org/whl/cu126
-torchfdtd-env/Scripts/python.exe -m pip install "torchfdtd[cuda-kernels] @ https://github.com/hyoseokp/TorchFDTD/releases/download/v1.1.4/torchfdtd-1.1.4-py3-none-any.whl"
+torchfdtd-env/Scripts/python.exe -m pip install "torchfdtd[cuda-kernels]"
 torchfdtd-env/Scripts/torchfdtd doctor
 torchfdtd-env/Scripts/torchfdtd serve
 ```
 
 Open **http://127.0.0.1:8765** in your browser. `torchfdtd doctor` checks the installation, CUDA device and fused-kernel launch before you start.
 
-For a CPU-only installation, use the PyTorch index `https://download.pytorch.org/whl/cpu` and omit `[cuda-kernels]` from the wheel command. The `cuda-kernels` extra installs CuPy for the fused CUDA path. See [installation and tested versions](docs/INSTALL.md) for requirements and troubleshooting.
+For a CPU-only installation, use the PyTorch index `https://download.pytorch.org/whl/cpu` and omit `[cuda-kernels]` from the installation command. The `cuda-kernels` extra installs CuPy for the fused CUDA path. See [installation and tested versions](docs/INSTALL.md) for requirements and troubleshooting.
 
 The server listens on loopback only. Use SSH forwarding for a remote GPU. The default workbench limit is 8 million resident cells. For larger local projects, see [memory admission and server limits](docs/SECURITY.md#memory-admission).
 
