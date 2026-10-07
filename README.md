@@ -227,10 +227,12 @@ Validation uses analytical solutions, independently authored CPU/CUDA references
 
 If TorchFDTD contributes to published work, please cite the [paper](https://arxiv.org/abs/2609.30039) and the [software on Zenodo](https://doi.org/10.5281/zenodo.22928834). The Zenodo link opens the latest archived release. Citation metadata is available in [CITATION.cff](CITATION.cff), which GitHub offers as "Cite this repository".
 
+The paper is by Hyoseok Park and Yeonsang Park, with Yeonsang Park as the corresponding author.
+
 ```bibtex
 @misc{park2026torchfdtd,
-  author        = {Park, Hyoseok},
-  title         = {{TorchFDTD}: {GPU}-accelerated finite-difference time-domain simulation with discrete adjoints and host-streamed execution for photonic inverse design},
+  author        = {Park, Hyoseok and Park, Yeonsang},
+  title         = {Inverse design of large-scale freeform meta-optics by breaking the memory wall of full-wave simulation},
   year          = {2026},
   eprint        = {2609.30039},
   archivePrefix = {arXiv},
