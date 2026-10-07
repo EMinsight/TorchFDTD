@@ -1,51 +1,251 @@
 {
   "torchfdtd_version": "1.1.7",
   "torch_version": "2.14.0+cpu",
+  "numpy_version": "2.2.6",
   "backend": "cpu",
   "precision": "float64",
   "shape": [
+    64,
     48,
-    40,
     1
   ],
-  "steps": 160,
+  "steps": 320,
   "checkpoints": 4,
-  "density_parameters": 256,
-  "seed": 7,
-  "iterations": 12,
-  "objective": "Mean squared Ez at one point, without power normalization",
-  "history": [
-    0.00021436913158136536,
-    0.00026115418011064855,
-    0.00028983760318055806,
-    0.0003111086275450732,
-    0.0003299392684692327,
-    0.00034815750753155723,
-    0.0003660846820569527,
-    0.0003834307192406271,
-    0.00039964451889183585,
-    0.00041405428778119505,
-    0.0004261811469855736,
-    0.0004360654023557923,
-    0.0004442126673386489
+  "density_parameters": 231,
+  "design_side_um": 2.1,
+  "guide_width_um": 0.5,
+  "output_centers_y_um": [
+    0.6,
+    -0.6
   ],
-  "initial_objective": 0.00021436913158136536,
-  "final_objective": 0.0004442126673386489,
-  "objective_ratio": 2.0721857856201873,
+  "wavelength_um": 1.55,
+  "core_index": 2.0,
+  "mirror_symmetric_design": true,
+  "fixed_port_contacts": true,
+  "seed": 7,
+  "iterations": 20,
+  "objective": "4 * upper_flux * lower_flux / (upper_flux + lower_flux)",
+  "history": [
+    {
+      "update": 0,
+      "score": 0.000711305376015888,
+      "powers": [
+        0.000355699684715772,
+        0.0003556057037173255
+      ]
+    },
+    {
+      "update": 1,
+      "score": 0.0008663287410271273,
+      "powers": [
+        0.00043318948281111927,
+        0.00043313926112739426
+      ]
+    },
+    {
+      "update": 2,
+      "score": 0.0009714319953768201,
+      "powers": [
+        0.0004857181875102339,
+        0.00048571380788633127
+      ]
+    },
+    {
+      "update": 3,
+      "score": 0.00102339273098819,
+      "powers": [
+        0.0005116812729542466,
+        0.000511711458924308
+      ]
+    },
+    {
+      "update": 4,
+      "score": 0.0010395539767142133,
+      "powers": [
+        0.0005197578706921407,
+        0.0005197961074284912
+      ]
+    },
+    {
+      "update": 5,
+      "score": 0.0010422686571484486,
+      "powers": [
+        0.0005211262529318509,
+        0.0005211424044668899
+      ]
+    },
+    {
+      "update": 6,
+      "score": 0.0010447483663980626,
+      "powers": [
+        0.0005223876590280806,
+        0.0005223607080652254
+      ]
+    },
+    {
+      "update": 7,
+      "score": 0.0010508887057591502,
+      "powers": [
+        0.0005254848610929528,
+        0.0005254038509110543
+      ]
+    },
+    {
+      "update": 8,
+      "score": 0.001060288436986245,
+      "powers": [
+        0.0005302138260164646,
+        0.000530074629243809
+      ]
+    },
+    {
+      "update": 9,
+      "score": 0.0010714125234375616,
+      "powers": [
+        0.0005358049188270607,
+        0.0005356076409350394
+      ]
+    },
+    {
+      "update": 10,
+      "score": 0.0010828123617545268,
+      "powers": [
+        0.0005415324635933589,
+        0.0005412799570444573
+      ]
+    },
+    {
+      "update": 11,
+      "score": 0.001093396925098105,
+      "powers": [
+        0.0005468500166711729,
+        0.0005465469924071369
+      ]
+    },
+    {
+      "update": 12,
+      "score": 0.0011024684062045389,
+      "powers": [
+        0.0005514080547762352,
+        0.0005510604610200224
+      ]
+    },
+    {
+      "update": 13,
+      "score": 0.0011096893031810745,
+      "powers": [
+        0.0005550374511749174,
+        0.000554651985902607
+      ]
+    },
+    {
+      "update": 14,
+      "score": 0.0011150249924374647,
+      "powers": [
+        0.0005577207249983938,
+        0.0005573044228682681
+      ]
+    },
+    {
+      "update": 15,
+      "score": 0.0011186796248373668,
+      "powers": [
+        0.0005595599477767623,
+        0.0005591198501985109
+      ]
+    },
+    {
+      "update": 16,
+      "score": 0.0011210157745942823,
+      "powers": [
+        0.0005607365216724924,
+        0.0005602794392922872
+      ]
+    },
+    {
+      "update": 17,
+      "score": 0.0011224620157223484,
+      "powers": [
+        0.0005614649364123727,
+        0.0005609972741566113
+      ]
+    },
+    {
+      "update": 18,
+      "score": 0.0011234283795010357,
+      "powers": [
+        0.0005619504851778339,
+        0.000561478092960135
+      ]
+    },
+    {
+      "update": 19,
+      "score": 0.0011242485713903489,
+      "powers": [
+        0.000562360348228106,
+        0.0005618884212634693
+      ]
+    },
+    {
+      "update": 20,
+      "score": 0.001125153456734596,
+      "powers": [
+        0.0005628103024675227,
+        0.0005623433480596445
+      ]
+    }
+  ],
+  "selected_iteration": 20,
+  "initial_objective": 0.000711305376015888,
+  "selected_objective": 0.001125153456734596,
+  "objective_ratio": 1.5818149203886576,
+  "total_flux_ratio": 1.5818151652213928,
+  "split_fraction": [
+    0.5002075069514548,
+    0.4997924930485452
+  ],
   "gradient_check": {
-    "parameter_flat_index": 240,
+    "parameter_flat_index": 53,
     "step": 0.0001,
-    "adjoint": -0.012796437945109637,
-    "finite_difference": -0.012796437927065085,
-    "relative_error": 1.4101230390167552e-09
+    "adjoint": -0.023610272803055554,
+    "finite_difference": -0.02361027278437888,
+    "relative_error": 7.910401944883648e-10
   },
+  "fixed_guides_unchanged": true,
+  "scope": "Spectral flux captured by two equal apertures. Not modal S-parameters or incident-normalized device efficiency.",
+  "cad_export": {
+    "permittivity_levels": 64,
+    "materials": 54,
+    "structures": 444,
+    "max_permittivity_difference": 0.02378662227119488
+  },
+  "numerical_driver_sha256": "eb286bc51e62618386dbf9af8ed08e3a219694ab63b9ea5ccb23d9cefcae1211",
   "example_driver": "examples/adjoint_inverse_design/optimize.py",
-  "example_driver_sha256": "f9f35c9eabbe57f285f6bf6aae8b31473cf2022c7abe9e65eb566001e4c73dc1",
-  "numerical_functions_sha256": "c3f2af4f26de4a331fc3850f067e54d3afb17005ac90d48fb808c450663c8d4d",
-  "numpy_version": "2.2.6",
+  "example_driver_sha256": "a509399cddee929f0497d99351bdf1c2853a0c9209afae0130cf11136ef7858a",
+  "numerical_functions_sha256": "c85d7876e13ab866c0e728180d81c9ef4c368eff24dc38b7f0b9f0d891f3cde8",
   "reference_data": "examples/adjoint_inverse_design/reference.npz",
-  "reference_data_sha256": "2592bbf28c043c8bbc76930adc8ef230e3f19f94a4ff99337f1347025965634f",
+  "reference_data_sha256": "6aa5cf40b12e2c3e70b1aad0e273f30a4ac49c127d7d7c5bb8a611931178f011",
   "figure": "docs/assets/adjoint-inverse-design.png",
-  "figure_sha256": "fd5668fce4260ba9cb6434c6a05c0c0905356f1beab743d7f31f6148ca6d27e8",
-  "scope": "Small CPU tutorial. Reported point-field objective is not power-normalized efficiency or a speed benchmark."
+  "figure_sha256": "c0f152cdd1a40db9e50745b4fab108e501cbe8d91bce81a0aabb307ab8d87ddb",
+  "cad_project": "examples/adjoint_inverse_design/splitter.json",
+  "cad_project_sha256": "e56d0222d8e880041cc328834bd1a7777cbc930091f37bebaf127566971dda86",
+  "cad_forward_check": {
+    "default_workbench_admission_passed": true,
+    "materials": 54,
+    "structures": 444,
+    "max_permittivity_difference": 0.02378662227119488,
+    "continuous_powers": [
+      0.0005628103024675227,
+      0.0005623433480596445
+    ],
+    "cad_powers": [
+      0.0005627153099919715,
+      0.0005622427739139313
+    ],
+    "relative_total_flux_difference": 0.00017381325756952914,
+    "cad_split_fraction": [
+      0.5002100238599111,
+      0.49978997614008897
+    ]
+  }
 }

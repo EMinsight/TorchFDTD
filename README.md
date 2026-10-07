@@ -118,17 +118,17 @@ This route reuses packages available in the base Python environment. Install a s
 
 ## Adjoint inverse design
 
-Start with a [small CPU example](examples/adjoint_inverse_design/) that optimizes a dielectric region between a source and a target point. TorchFDTD computes the discrete Yee/CPML adjoint, and PyTorch carries its material gradient through a density filter to an Adam optimizer.
+Start with a [small 2D splitter example](examples/adjoint_inverse_design/): **one input waveguide → square dielectric design region → two output waveguides**. The three guides stay fixed while TorchFDTD's discrete adjoint optimizes the dielectric pattern inside the square for balanced output flux.
 
-[![Initial and optimized dielectric, measured objective history and target signals of the CPU adjoint example](docs/assets/adjoint-inverse-design.png)](examples/adjoint_inverse_design/)
+[![Initial and optimized 2D waveguide splitter, computed field propagation and measured output fluxes](docs/assets/adjoint-inverse-design.png)](examples/adjoint_inverse_design/)
 
-*Actual installed-package run with TorchFDTD 1.1.7: 256 design variables, a 48 × 40 grid, 160 timesteps, FP64 on CPU and four checkpoints. Twelve Adam updates increase the mean squared target field by **2.07×**. This objective is measured over a fixed time window in arbitrary units. It is not power-normalized transmission or efficiency. [Conditions and numerical record](docs/assets/adjoint-inverse-design.json).*
+*Actual TorchFDTD 1.1.7 run: a 2.1 × 2.1 µm square design region, 0.5 µm wide guides and a carrier wavelength of 1.55 µm. Twenty CPU Adam updates give a measured **50.02% / 49.98%** split and **1.58×** the initial captured output flux. The 64 × 48 grid uses 320 timesteps, FP64 and four checkpoints. Fractions are measured in two equal output apertures and do not represent incident-normalized efficiency. [Conditions and numerical record](docs/assets/adjoint-inverse-design.json).*
 
 Download [optimize.py](examples/adjoint_inverse_design/optimize.py), then run it with the PyPI package:
 
 ```sh
 pip install torchfdtd
-python optimize.py --iterations 12 --check-gradient --output results/adjoint
+python optimize.py --iterations 20 --check-gradient --output results/splitter
 ```
 
 The core update is below. The linked script supplies the complete project, density parameterization, plotting and result export:
@@ -137,14 +137,13 @@ The core update is below. The linked script supplies the complete project, densi
 ```python
 optimizer.zero_grad(set_to_none=True)
 epsilon, density = material(theta, project.region.shape)
-result = model(epsilon)                  # DifferentiableSimulation
-objective = result.signals[:, 0].square().mean()
-loss = -torch.log(objective)
+objective, output_fluxes = evaluate(model, epsilon, project)
+loss = -torch.log(objective / initial_objective)
 loss.backward()                         # Discrete adjoint and density/filter gradient
 optimizer.step()
 ```
 
-The script can check one adjoint derivative against a central finite difference. It saves the initial/final design arrays, point signals, objective history and a summary figure. See [differentiable FDTD](docs/DIFFERENTIABLE_FDTD.md) for the supported API and [reversible CPML adjoints](docs/REVERSIBLE_CPML.md) for larger designs.
+The script checks one adjoint derivative against a central finite difference and saves the design arrays, output fluxes, field image and a browser project. You can also download the [ready-to-open splitter](examples/adjoint_inverse_design/splitter.json) and load it with `torchfdtd serve`. Its 64-level CAD approximation fits the default workbench limits and differs by 0.0174% in captured flux from the continuous design. See [differentiable planes](docs/DIFFERENTIABLE_PLANES.md) for the flux API and [reversible CPML adjoints](docs/REVERSIBLE_CPML.md) for larger designs.
 
 ## Paper designs: E1, E2, E3
 
