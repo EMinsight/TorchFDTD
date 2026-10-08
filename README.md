@@ -118,17 +118,17 @@ This route reuses packages available in the base Python environment. Install a s
 
 ## Adjoint inverse design
 
-Start with a [small 2D splitter example](examples/adjoint_inverse_design/): **one input waveguide → square dielectric design region → two output waveguides**. The three guides stay fixed while TorchFDTD's discrete adjoint optimizes the dielectric pattern inside the square for balanced output flux.
+Start with a [small 2D wavelength splitter](examples/adjoint_inverse_design/): **one input waveguide → square dielectric design region → two output waveguides**, with **1.31 µm routed to the upper guide and 1.55 µm to the lower guide**. The three guides stay fixed while TorchFDTD's discrete adjoint, computed for both wavelengths in one run, optimizes the dielectric pattern inside the square.
 
-[![Initial and optimized 2D waveguide splitter, computed field propagation and measured output fluxes](docs/assets/adjoint-inverse-design.png)](examples/adjoint_inverse_design/)
+[![Initial and optimized 2D wavelength splitter, field maps at 1.31 and 1.55 µm and measured routing](docs/assets/adjoint-inverse-design.png)](examples/adjoint_inverse_design/)
 
-*Actual TorchFDTD 1.1.7 run: a 2.1 × 2.1 µm square design region, 0.5 µm wide guides and a carrier wavelength of 1.55 µm. Twenty CPU Adam updates give a measured **50.02% / 49.98%** split and **1.58×** the initial captured output flux. The 64 × 48 grid uses 320 timesteps, FP64 and four checkpoints. Fractions are measured in two equal output apertures and do not represent incident-normalized efficiency. [Conditions and numerical record](docs/assets/adjoint-inverse-design.json).*
+*Actual TorchFDTD 1.1.7 run from PyPI: a 3 × 3 µm design region on a 40 nm grid, 5625 density variables with a filter and tanh projection, 60 Adam updates on eight CPU threads (35 min). The thresholded two-level design sends **97.5%** of the 1.31 µm light into the upper guide and **93.2%** of the 1.55 µm light into the lower guide, with 1.0% and 0.2% in the wrong guide. Transmissions are normalized by a straight guide, so scattering losses count. [Conditions and numerical record](docs/assets/adjoint-inverse-design.json).*
 
 Download [optimize.py](examples/adjoint_inverse_design/optimize.py), then run it with the PyPI package:
 
 ```sh
-pip install torchfdtd
-python optimize.py --iterations 20 --check-gradient --output results/splitter
+pip install torchfdtd matplotlib
+python optimize.py --iterations 60 --check-gradient --output results/wavelength-splitter
 ```
 
 The core update is below. The linked script supplies the complete project, density parameterization, plotting and result export:
@@ -136,9 +136,9 @@ The core update is below. The linked script supplies the complete project, densi
 <!-- readme-example: skip: core update excerpt; the complete standalone script is linked above -->
 ```python
 optimizer.zero_grad(set_to_none=True)
-epsilon, density = material(theta, project.region.shape)
-objective, output_fluxes = evaluate(model, epsilon, project)
-loss = -torch.log(objective / initial_objective)
+epsilon, density = material(theta, project, beta_at(update), background)
+t = transmissions(model, epsilon, project, incident)   # [port, wavelength] at 1.31 and 1.55 um
+loss = -objective(t)
 loss.backward()                         # Discrete adjoint and density/filter gradient
 optimizer.step()
 ```
