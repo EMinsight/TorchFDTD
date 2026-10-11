@@ -76,8 +76,12 @@ def test_format_version_constants_match_the_code():
 
 def test_version_strings_agree_across_pyproject_server_and_document():
     version = re.search(r'^version = "([^"]+)"', (ROOT / 'pyproject.toml').read_text(encoding='utf-8'), re.M).group(1)
+    # The server reports the installed package version instead of a literal of its own.
     server = (ROOT / 'torchfdtd' / 'server.py').read_text(encoding='utf-8')
-    assert server.count(f"'{version}'") == 2, 'FastAPI title version and /api/health version'
+    assert f"'{version}'" not in server and "version=__version__" in server and "'version': __version__" in server
+    import importlib.metadata
+    import torchfdtd
+    assert torchfdtd.__version__ == importlib.metadata.version('torchfdtd')
     assert f'Version of record: **{version}**' in COMPATIBILITY
     assert f'\n## {version} ' in CHANGELOG
 
