@@ -12,8 +12,7 @@ pairwise covering array over the axes, runs every admitted case and asserts
 every rejected case raises the registry's error from the registry's code path
 before any field allocation. The tables in docs/CAPABILITIES.md and the
 ``combinations`` block of ``/api/capabilities`` are rendered from this module by
-scripts/build_capability_tables.py. docs/FEATURE_CHECKLIST.md is a different
-inventory (Lumerical properties) and is only linked from here.
+scripts/build_capability_tables.py.
 
 Scene recipe (one Project per combination):
 
@@ -336,10 +335,8 @@ INCIDENCE = {
                                          'the angle asin(k_parallel / (n k0)) varies across the band; frequencies with '
                                          'k_parallel > n k0 are evanescent.'),
     'fixed_angle': dict(status='rejected', code_path='torchfdtd/source_preview.py::preview_source', exception='ValueError',
-                        feature_inventory=('source.angle', 'boundary.bfast'),
                         message='Fixed-angle broadband injection is not implemented: a Bloch cell fixes k_parallel, so the '
-                                'incidence angle varies across the band (feature inventory source.angle and boundary.bfast '
-                                'are missing). Preview the fixed-k_parallel source instead.'),
+                                'incidence angle varies across the band. Preview the fixed-k_parallel source instead.'),
 }
 
 
@@ -354,7 +351,7 @@ def registry_json():
                 axis_labels=AXIS_LABELS, value_labels=VALUE_LABELS, recipe=__doc__.split('Scene recipe (one Project per combination):', 1)[1].strip(),
                 summary={k: v for k, v in summary.items() if k != 'by_name'}, rules=rules, lanes=lanes,
                 pairs=pair_tables(), incidence=INCIDENCE,
-                related=dict(feature_checklist='docs/FEATURE_CHECKLIST.md', tables='docs/CAPABILITIES.md',
+                related=dict(tables='docs/CAPABILITIES.md',
                              tests='tests/test_capability_pairs.py'))
 
 

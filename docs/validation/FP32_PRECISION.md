@@ -34,12 +34,12 @@ allocation is not total process/device memory. The allocator's reserved pool
 is retained between runs and is recorded separately. This is a desktop
 measurement, not a general GPU throughput guarantee.
 
-The [original-context algebra check](cr-information-fp32.json) evaluates the
+The original-context algebra check evaluates the
 actual fixed CR electron context on an archived full response. FP32 differs
 from FP64 by 3.50e-6 bits per pixel, with response-gradient relative L2
 1.08e-5. It does not rerun optics or certify the full density gradient.
 
-The [full 144-case comparison](cr-full-fp32-comparison.json) now passes for
+The full 144-case comparison now passes for
 9 wavelengths and 16 rays on the original 128 x 128 binary seed. The FP32
 RTX 3060 run uses a 50 nm mesh, 1,600 steps and 12 PML cells. Against the
 archived directionally checked FP64 RTX 5880 density VJP, relative L2 errors

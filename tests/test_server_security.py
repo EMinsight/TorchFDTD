@@ -437,3 +437,28 @@ def test_gds_uploads_keep_the_vertex_limit_the_python_api_lifts(tmp_path, client
             'layers': [{'layer': 1, 'datatype': 0, 'z_min': 0, 'z_max': .1, 'material': project['materials'][0]['name']}]}
     response = client.post('/api/gds/' + upload.json()['id'] + '/convert', json=body)
     assert response.status_code == 422 and 'instance/vertex admission limits' in response.text, response.text
+
+
+def test_evicting_a_finished_job_removes_its_result_files(tmp_path):
+    from torchfdtd.server import evict_finished
+    jobs = {f'k{i}': {'status': 'completed'} for i in range(12)}
+    for name in ('k0.npz', 'k0.design.json', 'k0.modal.npz', 'k1.npz'):
+        (tmp_path / name).write_bytes(b'x')
+    evict_finished(jobs, tmp_path)
+    assert 'k0' not in jobs and len(jobs) == 11
+    assert not any((tmp_path / n).exists() for n in ('k0.npz', 'k0.design.json', 'k0.modal.npz'))
+    assert (tmp_path / 'k1.npz').exists()
+
+
+def test_a_wildcard_host_is_not_accepted(monkeypatch):
+    from fastapi.testclient import TestClient
+    from torchfdtd.server import create_app
+    monkeypatch.setenv('TORCHFDTD_ALLOWED_HOSTS', '*,testserver')
+    with TestClient(create_app()) as client:
+        assert client.get('/api/capabilities', headers={'Host': 'evil.example'}).status_code == 400
+
+
+def test_the_package_reports_its_installed_version():
+    import importlib.metadata
+    import torchfdtd
+    assert torchfdtd.__version__ == importlib.metadata.version('torchfdtd')

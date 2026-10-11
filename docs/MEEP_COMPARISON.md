@@ -1,6 +1,6 @@
 # Compared with Meep
 
-Rendered by `scripts/render_meep_comparison.py` from the records in `docs/validation/meep_comparison/`; do not edit by hand. Each example sets up one device from one geometry file and runs it in TorchFDTD (0.14.0.dev0, NVIDIA GeForce RTX 3060, fused CUDA kernels) and in Meep 1.34.0 (MPI ranks on the 12th Gen Intel(R) Core(TM) i7-12700) on the same grid, time step, step count, source, monitors and staircase material sampling; the agreement criteria were declared in each example's `criteria.json` before the first comparison run. The rules shared by the three examples are in [`examples/meep_comparison/BRIEF.md`](../examples/meep_comparison/BRIEF.md).
+Rendered by `scripts/render_meep_comparison.py` from the records in `docs/validation/meep_comparison/`; do not edit by hand. Each example sets up one device from one geometry file and runs it in TorchFDTD (0.14.0.dev0, NVIDIA GeForce RTX 3060, fused CUDA kernels) and in Meep 1.34.0 (MPI ranks on the 12th Gen Intel(R) Core(TM) i7-12700) on the same grid, time step, step count, source, monitors and staircase material sampling; the agreement criteria were declared in each example's `criteria.json` before the first comparison run.
 
 Timing rows marked "development run, shared host" are single runs made while other jobs used the CPU and the GPU; they bound the solver time from above and are replaced by the maintainer's `--timing` rerun (one warm-up, three timed solves, Meep with 12 ranks on a quiet host) once `<name>_<solver>_timing.json` records exist.
 

@@ -1,6 +1,6 @@
 """Independent check of the G7-01 binary designs with TORCWA 0.1.4.2 (rigorous coupled-wave analysis).
 
-    C:/anaconda3/python.exe examples/g7/metagrating/rcwa_check.py --job job.json --out result.json
+    python examples/g7/metagrating/rcwa_check.py --job job.json --out result.json
 
 TORCWA: C. Kim and B. Lee, Comput. Phys. Commun. 282, 108552 (2023). It is not a TorchFDTD
 dependency and lives in another interpreter, so workflow.py writes a job file and runs this

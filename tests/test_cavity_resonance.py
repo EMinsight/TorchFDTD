@@ -21,7 +21,7 @@ C0 = 299792458.0
 CELLS, MESH, STEPS = 8, .1, 4000
 SOURCE_END_STEPS = 600          # past 8 sigma of the 2-cycle Gaussian for both indices (477 steps at n = 1.5)
 ESTIMATOR_FLOOR = 1e-3          # declared budget of the DFT peak location
-CONTINUUM_LIMIT = 1e-2          # completion_gates.json cavity_resonant_frequency_relative_error
+CONTINUUM_LIMIT = 1e-2          # declared cavity resonant-frequency relative error
 
 
 def cavity_project(wavelength_um):

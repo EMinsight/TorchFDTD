@@ -1,8 +1,7 @@
 """Record the GPU, driver, CUDA runtime, Torch, CuPy, Python and OS of this host.
 
-The record is one JSON file under docs/validation/platforms/ and is the only
-basis for a row of docs/PLATFORM_MATRIX.md: a platform without a record file
-is "not recorded" there, never assumed. Nothing is executed on the GPU beyond
+The record is one JSON file under docs/validation/platforms/. Nothing is
+executed on the GPU beyond
 the memory query; this is an inventory, not a verification. The interpreter
 path is written with the user's home directory replaced by ``<user home>``, so
 a record never carries the account name.
@@ -15,11 +14,21 @@ import subprocess
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from record_gate_evidence import redact_home  # noqa: E402
 
 RECORD_VERSION = 1
 PLATFORMS_DIR = Path('docs') / 'validation' / 'platforms'
+
+
+def redact_home(path):
+    """A path with the user's home directory replaced by ``<user home>``, so a record never carries the account name."""
+    if path is None:
+        return None
+    text = str(path)
+    home = str(Path.home())
+    for candidate in (home, home.replace('\\', '/')):
+        if text.lower().startswith(candidate.lower()):
+            return '<user home>' + text[len(candidate):]
+    return text
 
 
 def nvidia_smi(query):

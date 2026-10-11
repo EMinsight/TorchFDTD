@@ -12,11 +12,4 @@ test-results/
 playwright-report/
 tmp/
 output/
-/docs/paper/*.aux
-/docs/paper/*.bbl
-/docs/paper/*.blg
-/docs/paper/*.out
-/docs/paper/*.fdb_latexmk
-/docs/paper/*.fls
-/docs/paper/*.synctex.gz
 research/

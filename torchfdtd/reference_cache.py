@@ -2,7 +2,6 @@
 from collections import OrderedDict
 from copy import deepcopy
 from dataclasses import replace
-import torch
 
 
 _TENSORS=('fields','frequency_hz','points_um','weights')

@@ -162,8 +162,8 @@ python -m pytest tests/test_g7_metalens.py
 Declared in [G7_WORKFLOWS.md](G7_WORKFLOWS.md) (section G7-03) and
 [`docs/validation/cases/G7-03r2.json`](validation/cases/G7-03r2.json), which revises the original case: 0.1 um
 design pixels instead of 0.2 um, and (b) judged against the best G6 design evaluated by the same pipeline at the
-same 0.05 um mesh (0.6025) instead of its 0.1 um value (0.6136). The runs of the original case are kept outside the
-repository by owner decision. Code: [`examples/g7/coupler/workflow.py`](../examples/g7/coupler/workflow.py).
+same 0.05 um mesh (0.6025) instead of its 0.1 um value (0.6136). The runs of the original case are not part of the
+repository. Code: [`examples/g7/coupler/workflow.py`](../examples/g7/coupler/workflow.py).
 Tests: `tests/test_g7_coupler.py`. Records: [`docs/validation/g7/G7-03/`](validation/g7/G7-03): `seed1.json` to
 `seed3.json`, `summary.json` (the seven criteria, the radius selection, the same-mesh baseline), `baseline.json`,
 `development/` (the radius selection runs) and `export/seedN/` (GDS, rectangles, layer-stack sidecar, binary
@@ -172,9 +172,8 @@ pixels).
 **Package.** The records come from a checkout import of this branch at commit 0950126 (each record names the
 file, the missing `__version__` attribute, the distribution version 0.15.0, `torchfdtd_import: checkout` and the
 commit). The gate G7-03 re-judges these committed records criterion by criterion, and the release-candidate round
-repeats that re-judge with the installed wheel; it does not rerun the workflow. The owner accepted source
-identity as the installation evidence on 2026-09-26: `git diff 0950126 v0.15.0 -- torchfdtd` is empty.
-The separate G9-05 installation self-review reruns the documented workflow in a fresh wheel environment.
+repeats that re-judge with the installed wheel; it does not rerun the workflow. The source is identical:
+`git diff 0950126 v0.15.0 -- torchfdtd` is empty.
 The workflow appends the examples root to the end of `sys.path`, so an installed torchfdtd is used when one exists.
 
 **Result: all seven criteria pass.** The three seeds reach one design that meets the 0.4 um linewidth and gap
@@ -302,10 +301,10 @@ From the checkout root; each command takes its own GPU slot, and the last judges
 ```
 set TORCHFDTD_G7_FULL=1
 set TORCHFDTD_G7_RECORD=docs/validation/g7/G7-03
-python D:/TorchFDTD/.local/gpu_lock.py python -m pytest -s tests/test_g7_coupler.py::test_full_same_mesh_baseline
-python D:/TorchFDTD/.local/gpu_lock.py python -m pytest -s "tests/test_g7_coupler.py::test_full_declared_seed[1]"
-python D:/TorchFDTD/.local/gpu_lock.py python -m pytest -s "tests/test_g7_coupler.py::test_full_declared_seed[2]"
-python D:/TorchFDTD/.local/gpu_lock.py python -m pytest -s "tests/test_g7_coupler.py::test_full_declared_seed[3]"
+python -m pytest -s tests/test_g7_coupler.py::test_full_same_mesh_baseline
+python -m pytest -s "tests/test_g7_coupler.py::test_full_declared_seed[1]"
+python -m pytest -s "tests/test_g7_coupler.py::test_full_declared_seed[2]"
+python -m pytest -s "tests/test_g7_coupler.py::test_full_declared_seed[3]"
 python -m pytest tests/test_g7_coupler.py::test_full_declared_run_meets_every_criterion
 ```
 

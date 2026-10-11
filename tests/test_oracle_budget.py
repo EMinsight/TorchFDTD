@@ -1,4 +1,4 @@
-"""Every G3 acceptance case names its oracle classes and layers; docs/ORACLE_BUDGET.md covers every case.
+"""Every G3 acceptance case names its oracle classes and layers.
 
 The bookkeeping (oracle_class and tests.layers) lives in the case file itself
 when it was declared there, or in a sidecar <case_id>.oracles.json next to a
@@ -19,7 +19,7 @@ ALLOWED = LAYER_A | LAYER_B | EITHER
 LAYER_B_REQUIRED = {'G3-01', 'G3-02', 'G3-03', 'G3-04', 'G3-05', 'G3-06', 'G3-07', 'G3-08', 'G3-09', 'G3-10', 'G3-11',
                     'G3-12', 'G3-13', 'G3-16'}
 LAYER_A_ONLY = {'G3-14', 'G3-15'}
-RECORDED = LAYER_B_REQUIRED | LAYER_A_ONLY | {'G3-17'}
+RECORDED = LAYER_B_REQUIRED | LAYER_A_ONLY
 
 
 def _load(path):
@@ -91,14 +91,3 @@ def test_every_listed_test_exists_in_its_source_file():
             for class_name in classes:
                 assert re.search(rf'^class {re.escape(class_name)}\b', text, re.M), (path.name, test_id, class_name)
             assert re.search(rf'^\s*def {re.escape(name)}\(', text, re.M), (path.name, test_id)
-
-
-def test_oracle_budget_document_covers_every_g3_case_and_class():
-    text = (ROOT/'docs/ORACLE_BUDGET.md').read_text(encoding='utf-8')
-    for path in CASES:
-        case = _load(path)
-        assert case['case_id'] in text, case['case_id']
-    for name in ALLOWED:
-        assert f'`{name}`' in text, name
-    for heading in ('Precision floor', 'Time window', 'PML'):
-        assert heading in text

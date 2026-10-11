@@ -141,14 +141,12 @@ def test_effective_bandwidth_matches_the_gaussian_spectrum_and_names_a_zero_spec
 
 
 def test_registry_and_server_refuse_the_fixed_angle_definition():
-    assert INCIDENCE['fixed_angle']['status'] == 'rejected' and INCIDENCE['fixed_angle']['feature_inventory'] == ('source.angle', 'boundary.bfast')
+    assert INCIDENCE['fixed_angle']['status'] == 'rejected'
     assert INCIDENCE['fixed_angle']['code_path'] == 'torchfdtd/source_preview.py::preview_source'
     p = bloch_sheet()
     with TestClient(create_app()) as client:
         registry = client.get('/api/capabilities').json()['combinations']['incidence']
         assert registry['fixed_angle']['message'] == INCIDENCE['fixed_angle']['message']
-        features = {f['id']: f for f in client.get('/api/capabilities').json()['features']}
-        assert features['source.angle']['native'] == 'missing' and features['boundary.bfast']['native'] == 'missing'
         ok = client.post('/api/sources/sheet/preview', json=p.model_dump(mode='json'))
         assert ok.status_code == 200 and ok.json()['incidence']['kind'] == 'fixed_k_parallel'
         same = client.post('/api/sources/sheet/preview', params={'incidence': 'fixed_k_parallel'}, json=p.model_dump(mode='json'))

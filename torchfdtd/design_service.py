@@ -9,6 +9,7 @@ from uuid import uuid4
 from fastapi import HTTPException
 from fastapi.responses import FileResponse, Response
 
+from .server import evict_finished, failure_message, log
 from .periodic_design import PeriodicDesignConfig, periodic_design_plan, run_periodic_design
 
 
@@ -79,7 +80,8 @@ def attach_design_routes(app, root, pool, jobs, lock):
                 last_objective=None if result['last_evaluated'] is None else result['last_evaluated']['objective'])
             job['status']=result['status']
         except Exception as exc:
-            job['error']=str(exc)
+            log.exception('design job %s failed', key)
+            job['error']=failure_message(exc)
             job['status']='failed'
 
     @app.post('/api/design/jobs',status_code=202)
@@ -88,9 +90,7 @@ def attach_design_routes(app, root, pool, jobs, lock):
         with lock:
             if sum(j['status'] in ('queued','running') for j in jobs.values()) >= 3:
                 raise HTTPException(409,'The shared run queue is full (one running and two waiting).')
-            if len(jobs)>=12:
-                old=next((k for k,j in jobs.items() if j['status'] in ('completed','cancelled','failed')),None)
-                if old:del jobs[old]
+            evict_finished(jobs, root)
             key=uuid4().hex
             jobs[key]=dict(id=key,kind='periodic_design',status='queued',progress={},
                 cancel=threading.Event(),project={'name':config.name},config=config.model_dump(mode='json'),created=time.time())

@@ -35,7 +35,7 @@ test('Bloch sheet preview states fixed k_parallel and refuses a fixed-angle defi
  await page.getByLabel('Incidence definition',{exact:true}).selectOption('fixed_angle');
  expect((await refused).status()).toBe(422);
  await expect(dialog.locator('[data-preview-incidence]')).toContainText('Refused: Fixed-angle broadband injection is not implemented');
- await expect(dialog.getByRole('alert')).toContainText('feature inventory source.angle and boundary.bfast are missing');
+ await expect(dialog.getByRole('alert')).toContainText('Fixed-angle broadband injection is not implemented');
  await page.screenshot({path:'results/ui-source-preview-refused.png',fullPage:true});
  await dialog.getByRole('button',{name:'Close',exact:true}).click();
  // A normal-incidence sheet on periodic boundaries.

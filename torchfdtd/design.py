@@ -5,7 +5,6 @@ is a complete independent simulation. Objectives receive the same Result as a
 single run, including complex monitor fields and physical mesh coordinates.
 """
 from dataclasses import dataclass
-import math
 from pathlib import Path
 import numpy as np
 

@@ -1,14 +1,8 @@
 import {test,expect} from '@playwright/test';
 
-test('feature audit and global/custom frequency plane run without page errors',async({page})=>{
+test('global/custom frequency plane runs without page errors',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/');await expect(page.locator('#tree')).toContainText('waveguide');
- await page.locator('[data-action="capabilities"]').click();
- const checklist=page.locator('.capability-dialog');
- await expect(checklist).toBeVisible();await expect(checklist.locator('thead')).toContainText('Python');
- await checklist.getByLabel('Search capabilities').fill('Adjoint');
- await expect(checklist.locator('tbody')).toContainText('미구현');
- await checklist.getByRole('button',{name:'Close',exact:true}).click();
  await page.locator('[data-add="field"]').click();
  await expect(page.locator('#properties')).toContainText('Frequency / flux monitor');
  await page.getByLabel('sample spacing',{exact:true}).selectOption('custom');

@@ -1,20 +1,9 @@
 # Pre-declared acceptance cases
 
 A case file fixes the inputs, the reference method and the acceptance limits of
-one verification **before** the run that will be judged against it. Evidence
-recorded by `scripts/record_gate_evidence.py --fixture <case>` stores the file's
-SHA-256, and `scripts/check_release_gates.py` refuses evidence whose case file
-has changed since the run. Editing a case after the run therefore invalidates
-that evidence; a scientific correction to a limit is a new case file, with the
-old file and its failing evidence preserved.
-Commit the case before the run: the recorder refuses an uncommitted case file
-(unless `--allow-dirty`, which the judge fails) and stores
-`declared_before_run_verified` from the case's first commit against the suite
-timestamp; a case first committed with or after its evidence is a warning in
-the judge and the validation report. A revised case (`supersedes`,
-`revision_of`) or a limit looser than the program thresholds is a scope change
-that the judge lists as pending until the owner records
-`scope_change_approval` in the task.
+one verification **before** the run that will be judged against it. A
+scientific correction to a limit is a new case file, with the old file
+preserved.
 
 ## File format
 
@@ -43,8 +32,7 @@ Example: [G1-03_quadrant_allocation_scaling.json](G1-03_quadrant_allocation_scal
 
 ## Rules
 
-- Limits come from `proposed_thresholds` in `completion_gates.json` unless the
-  case explains a fixture-specific budget declared before the run.
+- Each case states its limits, including any fixture-specific budget, before the run.
 - A case may list `not_yet_covered` items. Evidence against such a case verifies
   the covered tests only; the task is not complete against the specification
   until those items have tests and evidence.

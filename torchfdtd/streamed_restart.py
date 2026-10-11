@@ -427,7 +427,7 @@ class RestartJournal:
         """Mark the run failed with the exception named; best effort, never raises."""
         try:
             self._set_state('failed', phase=phase, block=block, reason=f'{type(exc).__name__}: {exc}')
-        except BaseException:
+        except Exception:
             pass
         self._release()
 

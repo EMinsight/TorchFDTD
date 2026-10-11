@@ -4,8 +4,7 @@ TorchFDTD ships one HTTP server, `torchfdtd serve`, whose only purpose is to
 drive the browser workbench on the machine that runs it. This document states
 what that server protects against, what it does not, and how the Python API
 treats files it reads. The checks are enforced by
-[tests/test_server_security.py](../tests/test_server_security.py) and recorded
-against gate task G9-01 in [validation/completion_gates.json](validation/completion_gates.json).
+[tests/test_server_security.py](../tests/test_server_security.py).
 This is an engineering description, not a certification.
 
 ## Deployment model
@@ -19,7 +18,7 @@ This is an engineering description, not a certification.
   result of the server session and write files under the results directory.
   On a shared machine that means every local account.
 - Remote exposure is out of scope. Putting the port behind a reverse proxy, an
-  SSH tunnel (`scripts/tunnel.py`, `scripts/start_remote.ps1`) or a container
+  SSH tunnel or a container
   does not change the server's trust assumptions; a deployment that reaches
   other users needs its own authentication, authorization and transport
   security in front of it, and is not something this package provides or

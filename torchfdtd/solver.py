@@ -13,7 +13,7 @@ import numpy as np
 import torch
 from fdtd.backend import NumpyBackend
 
-from .waveforms import TAIL_INNER, TAIL_OUTER, pulse_parameters, source_time_signal
+from .waveforms import TAIL_INNER, TAIL_OUTER, pulse_parameters, source_time_signal  # noqa: F401 (re-exported)
 from .models import Project, server_admission
 from .boundaries import YeeGrid
 from .materials import configure_materials, permittivity

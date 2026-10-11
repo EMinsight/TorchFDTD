@@ -1,7 +1,6 @@
 """Packed pole CUDA updates and the exact local density transpose."""
 from __future__ import annotations
 
-import math
 import torch
 
 from .cuda_kernels import FusedYeeCUDA, _compile, _direct_cuda_view

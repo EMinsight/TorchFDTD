@@ -79,9 +79,6 @@ python -m benchmarks.streamed_capacity --steps 128 --width 32 --depth 16 --local
 [deep-block measurements](local-replay-deep-5880.json),
 [larger-grid measurements](local-replay-capacity-5880.json), and
 [source hashes](local-replay-source-evidence.json) retain the evidence.
-The [TeX methods supplement](../paper/hierarchical-adjoint-notes.tex) describes
-the discrete transpose and the two replay levels. It is a development supplement,
-not a completed novelty assessment or submission-ready manuscript.
 
 Validation: the full local regression suite passed 744 tests with one skip.
 The affected RTX 5880 tests passed 76 tests. The subsequently added deep-policy

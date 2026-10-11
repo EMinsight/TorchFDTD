@@ -10,7 +10,7 @@ import struct
 
 import numpy as np
 
-from .fsp_native import FDTD, DIPOLE, PLANE, TFSF, TIME, DFT, identity
+from .fsp_native import FDTD, DIPOLE, TFSF, TIME, identity
 from .models import SourceTimeSettings, SpectrumSettings, BoundaryFace
 from .spectra import frequency_samples
 from .waveforms import C0, pulse_parameters

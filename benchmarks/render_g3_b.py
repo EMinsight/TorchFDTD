@@ -253,7 +253,7 @@ SUMMARY_KEYS = ('mesh_um', 'backend', 'precision', 'interface', 'polarization', 
 
 
 def summary(task, record):
-    """Compact observed metrics for record_gate_evidence.py --observed: the scalar metrics of every row."""
+    """Compact observed metrics: the scalar metrics of every row."""
     rows = {key: {k: v for k, v in row.items() if k in SUMMARY_KEYS} for key, row in record['rows'].items()}
     return dict(task=task, case_id=record['case_id'], generated=record['generated'], full_mode=record.get('full_mode', True),
                 environment=record['environment'], rows=rows)

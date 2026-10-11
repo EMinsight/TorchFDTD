@@ -133,7 +133,7 @@ python examples/meep_comparison/metagrating/compare.py
 
 Add `--timing` to the two solver commands for the timed records (`--ranks 12` with
 `mpirun -np 12` for Meep). The RCWA record is regenerated with
-`C:\anaconda3\python.exe examples/meep_comparison/metagrating/rcwa_metagrating.py --out docs/validation/meep_comparison/metagrating_rcwa.json`
+`python examples/meep_comparison/metagrating/rcwa_metagrating.py --out docs/validation/meep_comparison/metagrating_rcwa.json`
 (TORCWA 0.1.4.2, torch 2.6.0+cu118, complex128 on CUDA, 114 s for the sweep and the band).
 `compare.py` reads the three records, writes `metagrating_comparison.json` and renders the
 figure; `tests/test_meep_comparison_metagrating.py` reproduces the comparison JSON and this

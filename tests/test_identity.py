@@ -13,7 +13,7 @@ from torchfdtd.adjoint_planes import _plane_signature, _run_fingerprint
 from test_plan import scene
 from test_differentiable import gpu
 
-# The fp32 discrete tolerance of docs/validation/completion_gates.json proposed_thresholds.
+# The declared fp32 discrete tolerance.
 CUDA_REPLAY_RTOL, CUDA_REPLAY_ATOL = 1e-4, 1e-6
 
 

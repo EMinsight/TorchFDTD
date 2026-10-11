@@ -35,7 +35,7 @@ from torchfdtd.tile_workspace import TileWorkspace
 from test_differentiable import gpu
 from test_streamed_restart import options, scene, Interrupted, interrupt, reference
 
-# Declared limits: completion_gates.json proposed_thresholds discrete_dimensionless_fp32.
+# Declared limits: the fp32 discrete dimensionless threshold.
 RTOL, ATOL = 1e-4, 1e-6
 
 

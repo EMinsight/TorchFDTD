@@ -1,4 +1,4 @@
-"""Launch one of the three declared test suites (docs/GPU_RUNNER_POLICY.md).
+"""Launch one of the three declared test suites.
 
   cpu-pr        CPU only. CUDA is hidden from the child process with
                 CUDA_VISIBLE_DEVICES=-1, ``cuda`` and ``long`` tests are

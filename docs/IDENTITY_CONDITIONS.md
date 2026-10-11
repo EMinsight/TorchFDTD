@@ -84,8 +84,8 @@ whose automatic refinement re-meshes does not.
 
 Two runs of one plan on the CPU are bitwise equal: signals, final E and H,
 snapshot frames, plane fields and flux. Two runs of one plan on CUDA, with
-the torch or the fused kernel, agree within the fp32 discrete threshold of
-`docs/validation/completion_gates.json`, `rtol 1e-4` and `atol 1e-6`;
+the torch or the fused kernel, agree within the fp32 discrete threshold,
+`rtol 1e-4` and `atol 1e-6`;
 bitwise CUDA agreement is observed but not promised.
 
 ## Relation to the existing keys

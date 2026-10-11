@@ -138,6 +138,12 @@ def main(argv=None):
     if not report.is_file():
         sys.stderr.write(completed.stdout[-4000:] + completed.stderr[-4000:])
         raise SystemExit(f'Playwright wrote no JSON report to {report} (exit code {completed.returncode})')
+    # The public record names neither the machine nor the checkout location.
+    escaped = json.dumps(str(ROOT))[1:-1]
+    text = report.read_text(encoding='utf-8')
+    text = text.replace(escaped + '\\\\', '').replace(escaped + '/', '').replace(escaped, '.')
+    report.write_text(text, encoding='utf-8')
+    health.pop('hostname', None)
     parsed = json.loads(report.read_text(encoding='utf-8'))
     # Playwright names files relative to its testDir; the record names them relative to the repository.
     test_dir = Path(parsed['config']['projects'][0]['testDir'])

@@ -1,7 +1,6 @@
 """Suite markers and the GPU-required policy shared by every test module.
 
-Three suites are declared in docs/GPU_RUNNER_POLICY.md and launched by
-scripts/run_suite.py:
+Three suites are launched by scripts/run_suite.py:
 
   cpu-pr        -m "not cuda and not long"       CPU only, GitHub Actions
   gpu-nightly   -m "not long" --gpu-required     trusted commits on a lab GPU host
@@ -23,8 +22,7 @@ or ``numpy`` keeps that instance out of the marker.
 skip of a ``cuda``-marked test, into a failure unless the test carries the
 ``optional`` marker (mixed-platform checks such as the two-GPU NCCL case).
 Skips of ``optional`` tests are reported with the prefix
-``optional platform check:`` so scripts/record_gate_evidence.py can tell them
-apart from a missing GPU.
+``optional platform check:`` so they can be told apart from a missing GPU.
 """
 import ast
 import inspect

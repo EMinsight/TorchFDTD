@@ -1,7 +1,7 @@
 """Independent RCWA oracle for the G3-08 binary grating, run with TORCWA in a separate interpreter.
 
 TORCWA (Kim and Lee, Comput. Phys. Commun. 282, 108552, 2023) is installed in
-the C:/anaconda3 interpreter, not in the project virtual environment. This
+a separate interpreter, not in the project virtual environment. This
 script never imports torchfdtd. It writes one JSON file with the harmonic
 convergence sequence and the oracle values that tests/test_physics_g3_b.py
 reads for G3-08.
@@ -14,7 +14,7 @@ electric field along the ridges (TORCWA y, TorchFDTD 2D z); TM means the
 electric field in the plane of incidence (TORCWA x, TorchFDTD x).
 
 Run:
-  C:/anaconda3/python.exe benchmarks/g3_torcwa_grating.py --output docs/validation/g3/G3-08_torcwa_reference.json
+  python benchmarks/g3_torcwa_grating.py --output docs/validation/g3/G3-08_torcwa_reference.json
 """
 import argparse
 import hashlib

@@ -126,8 +126,7 @@ the same version; a client that targets `/api/...` pins the package version.
 
 ## Known limitations at this version
 
-- `WORKSTATION` is the only profile with a technical path to release; `HPC` is
-  `BLOCKED_EXTERNAL` for lack of a two-GPU host ([RELEASE_SCOPE.md](RELEASE_SCOPE.md)).
+- Multi-GPU (two or more GPUs in one run) has not been tested.
 - Excluded from differentiation: eigenmode and source-position derivatives, hole-vertex
   derivatives, second derivatives, fused CUDA adjoint kernels for PMC faces and tensors,
   differentiation through geometry-dependent mesh regeneration.
@@ -146,7 +145,7 @@ changelog line; `S3` is documented.
 
 | Grade | Definition | Examples |
 | --- | --- | --- |
-| S0 | A result is wrong by more than the declared tolerance of its gate (`proposed_thresholds` in `validation/completion_gates.json`) on a supported path, or a gradient has the wrong sign or a non-finite value, or a run reports success after silently dropping physics | wrong CPML sign, a monitor that ignores a component, an adjoint that is finite-difference inconsistent, a resumed journal that replays the wrong block |
+| S0 | A result is wrong by more than the declared tolerance of its validation case on a supported path, or a gradient has the wrong sign or a non-finite value, or a run reports success after silently dropping physics | wrong CPML sign, a monitor that ignores a component, an adjoint that is finite-difference inconsistent, a resumed journal that replays the wrong block |
 | S1 | A result is wrong only outside the declared support (a rejected configuration that is not rejected), or a convergence, normalization or unit is off by a constant factor that a user could carry into a downstream calculation | flux without the area factor, a mesh preview that does not match the realized mesh, a FP32 path that loses the small-signal ratio the FP64 path keeps |
 | S2 | A result is within tolerance but a diagnostic, an estimate or a warning is wrong or missing, or an unsupported case fails late instead of at validation | a memory estimate off by more than its stated margin, a warning that names the wrong axis |
 | S3 | Cosmetic: labels, ordering, formatting of numbers, documentation that lags the code | a CSV column label, a rounded value in a report |
@@ -155,17 +154,13 @@ changelog line; `S3` is documented.
 
 - A fix that changes a computed result on a supported path (any `S0` or `S1` fix, and any
   changed default) is announced in the changelog under **Results change** with: the affected
-  paths and versions, the largest observed difference on the gate fixtures, which
-  `docs/validation/runs/` evidence was re-recorded, and whether earlier result files remain
+  paths and versions, the largest observed difference on the validation fixtures, and whether earlier result files remain
   readable. Users who published numbers from an affected version are expected to re-run
   the affected cases; the notice says which ones.
 - Rolling back is `pip install torchfdtd==<previous version>` in a fresh environment. Project
   JSON and result NPZ written by a newer `PATCH` or `MINOR` version stay readable by the
   previous version unless the changelog entry says otherwise; a restart journal never
   crosses versions (its contract hashes the solver sources).
-- Gate evidence is tied to a commit and to the hashes of the test, fixture and criteria
-  files; a rollback makes the evidence recorded after the rollback point stale, and the
-  judge (`scripts/check_release_gates.py`) reports that rather than reusing it.
 
 ## Support matrix
 

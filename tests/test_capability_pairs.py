@@ -626,5 +626,5 @@ def test_api_capabilities_serves_the_registry():
     from torchfdtd.server import create_app
     with TestClient(create_app()) as client:
         payload = client.get('/api/capabilities').json()
-    assert payload['features'] and payload['combinations']['kind'] == 'capability_registry'
+    assert 'features' not in payload and payload['combinations']['kind'] == 'capability_registry'
     assert payload['combinations']['summary']['rules'] == len(C.RULES)

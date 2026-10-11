@@ -6,7 +6,7 @@ Same-hardware accuracy and speed comparison of TorchFDTD against Meep (CPU) and 
 
 All runs used one workstation: 12th Gen Intel(R) Core(TM) i7-12700 (12 physical cores, 20 logical CPUs visible to WSL2), NVIDIA GeForce RTX 3060 with 12288 MiB, Windows driver 591.86, Linux side Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.35 in the WSL2 distribution `torchfdtd-bench`.
 
-Linux side: WSL2 Ubuntu 22.04 distribution torchfdtd-bench on D: (imported because the LangtangSim VHD on the full C: drive could not grow). GPU shared with the Windows desktop compositor; every timing block waited for the idle criterion recorded in gpu_idle.
+Linux side: a WSL2 Ubuntu 22.04 distribution. GPU shared with the Windows desktop compositor; every timing block waited for the idle criterion recorded in gpu_idle.
 
 | Component | TorchFDTD and FDTDX (venv) | Meep (micromamba) |
 |---|---|---|
@@ -176,7 +176,7 @@ FDTDX compilation (excluded): FDTDX, checkpointed (num_checkpoints=2) 1.7 s, FDT
 The Meep throughput rows and the rank sweep are retaken, and the combined record and this document regenerated, by one command from a Windows shell (the GPU records are left untouched):
 
 ```
-wsl.exe -d torchfdtd-bench -- bash /mnt/d/TorchFDTD/.local/worktrees/cross-solver/benchmarks/cross_solver/run_meep_timing.sh
+bash benchmarks/cross_solver/run_meep_timing.sh   # from the repository root inside the Linux environment
 ```
 
 The script runs `run_meep.sh 12 --fixture throughput` (the primary 12-rank block), `meep_rank_sweep.sh` (4, 8, 12 and 16 ranks), `combine.py` and `report.py`. Idle criterion of a block: the master rank polls the Windows host CPU load through `powershell.exe (Get-CimInstance Win32_Processor).LoadPercentage` every 5 s and starts the block after two consecutive samples at or below 50 percent (`--cpu-idle-limit`, 30 min limit per block); the other ranks sleep on a token file meanwhile. The block (one warm-up plus three timed solves) is accepted when its wall times spread by at most a factor 1.25, otherwise it is retaken after the gate, up to four times; every attempt and the host load before and after each block are stored in the record. `combine.py` prefers `meep_throughput.json` when it exists and otherwise falls back to `meep_throughput_ranks12.json` (currently used: `meep_throughput_ranks12.json`). A quiet GPU is not required for this block.
@@ -192,4 +192,4 @@ The script runs `run_meep.sh 12 --fixture throughput` (the primary 12-rank block
 - **Material sampling.** TorchFDTD and FDTDX receive the same per-component staircase permittivity arrays (SHA-256 recorded). Meep rasterises the geometry itself at its Yee positions with eps_averaging=False; its epsilon array is not identical cell by cell.
 - **Execution model.** TorchFDTD runs fused CUDA kernels (NVRTC-compiled once, cached on disk) captured in a CUDA graph with a Python setup of about 15 ms; FDTDX runs one jitted XLA executable per case (compilation excluded and reported with JAX persistent compilation cache enabled, place_objects/apply_params of about 0.5 s included in the full solve); Meep runs 12 MPI ranks on the CPU with a per-step field probe; the rank-sweep table gives its stepping time for 4 to 16 ranks. The Meep driver can gate its timing blocks on the Windows host CPU load because other processes on the workstation share the cores; the Meep rows reported here come from the ungated sweep run described in section C.
 - **Adjoint semantics.** TorchFDTD differentiates its discrete Yee/CPML step with a checkpointed transpose; FDTDX differentiates the same forward model through JAX with either equinox checkpointing or time reversal. Meep's adjoint solver is frequency-domain and was not run.
-- **Shared GPU.** The RTX 3060 also drives the Windows desktop (about 2.6 GiB resident) and a remote-desktop encoder; every timing block waited until the reported memory and utilisation stayed below the idle criterion recorded in the records.
+- **Shared GPU.** The RTX 3060 also drives the Windows desktop (about 2.6 GiB resident); every timing block waited until the reported memory and utilisation stayed below the idle criterion recorded in the records.

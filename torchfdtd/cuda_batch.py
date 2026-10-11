@@ -6,7 +6,6 @@ from another solver, and the single-case Yee kernel generator is reused.
 """
 from __future__ import annotations
 
-import math
 from types import SimpleNamespace
 
 import numpy as np

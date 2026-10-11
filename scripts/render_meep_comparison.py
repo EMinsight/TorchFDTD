@@ -315,8 +315,7 @@ def render_doc(records):
            'Each example sets up one device from one geometry file and runs it in TorchFDTD '
            f'({torch_version}, {gpu}, fused CUDA kernels) and in Meep {meep_version} (MPI ranks on the {cpu}) on the same grid, time step, '
            'step count, source, monitors and staircase material sampling; the agreement criteria were declared in each example\'s '
-           '`criteria.json` before the first comparison run. The rules shared by the three examples are in '
-           '[`examples/meep_comparison/BRIEF.md`](../examples/meep_comparison/BRIEF.md).', '',
+           '`criteria.json` before the first comparison run.', '',
            'Timing rows marked "development run, shared host" are single runs made while other jobs used the CPU and the GPU; they bound '
            'the solver time from above and are replaced by the maintainer\'s `--timing` rerun (one warm-up, three timed solves, Meep with '
            '12 ranks on a quiet host) once `<name>_<solver>_timing.json` records exist.', '',

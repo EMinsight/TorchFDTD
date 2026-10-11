@@ -10,6 +10,8 @@ from concurrent.futures import wait
 from uuid import uuid4
 
 import numpy as np
+
+from .server import failure_message, log
 from fastapi import HTTPException
 from fastapi.responses import FileResponse, Response
 
@@ -165,7 +167,8 @@ def attach_mode_network_routes(app, root, pool, jobs, lock):
             with lock:
                 job['status'] = 'cancelled' if job['cancel'].is_set() else 'failed'
                 if job['status'] == 'failed':
-                    job['error'] = str(exc)
+                    log.exception('mode-network job failed')
+                    job['error'] = failure_message(exc)
         finally:
             temporary.unlink(missing_ok=True)
             scratch.unlink(missing_ok=True)

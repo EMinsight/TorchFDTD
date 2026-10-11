@@ -232,7 +232,7 @@ def rerun_section(c):
     return ['## Rerunning the Meep timing block', '',
             'The Meep throughput rows and the rank sweep are retaken, and the combined record and this document regenerated, by one command '
             'from a Windows shell (the GPU records are left untouched):', '',
-            '```', 'wsl.exe -d torchfdtd-bench -- bash /mnt/d/TorchFDTD/.local/worktrees/cross-solver/benchmarks/cross_solver/run_meep_timing.sh', '```', '',
+            '```', 'bash benchmarks/cross_solver/run_meep_timing.sh   # from the repository root inside the Linux environment', '```', '',
             'The script runs `run_meep.sh 12 --fixture throughput` (the primary 12-rank block), `meep_rank_sweep.sh` (4, 8, 12 and 16 ranks), '
             '`combine.py` and `report.py`. Idle criterion of a block: the master rank polls the Windows host CPU load through '
             '`powershell.exe (Get-CimInstance Win32_Processor).LoadPercentage` every 5 s and starts the block after two consecutive samples at or '
@@ -275,7 +275,7 @@ def differences_section(c):
             'because other processes on the workstation share the cores; the Meep rows reported here come from the ungated sweep run described in section C.',
             '- **Adjoint semantics.** TorchFDTD differentiates its discrete Yee/CPML step with a checkpointed transpose; FDTDX differentiates the same forward '
             'model through JAX with either equinox checkpointing or time reversal. Meep\'s adjoint solver is frequency-domain and was not run.',
-            '- **Shared GPU.** The RTX 3060 also drives the Windows desktop (about 2.6 GiB resident) and a remote-desktop encoder; every timing block waited '
+            '- **Shared GPU.** The RTX 3060 also drives the Windows desktop (about 2.6 GiB resident); every timing block waited '
             'until the reported memory and utilisation stayed below the idle criterion recorded in the records.', '']
 
 

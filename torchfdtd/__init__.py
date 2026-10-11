@@ -10,6 +10,13 @@ finally:
     _torch.set_grad_enabled(_previous_grad)
 del _torch, _fdtd, _previous_dtype, _previous_grad
 
+from importlib.metadata import PackageNotFoundError as _NotFound, version as _version
+try:
+    __version__ = _version('torchfdtd')
+except _NotFound:  # a source tree that is not installed
+    __version__ = '0+unknown'
+del _NotFound, _version
+
 from .models import Project, Region, MeshRefinement, Structure, Source, SourceTimeSettings, TimeSignal, Monitor, Material, BoundaryFace, Boundaries, SpectrumSettings
 from .solver import Simulation, Result
 from .session import FDTD

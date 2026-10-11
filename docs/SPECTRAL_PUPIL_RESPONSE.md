@@ -69,7 +69,7 @@ objective (0.2843927415139927) and directional derivative
 bytes because both source graphs remain in one active ray case. This differs
 from the earlier source-by-source replay pilot. Its 159.02-second measurement
 includes homogeneous references and is not a controlled speed comparison.
-See the [API parity record](validation/cr-periodic-response-api.json).
+See the API parity record.
 
 ## Bounded CPU reference reuse
 
@@ -116,8 +116,8 @@ run completed on RTX 3060 with fused forward/backward and a 64 MiB CPU
 reference cache. The gradient norm is 0.029781743905171024 and peak Torch CUDA
 allocation is 328,878,592 bytes. The independent RTX 5880 Torch forward also
 completed and agrees with the fused forward to roundoff on this schedule.
-See the [gradient record](validation/cr-full-gradient-3060.json) and
-[forward comparison](validation/cr-full-forward-kernel-parity.json).
+See the gradient record and
+forward comparison.
 Physical optical convergence and actual optimization remain unverified.
 The runner atomically saves `OUTPUT.forward.json` after all forward cases and
 objective assembly, before gradient replay. That snapshot explicitly says the
@@ -135,6 +135,6 @@ Its two coherent source bases are replayed one graph at a time. The explicit
 CR runner selects it with --execution-policy and admits every supplied case
 before computing fields. The legacy path remains available.
 
-The [matched spatial-refinement record](validation/CR_SPATIAL_REFINEMENT.md)
+The matched spatial-refinement record
 now covers all 144 cases at 25 nm and 6,400 steps. That legacy-path forward
 record does not validate the new execution integration or a converged gradient.

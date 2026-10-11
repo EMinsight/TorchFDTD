@@ -6,7 +6,6 @@ No history of volume fields, time-by-frequency table, or atomic sum is needed.
 """
 from __future__ import annotations
 
-import numpy as np
 import torch
 
 from .cuda_kernels import _compile

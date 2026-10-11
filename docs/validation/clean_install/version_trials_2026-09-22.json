@@ -42,7 +42,7 @@
       },
       "subset": {
         "path": "docs/validation/clean_install/version_trials/trial-torch222-np1.xml",
-        "sha256": "3bdb5470e680a97ccf8700b0db7ade1eb0bd4a0d8287dd6e85c22be0a39b5862",
+        "sha256": "830a6c8cd2d999789d24bd4fb66de8e5a6b8281fcddf7d4fa5cc1dfec4d2e3b6",
         "tests": 36,
         "failures": 0,
         "errors": 0,
@@ -86,7 +86,7 @@
       },
       "subset": {
         "path": "docs/validation/clean_install/version_trials/trial-torch241-np2.xml",
-        "sha256": "739f203b8776c2a5546e82c620d205a0041ac978f4f0d231de8462ccf2f438ec",
+        "sha256": "3c92232e646ec1d4f98553b01be7a518e0373ce7ae216a19a338b624c2a5b78d",
         "tests": 36,
         "failures": 0,
         "errors": 0,
@@ -112,7 +112,7 @@
       },
       "subset": {
         "path": "docs/validation/clean_install/version_trials/trial-py312.xml",
-        "sha256": "43d9954e9289f76ac80fe5316529ddc15ac262e1a2e7408a5f29e3990551bc57",
+        "sha256": "4e0b6cc877cbe6d69e1373470ce985775e9ef6f9ebf7743f849966cce3b7bb43",
         "tests": 36,
         "failures": 0,
         "errors": 0,

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+import logging
 import math
 import os
 import socket
@@ -129,6 +130,31 @@ def _limited(admission, fn, *args, **kwargs):
         return fn(*args, **kwargs)
 
 
+log = logging.getLogger('torchfdtd.server')
+
+
+def evict_finished(jobs, root, limit=12):
+    """Drop the oldest finished job once the session holds `limit` jobs, together with its result files."""
+    if len(jobs) < limit:
+        return
+    old = next((k for k, j in jobs.items() if j['status'] in ('completed', 'cancelled', 'failed')), None)
+    if old is None:
+        return
+    for name in (f'{old}.npz', f'{old}.design.json', f'{old}.modal.npz'):
+        try:
+            (Path(root) / name).unlink(missing_ok=True)
+        except OSError:  # a download still streaming the file keeps it; the job record goes anyway
+            log.warning('could not remove %s', name)
+    del jobs[old]
+
+
+def failure_message(exc):
+    # Expected refusals keep their plain message; anything else names its type, since a bare KeyError reads as 'x'.
+    if str(exc) and not isinstance(exc, (KeyError, IndexError, AttributeError, TypeError, NameError, AssertionError)):
+        return str(exc)
+    return f'{type(exc).__name__}: {exc}'
+
+
 class ServerExecutor(ThreadPoolExecutor):
     """A job pool whose tasks run inside models.server_limits(), like the requests that queue them.
 
@@ -142,17 +168,27 @@ class ServerExecutor(ThreadPoolExecutor):
 def create_app(result_dir=None, memory_admission=False):
     # memory_admission (torchfdtd serve --memory-admission) lifts SERVER_LIMITS: scenes are admitted
     # by the memory estimate as on the Python API. The input limits stay (docs/SECURITY.md).
-    app = FastAPI(title='TorchFDTD', version='1.1.7')
+    from . import __version__
+    app = FastAPI(title='TorchFDTD', version=__version__)
     # The Host allowlist is the loopback names only. TORCHFDTD_ALLOWED_HOSTS adds names, comma-separated;
     # tests/conftest.py sets it to testserver, the TestClient default, which no deployment allows.
-    extra = [h.strip() for h in os.environ.get('TORCHFDTD_ALLOWED_HOSTS', '').split(',') if h.strip()]
-    app.add_middleware(TrustedHostMiddleware, allowed_hosts=['localhost', '127.0.0.1', '[::1]', *extra])
+    # A wildcard would switch the DNS-rebinding defence off, so it is not accepted.
+    extra = [h.strip() for h in os.environ.get('TORCHFDTD_ALLOWED_HOSTS', '').split(',') if h.strip() and '*' not in h]
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=['localhost', '127.0.0.1', *extra])
     app.add_middleware(GZipMiddleware, minimum_size=4096, compresslevel=1)
     app.add_middleware(ServerLimits, memory_admission=memory_admission)
     root = Path(result_dir or os.environ.get('TORCHFDTD_RESULTS') or os.environ.get('PHOTONWEAVE_RESULTS', 'results')).resolve()
     root.mkdir(parents=True, exist_ok=True)
     pool = ServerExecutor(max_workers=1, thread_name_prefix='fdtd')
     jobs, lock = {}, threading.Lock()
+
+    @app.on_event('shutdown')
+    def stop_jobs():
+        # Ctrl+C on `torchfdtd serve` stops the running FDTD job at its next progress check instead of waiting for it.
+        for job in list(jobs.values()):
+            if job['status'] in ('queued', 'running'):
+                job['cancel'].set()
+        pool.shutdown(wait=False, cancel_futures=True)
 
     @app.middleware('http')
     async def local_origin(request: Request, call_next):
@@ -182,17 +218,14 @@ def create_app(result_dir=None, memory_admission=False):
     @app.get('/api/health')
     def health():
         admission = server_admission()
-        return {**hardware(), **execution_resources(), 'hostname': socket.gethostname(), 'version': '1.1.7',
+        return {**hardware(), **execution_resources(), 'hostname': socket.gethostname(), 'version': __version__,
                 'admission': admission, 'server_limits': SERVER_LIMITS if admission == 'fixed' else None}
 
     @app.get('/api/capabilities')
     def capabilities():
         import json
-        # The Lumerical property inventory plus the combination registry
-        # (torchfdtd/capabilities.py rendered by scripts/build_capability_tables.py).
-        inventory = json.loads(Path(__file__).with_name('feature_inventory.json').read_text(encoding='utf-8'))
-        inventory['combinations'] = json.loads(Path(__file__).with_name('capabilities.json').read_text(encoding='utf-8'))
-        return inventory
+        # The combination registry (torchfdtd/capabilities.py rendered by scripts/build_capability_tables.py).
+        return {'combinations': json.loads(Path(__file__).with_name('capabilities.json').read_text(encoding='utf-8'))}
 
     @app.get('/api/examples/{name}')
     def example(name: str):
@@ -346,7 +379,8 @@ def create_app(result_dir=None, memory_admission=False):
             job['epsilon'] = result.epsilon
             job['status'] = 'cancelled' if result.summary['cancelled'] else 'completed'
         except Exception as exc:
-            job['error'] = str(exc)
+            log.exception('job %s failed', key)
+            job['error'] = failure_message(exc)
             job['status'] = 'failed'
 
     @app.post('/api/jobs', status_code=202)
@@ -361,10 +395,7 @@ def create_app(result_dir=None, memory_admission=False):
         with lock:
             if sum(j['status'] in ('queued', 'running') for j in jobs.values()) >= 3:
                 raise HTTPException(409, 'The run queue is full (one running and two waiting).')
-            if len(jobs) >= 12:
-                old = next((k for k,j in jobs.items() if j['status'] in ('completed','cancelled','failed')), None)
-                if old:
-                    del jobs[old]
+            evict_finished(jobs, root)
             key = uuid4().hex
             jobs[key] = {'id': key, 'status': 'queued', 'progress': {'step':0,'total':project.region.steps},
                          'cancel': threading.Event(), 'project': project.model_dump(), 'created': time.time(),
@@ -417,7 +448,6 @@ def create_app(result_dir=None, memory_admission=False):
 
     @app.get('/api/jobs/{key}/flux.csv')
     def flux_csv(key:str):
-        import csv
         from itertools import repeat
         job=get_job(key)
         if 'flux_monitors' not in job:raise HTTPException(409,'Flux results are not ready.')
@@ -448,7 +478,6 @@ def create_app(result_dir=None, memory_admission=False):
 
     @app.get('/api/jobs/{key}/field-monitors/{monitor}')
     def frequency_field(key:str,monitor:str,frequency_index:int=Query(0,ge=0),component:str='Ez'):
-        import numpy as np
         if component not in ('Ex','Ey','Ez','Hx','Hy','Hz'):raise HTTPException(422,'Invalid field component.')
         try:m=next(m for m in get_job(key).get('frequency_fields',[]) if m['id']==monitor)
         except StopIteration:raise HTTPException(409,'Frequency fields unavailable.')

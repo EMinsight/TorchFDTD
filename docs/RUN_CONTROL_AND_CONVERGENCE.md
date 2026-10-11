@@ -1,14 +1,14 @@
-# 실행 제어, 다중 공진 재료와 메시 수렴
+# Run control, multi-pole materials and mesh convergence
 
-이 기능은 Python 프로젝트 모델에 저장되며 JSON 저장, Python export, NPZ 결과에 함께 남는다. 수치 검증에는 자체 계산과 해석해만 사용한다.
+These settings are stored in the Python project model and travel with JSON save, Python export and NPZ results. Numerical validation uses native calculations and analytic solutions only.
 
-## 자동 종료와 발산 감지
+## Automatic shutoff and divergence detection
 
 ```python
 from torchfdtd import Project, Simulation, RunControl
 
 project = Project.load("project.json")
-project.region.steps = 4000  # 최대 step 수
+project.region.steps = 4000  # maximum number of steps
 project.region.run_control = RunControl(
     auto_shutoff=True,
     decay_threshold=1e-6,
@@ -27,23 +27,23 @@ print(result.summary["steps"], result.summary["requested_steps"])
 result.save("result.npz")
 ```
 
-자동 종료는 기본적으로 꺼져 있다. 발산 검사는 기본적으로 50 step마다 실행한다. UI의 Simulation → **Termination and diagnostics**에서 같은 항목을 편집한다.
+Automatic shutoff is off by default. The divergence check runs every 50 steps by default. The same settings are edited in the workbench under Simulation → **Termination and diagnostics**.
 
-종료 원인은 `max_steps`, `decayed`, `cancelled`로 구분한다. `decayed`는 정상 완료이며 batch 목적함수도 평가한다. trace와 시간 배열은 실제 완료된 step까지만 반환하고 자동 종료 직전의 snapshot도 저장한다. 발산은 예외이며 batch에서는 failed로 처리한다.
+The termination reason is `max_steps`, `decayed` or `cancelled`. `decayed` is a normal completion, and batch objectives are evaluated for it. Traces and time arrays are returned up to the last completed step, and the snapshot just before an automatic shutoff is saved. Divergence raises an exception and is reported as failed in a batch.
 
-진단값은 셀 부피를 가중한 E/H 및 수동 oscillator 저장 상태의 양의 norm이다. 단일 E 성분의 영점이나 한 화면 단면만 검사하지 않는다. 재료 항에는 `(|Q/dt|² + omega_0² |P|²) / A`를 포함한다. CPML의 non-finite 상태도 확인한다. 이 값은 SI 에너지나 엄밀한 이산 보존량이 아니며 DFT 오차의 상한도 아니다.
+The diagnostic is a positive norm of the cell-volume-weighted E/H fields and the stored passive-oscillator states. It does not test a zero of a single E component or one displayed slice. The material term includes `(|Q/dt|² + omega_0² |P|²) / A`. Non-finite CPML states are checked as well. The value is neither an SI energy nor a strict discrete conserved quantity, and it is not an upper bound on the DFT error.
 
-모든 유한 소스의 envelope가 끝나야 종료 검사를 시작한다. Gaussian은 지정한 tail amplitude까지 기다리고 sampled source는 표의 마지막 시간까지 기다린다. 뒤늦게 켜지는 소스와 sampled source의 중간 무신호 구간을 건너뛰지 않는다. 연속파 소스가 켜져 있으면 decay 종료는 작동하지 않는다. `after_source_s`와 `min_steps`는 추가 대기 조건이다.
+The shutoff check starts only after the envelope of every finite source has ended. A Gaussian source waits until the given tail amplitude; a sampled source waits until the last time of its table. A source that switches on late and a silent stretch inside a sampled source are not skipped. A continuous-wave source keeps decay shutoff from triggering. `after_source_s` and `min_steps` add further waiting conditions.
 
-소스 종료 전 최대 norm을 기준으로 연속된 저하를 확인한다. 발산의 상대 성장 한도는 종료 이후에 고정한 기준에 적용한다. 구동 중에는 source가 에너지를 공급하므로 임의의 상대 성장만으로 발산이라고 판단하지 않는다. 필요하면 reduced field 단위의 `field_limit`을 지정한다.
+A sustained decay is measured against the largest norm seen before the sources end. The relative growth limit for divergence applies to a reference fixed after the sources end. While a source drives the fields it supplies energy, so relative growth alone is not treated as divergence. A `field_limit` in reduced field units can be set when needed.
 
-CuPy가 설치된 CUDA 환경에서는 두 개의 읽기 전용 reduction kernel을 사용한다. float32/64, 복소장, graded volume과 multipole 상태를 처리하며 제곱과 합산 전에 double로 승격한다. 전체 장의 double 복사본을 만들지 않는다. `diagnostic_backend`가 실제 경로를 알려준다. `diagnostic_seconds`는 진단 호출에서 보낸 **host 경과 시간**이며 앞서 queue에 넣은 GPU step을 기다린 시간도 포함한다. 순수한 진단 kernel 시간이나 추가 오버헤드로 해석하면 안 된다. 오버헤드는 같은 고정 길이를 진단 on/off로 비교해 측정한다.
+In a CUDA environment with CuPy, two read-only reduction kernels are used. They handle float32/64, complex fields, graded volumes and multipole states, and promote to double before squaring and summing. No double copy of a whole field is made. `diagnostic_backend` reports the path taken. `diagnostic_seconds` is the **host wall time** spent in diagnostic calls, which includes waiting for GPU steps queued earlier. It is not the pure diagnostic kernel time or the added overhead; measure the overhead by comparing the same fixed length with the diagnostic on and off.
 
-적분값이 0이 아닌 전류형 soft dipole은 정전기 잔류장을 남길 수 있다. 이때 엄격한 임계값에서 자동 종료하지 않는 것이 정상이며 최대 step에서 끝난다. [Meep의 소스 설명](https://meep.readthedocs.io/en/master/Python_User_Interface/)도 dipole moment와 전류의 적분 관계를 구분한다. native 검증은 원래 Gaussian의 잔류 사례와, 유한 dipole pulse의 이산 차분으로 만든 적분값 0의 sampled current 사례를 모두 기록한다. 기존 소스 정의나 종료 threshold를 몰래 바꾸지 않는다. [측정 결과](validation/RUN_CONTROL_REPORT.md).
+A current-type soft dipole whose time integral is not zero can leave a static residual field. A run with a strict threshold then correctly does not shut off and ends at the maximum step. The [Meep source description](https://meep.readthedocs.io/en/master/Python_User_Interface/) also distinguishes the dipole moment from the integral of the current. The native validation records both the residual case of the original Gaussian and a zero-integral sampled current built from the discrete difference of a finite dipole pulse. Existing source definitions and shutoff thresholds are never changed silently. [Measurements](validation/RUN_CONTROL_REPORT.md).
 
-고-Q 공진이나 약한 신호는 더 엄격한 threshold와 더 긴 시간으로 확인해야 한다. 서로 다른 step 수로 자동 종료한 sample/reference는 정규화 서명이 일치하지 않는다. R/T 비교에는 같은 고정 시간을 쓰거나 실제 종료 step으로 두 계산을 맞춰 다시 실행한다. 자동 종료만으로 스펙트럼 수렴을 증명하지 않는다. 시간 길이가 Fourier 수렴에 미치는 영향은 [Meep FAQ](https://meep.readthedocs.io/en/latest/FAQ/)에서도 설명한다.
+High-Q resonances and weak signals need a stricter threshold and a longer time. A sample and a reference that shut off at different step counts do not have matching normalization signatures. For R/T comparisons use the same fixed time, or rerun both calculations to the actual shutoff step. Automatic shutoff alone does not prove spectral convergence. The [Meep FAQ](https://meep.readthedocs.io/en/latest/FAQ/) also explains how the time length affects Fourier convergence.
 
-## 수동 다중 공진 재료
+## Manual multi-pole materials
 
 ```python
 from torchfdtd import Material, LorentzPole
@@ -60,13 +60,13 @@ material = Material(
 project.materials.append(material)
 ```
 
-주파수 응답은 `epsilon_inf + sum(A_j / (omega_j² - omega² - i gamma_j omega))`이다. `resonance_rad_s=0`이면 Drude 항이다. 모든 A는 양수, damping은 0 이상이며 최대 16개 pole을 지원한다. 모든 주파수 파라미터는 angular SI 단위다. Lorentz 기존 입력의 `linewidth_rad_s`는 damping의 절반이며, 새 pole의 `damping_rad_s`는 식의 gamma 자체다.
+The frequency response is `epsilon_inf + sum(A_j / (omega_j² - omega² - i gamma_j omega))`. `resonance_rad_s=0` gives a Drude term. Every A is positive, damping is zero or more, and up to 16 poles are supported. All frequency parameters are angular SI units. In the earlier Lorentz input, `linewidth_rad_s` is half the damping; `damping_rad_s` of a new pole is the gamma of the formula itself.
 
-공통 전기장을 먼저 함께 구한 뒤 각 P/Q 상태를 갱신한다. pole별 보정을 E에 순서대로 적용하는 방식이 아니다. 기존 단일 pole 계산 순서와 수치를 유지한다. CPU/CUDA, real/Bloch complex, graph/eager와 실수 fused kernel 경로에서 같은 sparse ADE를 사용한다. 메모리 추정은 pole 개수를 반영한다.
+The common electric field is solved first, and then each P/Q state is updated; per-pole corrections are not applied to E one after another. The calculation order and values of the existing single-pole path are kept. CPU/CUDA, real and Bloch-complex, graph and eager, and the real fused-kernel path all use the same sparse ADE. The memory estimate accounts for the number of poles.
 
-UI에서는 Materials → **Multiple Drude / Lorentz poles**에서 추가·삭제·편집하고 n/k 및 timestep에 따른 ADE 응답을 확인한다. 이는 사용자가 pole 계수를 입력하는 모델이다. 측정 n/k의 자동 passive fitting과 광학상수 DB는 아직 구현되지 않았다. 연속 감수율과 별개로 공간 이산화, 계면과 PML 안정성은 검증해야 한다. 일반적인 분산 감수율 표현은 [Meep Materials](https://meep.readthedocs.io/en/latest/Materials/)를 참고할 수 있다.
+In the workbench, Materials → **Multiple Drude / Lorentz poles** adds, deletes and edits poles and shows n/k and the timestep-dependent ADE response. This is a model in which the user enters the pole coefficients. Spatial discretization, interface and PML stability need to be validated separately from the continuous susceptibility. [Meep Materials](https://meep.readthedocs.io/en/latest/Materials/) describes the common dispersive susceptibility forms.
 
-## 같은 물리적 조건의 메시 수렴
+## Mesh convergence at the same physical conditions
 
 ```python
 from torchfdtd import mesh_convergence, normalize_flux
@@ -90,19 +90,19 @@ study = mesh_convergence(
 print(study.status)
 ```
 
-실행 가능한 예제:
+Runnable example:
 
 ```bash
 python -m examples.mesh_convergence --backend cpu
 python -m examples.mesh_convergence --backend cuda
 ```
 
-격자 간격을 줄이면서 같은 step 수를 사용하면 물리적 계산 시간이 짧아진다. 이 API는 원래의 `steps * dt`를 보존하도록 step 수를 다시 계산한다. 올림으로 생기는 차이는 한 timestep 미만이며 보고서에 실제 시간도 기록한다. 영역 크기와 PML 물리 두께가 각 간격의 정수 배가 아니면 명시적으로 거부한다. PML layer 수와 총 step 수의 기존 모델 한도도 그대로 적용된다.
+Refining the grid with the same step count shortens the physical simulation time. This API recomputes the step count so that the original `steps * dt` is kept. Rounding up changes the time by less than one timestep, and the report records the actual time. A region size or PML physical thickness that is not an integer multiple of each spacing is rejected explicitly. The existing model limits on PML layers and total steps still apply.
 
-기본은 uniform mesh다. `mesh_type="graded"`를 지정하면 같은 graded 알고리즘을 단계별로 평가한다. matched reference는 각 sample의 refinements를 동결하여 동일한 node 배열을 사용한다. source/monitor 정의도 사용자가 일치시켜야 하며 `normalize_flux`가 최종 서명을 검사한다. 자동 종료는 이 study에서 꺼져 있으므로 sample/reference의 시간 길이가 달라지지 않는다.
+The default is a uniform mesh. With `mesh_type="graded"`, the same graded algorithm is evaluated at every stage. The matched reference freezes the refinements of each sample so that both use the same node arrays. Source and monitor definitions must also match, and `normalize_flux` checks the final signature. Automatic shutoff is off in this study, so sample and reference keep the same time length.
 
-관측량은 유한한 실수 scalar, 배열 또는 이름별 mapping을 반환해야 한다. 단계마다 이름과 배열 shape가 같아야 한다. 마지막 연속 비교가 모두 `abs(a-b) <= atol + rtol * max(abs(a), abs(b))`를 만족해야 `converged`다. 취소와 잘못된 값은 성공으로 처리하지 않는다. 보고서는 각 grid, 실제 시간, 관측량, 변화량, 계산 비용과 summary를 포함한다. 선택형 출력 폴더에 sample/reference NPZ와 `convergence.json`을 저장한다.
+The observable must return a finite real scalar, an array, or a mapping by name, with the same names and array shapes at every stage. The study is `converged` when the last consecutive comparisons all satisfy `abs(a-b) <= atol + rtol * max(abs(a), abs(b))`. Cancellation and invalid values are never reported as success. The report holds each grid, the actual time, the observables, their changes, the compute cost and a summary. An optional output folder receives the sample/reference NPZ files and `convergence.json`.
 
-같은 결과가 나온다는 사실만으로 해석해와의 오차가 증명되지는 않는다. 파장 표를 고정하고 정규화된 물리량을 선택해야 한다. 격자에 따라 물리적 dipole 강도가 달라질 수 있는 unnormalized point-source peak를 전송률처럼 해석하지 않는다. 자동 error estimator, conformal mesh나 전용 GUI study 실행은 아직 별도 작업이다.
+Agreement between stages alone does not prove the error against an analytic solution. Fix the wavelength table and choose a normalized physical quantity. An unnormalized point-source peak, whose physical dipole strength can change with the grid, is not a transmission.
 
-`mesh_refinement_projects(project, meshes)`는 동일 조건의 프로젝트 목록만 만든다. 이를 `BatchCase`로 감싸 기존 `BatchRunner`에 넘기면 메모리 admission을 사용하는 독립 병렬 sweep으로 실행할 수 있다. `mesh_convergence`는 한 번에 한 단계의 sample/reference를 처리해 큰 최종 field 배열을 전부 메모리에 보관하지 않는다.
+`mesh_refinement_projects(project, meshes)` builds only the list of projects with matched conditions. Wrapped in `BatchCase` and handed to the existing `BatchRunner`, they run as an independent parallel sweep with memory admission. `mesh_convergence` processes one stage's sample and reference at a time, so it never keeps all large final field arrays in memory.

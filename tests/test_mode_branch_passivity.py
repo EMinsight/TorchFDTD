@@ -29,7 +29,7 @@ from test_mode_branches import (CORE, CLAD, crossing_ports, crossing_sections, d
 
 C0 = 299792458.0
 MESH, PML_UM, STEPS = .05, .8, 2400   # 229 fs window; the closure is unchanged at 3200 steps
-CLOSURE_BUDGET = .01       # completion_gates.json lossless_complete_channel_balance_absolute_error
+CLOSURE_BUDGET = .01       # declared lossless channel-balance absolute error
 GUIDED_EXCESS = .01        # guided power may not exceed the full-plane flux by more than this
 PASSIVITY_MARGIN = .002    # the margin the existing branch tests record for column power
 STRAIGHT_SIDE_LEAK = .01   # side flux of the calibration guide relative to its incident power

@@ -19,7 +19,7 @@ import numpy as np
 import torch
 
 from .boundaries import (BoundaryDescription, CURL_TERMS, reject_pml_dispersion, _slice, extended_shape, face_index,
-                         is_nodal, material_shape)
+                         material_shape)
 from .models import Project
 from .plan import check_snapshot, project_snapshot
 from .solver import field_axes, index_at

@@ -4,7 +4,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / '.github' / 'workflows' / 'test.yml'
-POLICY = ROOT / 'docs' / 'GPU_RUNNER_POLICY.md'
 SUITES = ('cpu-pr', 'gpu-nightly', 'release-full')
 
 
@@ -27,11 +26,9 @@ def test_workflow_triggers_are_the_declared_three():
     assert set(triggers) == {'push', 'pull_request', 'workflow_dispatch'}, triggers
 
 
-def test_workflow_skips_only_the_manuscripts():
-    """Tests read the README and documents under docs/ (the validation report, the gate records, the release review),
-    so a push that changes only those must still run the suite; only the manuscripts are skipped."""
-    ignored = re.findall(r"^\s+- '([^']+)'", workflow_text().split('jobs:', 1)[0], re.MULTILINE)
-    assert ignored and set(ignored) == {'docs/paper/**'}, ignored
+def test_workflow_skips_no_path():
+    """Tests read the README and documents under docs/, so every push runs the suite."""
+    assert 'paths-ignore' not in workflow_text().split('jobs:', 1)[0]
 
 
 def test_workflow_runs_the_cpu_pr_suite_only():
@@ -39,15 +36,6 @@ def test_workflow_runs_the_cpu_pr_suite_only():
     assert 'scripts/run_suite.py cpu-pr' in text
     assert re.search(r'run:\s*python -m pytest', text) is None, 'pytest must be launched through the suite runner'
     assert '--gpu-required' not in text
-
-
-def test_policy_names_the_three_suites_and_the_fork_rule():
-    text = POLICY.read_text(encoding='utf-8')
-    for suite in SUITES:
-        assert f'`{suite}`' in text, suite
-    assert 'Fork pull requests never execute on them' in text
-    for phrase in ('by commit hash', 'no `GITHUB_TOKEN`', 'worktree remove', '--gpu-required', 'optional platform check:'):
-        assert phrase in text, phrase
 
 
 def test_suite_runner_knows_the_same_three_suites():

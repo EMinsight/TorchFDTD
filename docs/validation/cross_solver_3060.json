@@ -5,7 +5,7 @@
   "hardware": {
     "gpu": "NVIDIA GeForce RTX 3060 12 GB (WSL2, driver from Windows)",
     "cpu": "12th Gen Intel(R) Core(TM) i7-12700",
-    "note": "Linux side: WSL2 Ubuntu 22.04 distribution torchfdtd-bench on D: (imported because the LangtangSim VHD on the full C: drive could not grow). GPU shared with the Windows desktop compositor; every timing block waited for the idle criterion recorded in gpu_idle."
+    "note": "Linux side: a WSL2 Ubuntu 22.04 distribution. GPU shared with the Windows desktop compositor; every timing block waited for the idle criterion recorded in gpu_idle."
   },
   "environments": {
     "torchfdtd": {

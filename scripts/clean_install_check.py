@@ -1,6 +1,6 @@
 """Build the wheel, install it into clean virtual environments and record what an end user gets.
 
-The record answers G8-05 and G8-07 of docs/COMPLETION_PROGRAM_KO.md with
+The record holds
 measurements, not claims: the wheel's hash and payload, whether its browser
 assets are the committed ones, the package list of each environment and the
 result of every step. Steps run from a working directory outside the checkout
@@ -15,10 +15,10 @@ so that a source tree on sys.path cannot mask a packaging defect.
 Everything the script creates (venvs, wheel, scratch, pip cache) lives under
 --local-root, which must lie outside the checkout: the probes assert that the
 installed package does not resolve under it. The default is a sibling of the
-checkout (D:/TorchFDTD-clean for D:/TorchFDTD). Example, from the checkout root:
+checkout (../TorchFDTD-clean). Example, from the checkout root:
 
-    python scripts/clean_install_check.py --local-root D:/torchfdtd-clean ^
-        --find-links D:/TorchFDTD/.local/wheels --cuda-torch "torch==2.10.0+cu126"
+    python scripts/clean_install_check.py --local-root ../torchfdtd-clean ^
+        --find-links ../wheels --cuda-torch "torch==2.10.0+cu126"
 
 tests/test_clean_install.py reads the newest record under docs/validation/clean_install.
 """

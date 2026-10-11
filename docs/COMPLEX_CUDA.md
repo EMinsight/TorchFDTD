@@ -55,13 +55,13 @@ The measured speedup is 3.7483x. The final response difference is 5.55e-17.
 This measures one ray and wavelength with fixed coarse numerical settings.
 It does not establish converged optical accuracy, full-pupil runtime,
 backward speedup or superiority over a competing solver. See the
-[raw repetitions](validation/cr-complex-forward-3060.json).
+raw repetitions.
 
 The actual relaxed seed also reproduces objective 0.2843927415139927 and
 its recorded directional derivative 0.21922469270490433 when fused forward
 and replay are combined with the Torch transpose. This complete call took
 52.00 seconds and peaked at 413,641,728 Torch CUDA bytes. It is a single
 functional validation, not a repeated backward timing comparison. See the
-[gradient record](validation/cr-complex-forward-gradient.json).
+gradient record.
 Eighteen additional existing real CUDA forward/adjoint tests passed after the
 shared kernel initialization change, bringing the relevant local total to 68.

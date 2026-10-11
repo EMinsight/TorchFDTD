@@ -38,7 +38,7 @@ RECORDS = ROOT/'docs'/'validation'/'g7'/'G7-01'
 FULL = os.environ.get('TORCHFDTD_G7_FULL') == '1'
 RECORD = os.environ.get('TORCHFDTD_G7_RECORD')
 CHECKPOINTS = os.environ.get('TORCHFDTD_G7_CHECKPOINT_DIR')
-RCWA_PYTHON = os.environ.get('TORCHFDTD_RCWA_PYTHON', 'C:/anaconda3/python.exe')
+RCWA_PYTHON = os.environ.get('TORCHFDTD_RCWA_PYTHON', sys.executable)
 LAUNCHER = os.environ.get('TORCHFDTD_G7_LAUNCHER', '').split()
 RCWA_THREADS = os.environ.get('TORCHFDTD_G7_RCWA_THREADS')
 PAUSE = os.environ.get('TORCHFDTD_G7_PAUSE_FILE')

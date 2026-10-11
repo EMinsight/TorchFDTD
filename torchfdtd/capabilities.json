@@ -13315,15 +13315,10 @@
    "status": "rejected",
    "code_path": "torchfdtd/source_preview.py::preview_source",
    "exception": "ValueError",
-   "feature_inventory": [
-    "source.angle",
-    "boundary.bfast"
-   ],
-   "message": "Fixed-angle broadband injection is not implemented: a Bloch cell fixes k_parallel, so the incidence angle varies across the band (feature inventory source.angle and boundary.bfast are missing). Preview the fixed-k_parallel source instead."
+   "message": "Fixed-angle broadband injection is not implemented: a Bloch cell fixes k_parallel, so the incidence angle varies across the band. Preview the fixed-k_parallel source instead."
   }
  },
  "related": {
-  "feature_checklist": "docs/FEATURE_CHECKLIST.md",
   "tables": "docs/CAPABILITIES.md",
   "tests": "tests/test_capability_pairs.py"
  }

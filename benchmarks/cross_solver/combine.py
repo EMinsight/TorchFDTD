@@ -261,7 +261,7 @@ def main():
     combined = dict(
         schema='torchfdtd-cross-solver-combined-v1', date=time.strftime('%Y-%m-%d'), worktree_head_at_run=git_commit(),
         hardware=dict(gpu='NVIDIA GeForce RTX 3060 12 GB (WSL2, driver from Windows)', cpu=common.cpu_model(),
-                      note='Linux side: WSL2 Ubuntu 22.04 distribution torchfdtd-bench on D: (imported because the LangtangSim VHD on the full C: drive could not grow). '
+                      note='Linux side: a WSL2 Ubuntu 22.04 distribution. '
                            'GPU shared with the Windows desktop compositor; every timing block waited for the idle criterion recorded in gpu_idle.'),
         environments=environments,
         fixtures={name: {k: v for k, v in spec.items()} for name, spec in fixtures.items()},

@@ -12,7 +12,7 @@ The fixture's own 'in' and 'out' planes (401 wavelengths) are kept unchanged. On
 fixture's fused CUDA Yee kernel and fused CUDA monitor kernel. Writes
 docs/validation/meep_comparison/microring_fields_torchfdtd.npz and .json (data only, no figure).
 
-    D:/TorchFDTD/.venv/Scripts/python.exe .local/paper_review/microring_fields/run_fields.py [--probe-steps N]
+    python benchmarks/paper_review/microring_fields/run_fields.py [--probe-steps N]
 """
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ from pathlib import Path
 import numpy as np
 
 sys.dont_write_bytecode = True
-REPO = Path(r'D:\TorchFDTD')
+REPO = Path(__file__).resolve().parents[3]
 FIXTURE = REPO / 'examples' / 'meep_comparison' / 'microring'
 VALIDATION = REPO / 'docs' / 'validation' / 'meep_comparison'
 RECORD = VALIDATION / 'microring_torchfdtd.json'

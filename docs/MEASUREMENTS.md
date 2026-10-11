@@ -115,8 +115,7 @@ connects explicit full-cell TEXT markers to the opposing-port network and a
 caller-sampled native material tensor. The native dipole angular-pattern error decreases from 1.03%
 to 0.23% over three FP32 meshes. The [stored-plane diffraction workflow](RADIATION_WORKFLOW.md)
 adds browser order tables, matched-reference efficiencies and NPZ/Python
-postprocessing without another FDTD run. See [RELEASE_SCOPE.md](RELEASE_SCOPE.md)
-for verified scope and remaining work. This does not establish overall FDTDX
+postprocessing without another FDTD run. This does not establish overall FDTDX
 parity or a speed advantage over it.
 
 An opt-in [reversible adjoint](REVERSIBLE_ADJOINT.md) now reconstructs
@@ -239,16 +238,9 @@ These are internal backend comparisons on RTX 5880, within VRAM capacity.
 The CPU baseline is this project's Torch implementation. These are not
 external-solver or beyond-VRAM speedups.
 
-
 [Differentiable detector allocation](DETECTOR_ALLOCATION.md) preserves the CR reference's electric-intensity well fractions with independent midpoint quadrature. Synthetic source parity and material-gradient tests pass. Matched CR optical validation remains pending.
 
 [Selected-frequency polarization synthesis](POLARIZATION_SYNTHESIS.md) now passes a 3D oblique x/y slab check for transmission, energy balance and material derivatives. It uses two calibrated source responses and is not yet full-pupil CR validation.
-
-[Equivalent-electron objectives](ELECTRON_OBJECTIVE.md) now connect spectral response, fixed calibration, shot noise and exposure-weighted information. Scores and gradients match the active CR objective using its locked development context. The optical CR simulation itself remains unvalidated.
-
-The first [locked CR seed optical pilot](validation/CR_SEED_OPTICAL_PILOT.md) now compares TORCWA and FDTD at one wavelength/ray. Mesh refinement reduces the discrepancy, but convergence and full-pupil inverse design remain unvalidated. Dense observation gathering was also batched to remove per-sample Python overhead.
-
-The [actual CR density derivative pilot](validation/CR_DENSITY_ADJOINT_PILOT.md) passes one directional finite-difference check on RTX 3060 and RTX 5880, with relative discrepancy 3.06e-6 and peak Torch allocation 332 MB. This validates a discrete one-ray test objective, not the full CR information optimization.
 
 [Spectral/pupil objective assembly](SPECTRAL_PUPIL_RESPONSE.md) now connects explicit wavelength/ray cases to electron information with bounded case replay and unnormalized illumination weights. Full CR optical validation remains in progress.
 
@@ -258,9 +250,6 @@ file-backed execution, with one source-basis solver graph at a time. The CR
 runner exposes these policies and preflights its complete case schedule.
 Small response/gradient checks pass. Full-application validation of this new
 integration remains separate from the legacy-path optical measurements.
-The [restartable CR design driver](CR_INVERSE_DESIGN.md) adds projected
-Adam updates, atomic density/moment checkpoints and a complete final forward
-evaluation. The original CR application's physical optimization remains pending.
 `PeriodicLayerResponse.auto(...)` now selects resident, DRAM or explicitly
 configured file execution from shared memory budgets without calibration
 solves. It shrinks tiles when needed and keeps the chosen policy for backward.
@@ -275,19 +264,10 @@ The CR evaluator and optimizer now default to one FP32 path for density,
 fields, information, gradients and Adam moments. `PeriodicLayerResponse` also
 defaults to FP32. FP64 remains an explicit validation option. See the
 [precision scope and checks](validation/FP32_PRECISION.md).
-The full 144-case FP32 CR response and density-gradient comparison now passes
-against the archived FP64 reference. Physical convergence and completed
-original-protocol optimization remain pending.
 A [measured observation-setup improvement](validation/PERIODIC_OBSERVATION_SETUP.md)
 removes repeated mesh-count derivation. On a synthetic periodic RTX 3060 case,
 full response/objective/VJP medians improve by 1.52x at 128 steps and 1.04x at
 1,600 steps, with bitwise-identical responses and density gradients.
-
-The completed [144-case spatial refinement](validation/CR_SPATIAL_REFINEMENT.md)
-reduced the response discrepancy relative to the recorded TORCWA order-16
-reference from 4.85% to 0.888% in relative L2 when mesh spacing changed from
-50 to 25 nm at matched duration and PML thickness. This is a convergence trend,
-not a physical-gradient or optimized-design certificate.
 
 [Bounded CPU reference caching](SPECTRAL_PUPIL_RESPONSE.md#bounded-cpu-reference-reuse) can reuse homogeneous spectral planes across case replay without retaining full field histories. It preserves tested responses and density gradients. No cache speedup is claimed yet.
 
@@ -351,7 +331,7 @@ The table keeps failed, partial and unmeasured conditions instead of treating AP
 
 **Current development, 0.14:** closed normal-incidence [TFSF boxes](TFSF_SOURCES.md) separate incident and scattered fields around isolated structures. Python, UI previews, CPU/CUDA and shared CUDA batches use a live incident Yee line and sparse face corrections. Independent discrete references and analytic Mie sphere comparisons are recorded, including non-monotonic mesh errors. A 3D FSP source subset is mapped, while oblique incidence and general FSP compatibility remain open. Version 0.13 added [one-way periodic-cell planes](ONEWAY_SOURCES.md), while 0.12 added [electric/magnetic vector sources](DIPOLE_SOURCES.md). Python controls fixed-duration ensembles, objectives and native field results through [`run_tensor_batch`](TENSOR_BATCH.md). Automatic decay termination, full-domain divergence checks, coupled passive multipole materials and matched-reference mesh studies remain available in single/process runs. See the ordered implementation priorities.
 
-Six-component frequency planes, reference-normalized flux, global/custom monitor frequencies, independent process batches and black-box inverse design are also available. Read the [Python and batch guide](PYTHON_BATCH.md), run the [slab example](../examples/flux_slab.py) or [design example](../examples/inverse_design.py), and see the [technical manuscript by Hyoseok Park](paper/torchfdtd-manuscript.pdf) ([LaTeX source](paper/manuscript.tex), [build and Overleaf guide](paper/README.md)). The manuscript is a draft, not a peer-reviewed publication.
+Six-component frequency planes, reference-normalized flux, global/custom monitor frequencies, independent process batches and black-box inverse design are also available. Read the [Python and batch guide](PYTHON_BATCH.md), run the [slab example](../examples/flux_slab.py) or [design example](../examples/inverse_design.py). The manuscript is a draft, not a peer-reviewed publication.
 
 **Spectral batch development:** selectable shared CUDA plane interpolation and DFT accumulation now cover single runs and independent cohorts. Set `region.cuda_monitor_kernel="fused"`, or use **Frequency monitor kernel** in the FDTD panel. The new tables separate monitor improvements, cohort scheduling and an external baseline given the same fused observation adapter. [Complete Python example](../examples/spectral_batch.py), [algorithm and limits](CUDA_SPECTRA.md).
 
@@ -818,17 +798,13 @@ trace = fdtd.getresult("output")
 
 ## GPU workstation
 
-`scripts/remote.py` deploys into a dedicated directory and a new venv, reusing an existing CUDA PyTorch interpreter without changing that interpreter's packages. It requires `pip install paramiko` locally. Passwords are requested interactively, or passed via `TORCHFDTD_SSH_PASSWORD`, and are never written into the project.
+Install TorchFDTD on the GPU machine, start `torchfdtd serve` there and forward its loopback port over SSH:
 
 ```powershell
-python scripts/remote.py deploy --host YOUR_GPU_HOST --user YOUR_USER --python C:/path/to/cuda/python.exe --root C:/path/to/torchfdtd
-# Start `python -m torchfdtd.cli serve` inside that remote venv.
 ssh -N -L 8766:127.0.0.1:8765 YOUR_USER@YOUR_GPU_HOST
 ```
 
-Open **http://127.0.0.1:8766**. The connection badge identifies the actual GPU and host. `scripts/tunnel.py` provides equivalent SSH forwarding with a host key recorded by the deployment helper.
-
-On Windows, after deployment, `scripts/start_remote.ps1 -GpuHost YOUR_GPU_HOST` starts a persistent SSH session for the remote solver and opens a local forwarding port. The password is requested once and is not saved. Keep that tunnel process running while using the workbench. The script prints its process ID and local URL.
+Open **http://127.0.0.1:8766**. The connection badge identifies the actual GPU and host.
 
 ## Numerical model and limits
 

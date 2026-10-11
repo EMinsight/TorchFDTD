@@ -21,8 +21,7 @@ case file docs/validation/cases/G7-01r3.json supplies the declared quantities an
     python -m examples.g7.metagrating.workflow --stage judge --out <records>
     python -m examples.g7.metagrating.workflow --small --out <dir>                           (CPU-sized development run)
 
-The full run needs CUDA; on the shared workstation every stage that uses the GPU runs under
-D:/TorchFDTD/.local/gpu_lock.py.
+The full run needs CUDA.
 """
 from __future__ import annotations
 
@@ -32,6 +31,7 @@ import hashlib
 import json
 import math
 import os
+import sys
 from pathlib import Path
 import platform
 import re
@@ -1042,7 +1042,7 @@ def main(argv=None):
     parser.add_argument('--selection-dir', type=Path, help='directory of the development selection records (outside the repository)')
     parser.add_argument('--small', action='store_true', help='CPU development size: coarser meshes, shorter runs, one seed, few iterations')
     parser.add_argument('--checkpoint-dir', type=Path, help='save the design state after every iteration and resume from it')
-    parser.add_argument('--rcwa-python', default=os.environ.get('TORCHFDTD_RCWA_PYTHON', 'C:/anaconda3/python.exe'),
+    parser.add_argument('--rcwa-python', default=os.environ.get('TORCHFDTD_RCWA_PYTHON', sys.executable),
                         help='interpreter that holds TORCWA 0.1.4.2')
     parser.add_argument('--skip-rcwa', action='store_true', help='development only: no TORCWA check (criterion c then fails)')
     args = parser.parse_args(argv)

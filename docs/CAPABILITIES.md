@@ -4,8 +4,7 @@ Generated from [torchfdtd/capabilities.py](../torchfdtd/capabilities.py) by
 `scripts/build_capability_tables.py`; do not edit by hand. The same registry is served
 to the workbench as the `combinations` block of `/api/capabilities` and is checked
 against the code by [tests/test_capability_pairs.py](../tests/test_capability_pairs.py).
-The Lumerical property inventory is a different document,
-[FEATURE_CHECKLIST.md](FEATURE_CHECKLIST.md); this one states which combinations of
+It states which combinations of
 the solver contract run and which are rejected, and where.
 
 ## What a cell means
@@ -445,7 +444,7 @@ The realized definition of an oblique source, served as the `incidence` block an
 | --- | --- | --- | --- |
 | `normal` | admitted | `torchfdtd/solver.py::source_profile` | No Bloch phase on a transverse axis: k_parallel = 0 at every frequency. |
 | `fixed_k_parallel` | admitted | `torchfdtd/solver.py::source_profile` | Bloch phase phi on a transverse axis of length L: k_parallel = phi / L is fixed and the angle asin(k_parallel / (n k0)) varies across the band; frequencies with k_parallel > n k0 are evanescent. |
-| `fixed_angle` | rejected | `torchfdtd/source_preview.py::preview_source` | Fixed-angle broadband injection is not implemented: a Bloch cell fixes k_parallel, so the incidence angle varies across the band (feature inventory source.angle and boundary.bfast are missing). Preview the fixed-k_parallel source instead. |
+| `fixed_angle` | rejected | `torchfdtd/source_preview.py::preview_source` | Fixed-angle broadband injection is not implemented: a Bloch cell fixes k_parallel, so the incidence angle varies across the band. Preview the fixed-k_parallel source instead. |
 
 ## Rules (rejections, in the order the code checks them)
 

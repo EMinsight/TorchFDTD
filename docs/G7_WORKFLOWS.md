@@ -2,8 +2,8 @@
 
 This page fixes, before any G7 run, the three application workflows, the independent-solver comparison and the cost
 measurements. The case files `docs/validation/cases/G7-01.json` to `G7-05.json` carry the same
-declarations in machine-readable form; a later change to a fixed quantity is a revised case and
-needs the owner's approval. Every workflow runs from the installed wheel in an environment outside
+declarations in machine-readable form; a later change to a fixed quantity is a revised case.
+Every workflow runs from the installed wheel in an environment outside
 the checkout, on the RTX 3060 workstation (`rtx3060-win11-lab`) unless a row says otherwise.
 
 Baselines quoted below were read from records that predate this page:
@@ -113,7 +113,7 @@ become the baseline and a test flags a later run whose stage median exceeds 1.25
 
 ## Revisions
 
-- G7-01r4 (owner approved 2026-09-27): the r3 performance attempt failed. The
+- G7-01r4 (2026-09-27): the r3 performance attempt failed. The
   revised design uses six alternating ridge/gap runs with a minimum of three
   pixels per run. A disclosed TORCWA-assisted initializer is perturbed with
   logit jitter 0.03 for held-out seeds 7, 8 and 9. Six Adam steps at 0.02 um and
@@ -123,7 +123,7 @@ become the baseline and a test flags a later run whose stage median exceeds 1.25
   incidence, anomaly exclusions and every numerical limit. Performance is
   compared with the larger of 0.7706 and the baseline in the judged path.
   See [G7-01r4.json](validation/cases/G7-01r4.json).
-- G7-05r2 (owner approved 2026-09-27): the released tensor-batch API is forward
+- G7-05r2 (2026-09-27): the released tensor-batch API is forward
   only and cannot perform the required design backward. The cost study compares
   one broadband three-frequency adjoint with three sequential single-frequency
   adjoints contributing to one mean objective and one optimizer update. The
@@ -133,7 +133,7 @@ become the baseline and a test flags a later run whose stage median exceeds 1.25
   48 temporal steps and 16 checkpoints. See
   [G7-05r2.json](validation/cases/G7-05r2.json).
 
-Each revision is a separate case file that supersedes the declared one, with its reason, evidence and the owner's approval; the declared rows above are kept as declared.
+Each revision is a separate case file that supersedes the declared one, with its reason and evidence; the declared rows above are kept as declared.
 
 - G7-04r2: the reference is checked against 241 orders instead of 51 (every efficiency within 1e-4). Reason: the declared reference check compared the 101-order TORCWA reference with a 51-order solution, which measures the error of the 51-order solution rather than of the reference; a reference is checked against a higher order. Evidence: 101 orders against 51 differ by up to 4.7e-4 (T+1 at 1.50 um); 101 orders against the committed 241-order record (docs/validation/meep_comparison/metagrating_rcwa.json) differ by at most 6.4e-5 in any efficiency, 9.7e-6 in T+1 at 1.55 um and 8.7e-7 in the band mean, far below the smallest error target 0.002. Approved by the owner on 2026-09-24.
 

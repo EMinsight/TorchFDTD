@@ -70,7 +70,7 @@ backward kernels. Every measured repetition had the listed peak and a common
 17,170,944-byte starting allocation. The maximum per-pixel gradient difference
 was 2.17e-19. Objective 0.2843927415139927 and directional derivative
 0.21922469270490433 reproduce the preceding selected-ray validation.
-[Raw repetitions](validation/cr-complex-adjoint-3060.json) include all timings
+Raw repetitions include all timings
 and allocator baselines. These results do not establish full-pupil optimization,
 physical convergence or performance relative to another solver. Earlier pilot
 peaks measured before the closure-lifetime fix are not directly comparable.
